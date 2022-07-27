@@ -1,4 +1,4 @@
-package config
+package hyperledgerFabricConnectors
 
 import (
 	"fmt"
@@ -9,14 +9,14 @@ import (
 	"time"
 )
 
-type HyperledgerFabricServiceInterface interface {
-	Connect(grpcConn *grpc.ClientConn, channel string, chaincode string)
-	Query(function string, args ...string) []byte
-	Submit(function string, args ...string) []byte
+type BaseConnector interface {
+	Connect(grpcConn *grpc.ClientConn, channel string, chaincode string) error
+	Query(function string, args ...string) ([]byte, error)
+	Submit(function string, args ...string) ([]byte, error)
 	SubmitAsync(function string, args ...string) ([]byte, *client.Commit)
 }
 
-type hyperledgerFabricService struct {
+type baseConnector struct {
 	identity *identity.X509Identity
 	sign     identity.Sign
 	gateway  *client.Gateway
@@ -24,8 +24,8 @@ type hyperledgerFabricService struct {
 	contract *client.Contract
 }
 
-func New(mspID string, certPath string, keyPath string) HyperledgerFabricServiceInterface {
-	return &hyperledgerFabricService{
+func NewBaseConnector(mspID string, certPath string, keyPath string) BaseConnector {
+	return &baseConnector{
 		identity: newIdentity(certPath, mspID),
 		sign:     newSign(keyPath),
 		gateway:  nil,
@@ -34,14 +34,14 @@ func New(mspID string, certPath string, keyPath string) HyperledgerFabricService
 	}
 }
 
-func (hfs *hyperledgerFabricService) Connect(grpcConn *grpc.ClientConn, channel string, chaincode string) {
-	if hfs.gateway != nil {
-		return
+func (bc *baseConnector) Connect(grpcConn *grpc.ClientConn, channel string, chaincode string) error {
+	if bc.gateway != nil {
+		return fmt.Errorf("gateway is already connected")
 	}
 
 	gateway, err := client.Connect(
-		hfs.identity,
-		client.WithSign(hfs.sign),
+		bc.identity,
+		client.WithSign(bc.sign),
 		client.WithClientConnection(grpcConn),
 
 		// Default timeouts for different gRPC calls
@@ -52,36 +52,37 @@ func (hfs *hyperledgerFabricService) Connect(grpcConn *grpc.ClientConn, channel 
 	)
 
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	hfs.gateway = gateway
-	hfs.network = gateway.GetNetwork(channel)
-	hfs.contract = hfs.network.GetContract(chaincode)
+	bc.gateway = gateway
+	bc.network = gateway.GetNetwork(channel)
+	bc.contract = bc.network.GetContract(chaincode)
+	return nil
 }
 
-func (hfs *hyperledgerFabricService) Query(function string, args ...string) []byte {
-	evaluateResult, err := hfs.contract.EvaluateTransaction(function, args...)
+func (bc *baseConnector) Query(function string, args ...string) ([]byte, error) {
+	evaluateResult, err := bc.contract.EvaluateTransaction(function, args...)
 
 	if err != nil {
-		panic(fmt.Errorf("failed to evaluate transaction: %w", err))
+		return nil, fmt.Errorf("failed to evaluate transaction: %w", err)
 	}
 
-	return evaluateResult
+	return evaluateResult, nil
 }
 
-func (hfs *hyperledgerFabricService) Submit(function string, args ...string) []byte {
-	evaluateResult, err := hfs.contract.SubmitTransaction(function, args...)
+func (bc *baseConnector) Submit(function string, args ...string) ([]byte, error) {
+	evaluateResult, err := bc.contract.SubmitTransaction(function, args...)
 
 	if err != nil {
-		panic(fmt.Errorf("failed to evaluate transaction: %w", err))
+		return nil, fmt.Errorf("failed to evaluate transaction: %w", err)
 	}
 
-	return evaluateResult
+	return evaluateResult, nil
 }
 
-func (hfs *hyperledgerFabricService) SubmitAsync(function string, args ...string) ([]byte, *client.Commit) {
-	submitResult, commit, err := hfs.contract.SubmitAsync(function, client.WithArguments(args...))
+func (bc *baseConnector) SubmitAsync(function string, args ...string) ([]byte, *client.Commit) {
+	submitResult, commit, err := bc.contract.SubmitAsync(function, client.WithArguments(args...))
 	if err != nil {
 		panic(fmt.Errorf("failed to submit transaction asynchronously: %w", err))
 	}
@@ -113,9 +114,15 @@ func newIdentity(certPath string, mspID string) *identity.X509Identity {
 // newSign creates a function that generates a digital
 // signature from a message digest using a private key.
 func newSign(keyPath string) identity.Sign {
-	privateKey, err := ioutil.ReadFile(keyPath)
+	privateKeyPEM, err := ioutil.ReadFile(keyPath)
 	if err != nil {
 		panic(fmt.Errorf("failed to read private key file: %w", err))
+	}
+
+	// TODO -> Undestand this
+	privateKey, err := identity.PrivateKeyFromPEM(privateKeyPEM)
+	if err != nil {
+		panic(err)
 	}
 
 	sign, err := identity.NewPrivateKeySign(privateKey)

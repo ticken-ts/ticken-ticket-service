@@ -1,8 +1,14 @@
 package models
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"container/list"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"time"
+)
 
 type Event struct {
-	ID       primitive.ObjectID `json:"id"`
-	IsActive bool               `json:"is_active" validate:"required"`
+	EventID  primitive.ObjectID `json:"event_id"`
+	Name     string             `json:"name"`
+	Date     time.Time          `json:"date"`
+	Sections list.List          `json:"sections"`
 }

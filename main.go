@@ -2,17 +2,16 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	"ticken-ticket-service/config"
-	"ticken-ticket-service/routes"
+	"ticken-ticket-service/controllers/ticketController"
 )
 
 func main() {
 	router := gin.Default()
 
-	config.ConnectDB()
+	ticketController.RegisterRoutes(router)
 
-	//routes
-	routes.TicketRoute(router)
-
-	router.Run("localhost:8080")
+	err := router.Run("localhost:8080")
+	if err != nil {
+		panic(err)
+	}
 }
