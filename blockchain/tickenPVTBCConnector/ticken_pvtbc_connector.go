@@ -1,4 +1,4 @@
-package tickenPVTBCService
+package tickenPVTBCConnector
 
 import (
 	"crypto/x509"
@@ -7,8 +7,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"io/ioutil"
+	"ticken-ticket-service/blockchain/tickenPVTBCConnector/hyperledgerFabricConnectors"
 	"ticken-ticket-service/models/ticket"
-	"ticken-ticket-service/services/tickenPVTBCService/hyperledgerFabricConnectors"
 )
 
 const globalPath = "/Users/facundotorraca/Documents/ticken/papers-and-books/repos/fabric-samples"
@@ -20,32 +20,31 @@ const (
 	gatewayPeer  = "peer0.org1.example.com"
 )
 
-type TickenPVTBCService interface {
-	Connect() error
+type TickenPVTBConnector interface {
+	Connect(channel string) error
 	IsConnected() bool
 	IssueTicket(ticket *ticket.Ticket) error
 }
 
-type tickenPVTBCService struct {
+type tickenPVTBCConnector struct {
 	channel                  string
 	grpcConn                 *grpc.ClientConn
 	eventChaincodeConnector  hyperledgerFabricConnectors.EventChaincodeConnector
 	ticketChaincodeConnector hyperledgerFabricConnectors.TicketChaincodeConnector
 }
 
-func New(channel string) TickenPVTBCService {
-	tickenPVTBCService := new(tickenPVTBCService)
+func New() TickenPVTBConnector {
+	tickenPVTBCService := new(tickenPVTBCConnector)
 
-	tickenPVTBCService.channel = channel
 	tickenPVTBCService.eventChaincodeConnector = hyperledgerFabricConnectors.NewEventChaincodeConnector()
 	tickenPVTBCService.ticketChaincodeConnector = hyperledgerFabricConnectors.NewTicketChaincodeConnector()
 
 	return tickenPVTBCService
 }
 
-func (s *tickenPVTBCService) Connect() error {
-	if s.IsConnected() {
-		return fmt.Errorf("already connected")
+func (s *tickenPVTBCConnector) Connect(channel string) error {
+	if s.IsConnected() && s.channel == channel {
+		return fmt.Errorf("already connected to channel %s", channel)
 	}
 
 	newGrpcConn, err := newGrpcConnection()
@@ -67,16 +66,19 @@ func (s *tickenPVTBCService) Connect() error {
 	return nil
 }
 
-func (s *tickenPVTBCService) IsConnected() bool {
+func (s *tickenPVTBCConnector) IsConnected() bool {
 	return s.grpcConn != nil
 }
 
-func (s *tickenPVTBCService) IssueTicket(ticket *ticket.Ticket) error {
+func (s *tickenPVTBCConnector) IssueTicket(ticket *ticket.Ticket) error {
 	if !s.IsConnected() {
 		return fmt.Errorf("service is not connected")
 	}
 
-	s.ticketChaincodeConnector.IssueTicket(ticket)
+	err := s.ticketChaincodeConnector.IssueTicket(ticket)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

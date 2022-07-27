@@ -5,7 +5,6 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"net/http"
-	"ticken-ticket-service/models/ticket"
 	"ticken-ticket-service/utils"
 )
 
@@ -34,8 +33,12 @@ func (controller *ticketController) BuyTicket(c *gin.Context) {
 		return
 	}
 
-	var newTicket = ticket.New(payload.EventID, payload.Section)
-	_ = newTicket.AssignTo(owner) // new ticket never has owner
+	newTicket, err := controller.ticketIssuer.IssueTicket(payload.EventID, payload.Section, owner)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, utils.HttpResponse{Message: err.Error()})
+		c.Abort()
+		return
+	}
 
 	c.JSON(http.StatusCreated, utils.HttpResponse{Data: newTicket})
 }

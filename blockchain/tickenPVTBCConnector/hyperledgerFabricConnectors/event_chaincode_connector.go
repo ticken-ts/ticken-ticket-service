@@ -3,9 +3,8 @@ package hyperledgerFabricConnectors
 import (
 	"container/list"
 	"encoding/json"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc"
-	"ticken-ticket-service/models"
+	"ticken-ticket-service/models/event"
 	"time"
 )
 
@@ -42,7 +41,7 @@ func (c *eventChaincodeConnector) Connect(grpcConn *grpc.ClientConn, channel str
 	return nil
 }
 
-func (c *eventChaincodeConnector) GetEvent(eventID string) (*models.Event, error) {
+func (c *eventChaincodeConnector) GetEvent(eventID string) (*event.Event, error) {
 	eventData, err := c.hyperledgerFabricBaseConnector.Query(EVENT_CC_GET_FUNCTION, eventID)
 	if err != nil {
 		return nil, err
@@ -55,16 +54,8 @@ func (c *eventChaincodeConnector) GetEvent(eventID string) (*models.Event, error
 		return nil, err
 	}
 
-	parsedEventID, err := primitive.ObjectIDFromHex(payload.EventID)
-	if err != nil {
-		return nil, err
-	}
-
-	event := models.Event{
-		EventID:  parsedEventID,
-		Name:     payload.Name,
-		Date:     payload.Date,
-		Sections: payload.Sections,
+	event := event.Event{
+		EventID: payload.EventID,
 	}
 
 	return &event, nil

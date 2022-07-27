@@ -14,7 +14,7 @@ type Ticket struct {
 
 func New(eventID string, section string) *Ticket {
 	return &Ticket{
-		TicketID: uuid.New().String(),
+		TicketID: uuid.NewString(),
 		EventID:  eventID,
 		Section:  section,
 	}
