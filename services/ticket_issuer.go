@@ -32,7 +32,7 @@ func NewTicketIssuer(
 func (s *ticketIssuer) IssueTicket(eventID string, section string, owner string) (*ticket.Ticket, error) {
 	event := s.eventRepository.FindEventByID(eventID)
 	if event == nil {
-		return nil, fmt.Errorf("event not found")
+		return nil, fmt.Errorf("could not determine organizer channel")
 	}
 
 	err := s.pvtbcConnector.Connect(event.PvtBCChannel)

@@ -10,6 +10,7 @@ import (
 
 const (
 	EVENT_CC_GET_FUNCTION = "Get"
+	TickenEventChaincode  = "ticken-event"
 )
 
 type perBCEvent struct {
@@ -34,7 +35,7 @@ func NewEventChaincodeConnector() EventChaincodeConnector {
 
 func (c *eventChaincodeConnector) Connect(grpcConn *grpc.ClientConn, channel string) error {
 	c.hyperledgerFabricBaseConnector = NewBaseConnector(mspID, certPath, keyPath)
-	err := c.hyperledgerFabricBaseConnector.Connect(grpcConn, channel, chaincode)
+	err := c.hyperledgerFabricBaseConnector.Connect(grpcConn, channel, TickenEventChaincode)
 	if err != nil {
 		return err
 	}

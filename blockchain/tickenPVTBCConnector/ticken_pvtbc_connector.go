@@ -43,17 +43,20 @@ func New() TickenPVTBConnector {
 }
 
 func (s *tickenPVTBCConnector) Connect(channel string) error {
-	if s.IsConnected() && s.channel == channel {
-		return fmt.Errorf("already connected to channel %s", channel)
+	if s.IsConnected() {
+		if s.channel == channel {
+			return fmt.Errorf("already connected to channel %s", channel)
+		}
+		s.channel = channel
+	} else {
+		newGrpcConn, err := newGrpcConnection()
+		if err != nil {
+			return err
+		}
+		s.grpcConn = newGrpcConn
 	}
 
-	newGrpcConn, err := newGrpcConnection()
-	if err != nil {
-		return err
-	}
-
-	s.grpcConn = newGrpcConn
-	err = s.eventChaincodeConnector.Connect(s.grpcConn, s.channel)
+	err := s.eventChaincodeConnector.Connect(s.grpcConn, s.channel)
 	if err != nil {
 		return err
 	}

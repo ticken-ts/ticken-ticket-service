@@ -48,7 +48,7 @@ func (r *eventMongoDBRepository) FindEventByID(eventID string) *event.Event {
 	defer cancel()
 
 	events := r.getCollection()
-	result := events.FindOne(findContext, bson.M{"eventID": eventID})
+	result := events.FindOne(findContext, bson.M{"_id": eventID})
 
 	var foundEvent event.Event
 	err := result.Decode(&foundEvent)

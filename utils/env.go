@@ -30,3 +30,23 @@ func GetEnvOrPanic(key string) string {
 	}
 	return value
 }
+
+const TickenEnvName = "TICKEN_ENV"
+
+const (
+	DevEnv  = "Dev"
+	ProdEnv = "Prod"
+	TestEnv = "Test"
+)
+
+func IsDev() bool {
+	return GetEnvOrPanic(TickenEnvName) == DevEnv
+}
+
+func IsProd() bool {
+	return GetEnvOrPanic(TickenEnvName) == ProdEnv
+}
+
+func Istest() bool {
+	return GetEnvOrPanic(TickenEnvName) == TestEnv
+}

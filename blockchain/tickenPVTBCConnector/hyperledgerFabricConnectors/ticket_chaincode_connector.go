@@ -10,14 +10,14 @@ const globalPath = "/Users/facundotorraca/Documents/ticken/papers-and-books/repo
 const cryptoPath = globalPath + "/test-network/organizations/peerOrganizations/org1.example.com"
 
 const (
-	mspID     = "Org1MSP"
-	certPath  = cryptoPath + "/users/User1@org1.example.com/msp/signcerts/User1@org1.example.com-cert.pem"
-	keyPath   = cryptoPath + "/users/User1@org1.example.com/msp/keystore/priv_sk"
-	chaincode = "tickenticket"
+	mspID    = "Org1MSP"
+	certPath = cryptoPath + "/users/User1@org1.example.com/msp/signcerts/User1@org1.example.com-cert.pem"
+	keyPath  = cryptoPath + "/users/User1@org1.example.com/msp/keystore/priv_sk"
 )
 
 const (
 	TICKET_CC_ISSUE_FUNCTION = "Issue"
+	TickenTickenChaincode    = "ticken-ticket"
 )
 
 type ticketPerBCPayload struct {
@@ -43,7 +43,7 @@ func NewTicketChaincodeConnector() TicketChaincodeConnector {
 
 func (c *ticketChaincodeConnector) Connect(grpcConn *grpc.ClientConn, channel string) error {
 	c.hyperledgerFabricBaseConnector = NewBaseConnector(mspID, certPath, keyPath)
-	err := c.hyperledgerFabricBaseConnector.Connect(grpcConn, channel, chaincode)
+	err := c.hyperledgerFabricBaseConnector.Connect(grpcConn, channel, TickenTickenChaincode)
 	if err != nil {
 		return err
 	}
