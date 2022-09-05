@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc/credentials"
 	"io/ioutil"
 	"ticken-ticket-service/blockchain/tickenPVTBCConnector/hyperledgerFabricConnectors"
-	"ticken-ticket-service/models/ticket"
+	"ticken-ticket-service/models"
 )
 
 const globalPath = "/Users/facundotorraca/Documents/ticken/papers-and-books/repos/fabric-samples"
@@ -23,7 +23,7 @@ const (
 type TickenPVTBConnector interface {
 	Connect(channel string) error
 	IsConnected() bool
-	IssueTicket(ticket *ticket.Ticket) error
+	IssueTicket(ticket *models.Ticket) error
 }
 
 type tickenPVTBCConnector struct {
@@ -73,7 +73,7 @@ func (s *tickenPVTBCConnector) IsConnected() bool {
 	return s.grpcConn != nil
 }
 
-func (s *tickenPVTBCConnector) IssueTicket(ticket *ticket.Ticket) error {
+func (s *tickenPVTBCConnector) IssueTicket(ticket *models.Ticket) error {
 	if !s.IsConnected() {
 		return fmt.Errorf("service is not connected")
 	}

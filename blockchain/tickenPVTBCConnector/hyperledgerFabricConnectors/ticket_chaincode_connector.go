@@ -3,7 +3,7 @@ package hyperledgerFabricConnectors
 import (
 	"encoding/json"
 	"google.golang.org/grpc"
-	"ticken-ticket-service/models/ticket"
+	"ticken-ticket-service/models"
 )
 
 const globalPath = "/Users/facundotorraca/Documents/ticken/papers-and-books/repos/fabric-samples"
@@ -33,7 +33,7 @@ type ticketChaincodeConnector struct {
 
 type TicketChaincodeConnector interface {
 	Connect(grpcConn *grpc.ClientConn, channel string) error
-	IssueTicket(ticket *ticket.Ticket) error
+	IssueTicket(ticket *models.Ticket) error
 }
 
 func NewTicketChaincodeConnector() TicketChaincodeConnector {
@@ -50,7 +50,7 @@ func (c *ticketChaincodeConnector) Connect(grpcConn *grpc.ClientConn, channel st
 	return nil
 }
 
-func (c *ticketChaincodeConnector) IssueTicket(ticket *ticket.Ticket) error {
+func (c *ticketChaincodeConnector) IssueTicket(ticket *models.Ticket) error {
 	data, err := c.hyperledgerFabricBaseConnector.Submit(
 		TICKET_CC_ISSUE_FUNCTION,
 		ticket.TicketID,

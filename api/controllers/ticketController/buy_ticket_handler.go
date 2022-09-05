@@ -33,7 +33,9 @@ func (controller *ticketController) BuyTicket(c *gin.Context) {
 		return
 	}
 
-	newTicket, err := controller.ticketIssuer.IssueTicket(payload.EventID, payload.Section, owner)
+	ticketIssuer := controller.serviceProvider.GetTicketIssuer()
+
+	newTicket, err := ticketIssuer.IssueTicket(payload.EventID, payload.Section, owner)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.HttpResponse{Message: err.Error()})
 		c.Abort()

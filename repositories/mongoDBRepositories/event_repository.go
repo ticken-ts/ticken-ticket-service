@@ -1,10 +1,10 @@
-package repositories
+package mongoDBRepositories
 
 import (
 	"context"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
-	"ticken-ticket-service/models/event"
+	"ticken-ticket-service/models"
 	"time"
 )
 
@@ -16,10 +16,11 @@ type eventMongoDBRepository struct {
 	db       *mongo.Client
 }
 
-func NewEventMongoDBRepository(db *mongo.Client, database string) EventRepository {
+func NewEventRepository(db *mongo.Client, database string) *eventMongoDBRepository {
 	return &eventMongoDBRepository{
 		db:       db,
-		database: database}
+		database: database,
+	}
 }
 
 func (r *eventMongoDBRepository) getCollection() *mongo.Collection {
@@ -30,7 +31,7 @@ func (r *eventMongoDBRepository) generateOpSubcontext() (context.Context, contex
 	return context.WithTimeout(context.Background(), TimeoutOperationsInSeconds*time.Second)
 }
 
-func (r *eventMongoDBRepository) AddEvent(event *event.Event) error {
+func (r *eventMongoDBRepository) AddEvent(event *models.Event) error {
 	storeContext, cancel := r.generateOpSubcontext()
 	defer cancel()
 
@@ -43,14 +44,14 @@ func (r *eventMongoDBRepository) AddEvent(event *event.Event) error {
 	return nil
 }
 
-func (r *eventMongoDBRepository) FindEventByID(eventID string) *event.Event {
+func (r *eventMongoDBRepository) FindEventByID(eventID string) *models.Event {
 	findContext, cancel := r.generateOpSubcontext()
 	defer cancel()
 
 	events := r.getCollection()
 	result := events.FindOne(findContext, bson.M{"_id": eventID})
 
-	var foundEvent event.Event
+	var foundEvent models.Event
 	err := result.Decode(&foundEvent)
 
 	if err != nil {

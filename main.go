@@ -1,27 +1,25 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
-	"ticken-ticket-service/controllers/ticketController"
-	"ticken-ticket-service/db"
+	"ticken-ticket-service/app"
+	"ticken-ticket-service/infra"
 	"ticken-ticket-service/utils"
 )
 
 func main() {
-	router := gin.Default()
-
-	err := godotenv.Load()
+	tickenConfig, err := utils.LoadConfig(".")
 	if err != nil {
 		panic(err)
 	}
 
-	mongoDB := db.ConnectMongoDB(utils.GetEnvOrPanic("MONGO_URI"))
-
-	ticketController.RegisterRoutes(router, mongoDB)
-
-	err = router.Run("localhost:8080")
+	builder, err := infra.NewBuilder(tickenConfig)
 	if err != nil {
 		panic(err)
 	}
+
+	db := builder.BuildDb()
+	router := builder.BuildRouter()
+
+	tickenTicketServer := app.New(router, db, tickenConfig)
+	tickenTicketServer.Start()
 }

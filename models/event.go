@@ -1,4 +1,4 @@
-package event
+package models
 
 type Event struct {
 	EventID      string `json:"event_id" bson:"_id"`

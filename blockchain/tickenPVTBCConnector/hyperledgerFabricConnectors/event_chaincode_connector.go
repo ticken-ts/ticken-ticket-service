@@ -4,7 +4,7 @@ import (
 	"container/list"
 	"encoding/json"
 	"google.golang.org/grpc"
-	"ticken-ticket-service/models/event"
+	"ticken-ticket-service/models"
 	"time"
 )
 
@@ -42,7 +42,7 @@ func (c *eventChaincodeConnector) Connect(grpcConn *grpc.ClientConn, channel str
 	return nil
 }
 
-func (c *eventChaincodeConnector) GetEvent(eventID string) (*event.Event, error) {
+func (c *eventChaincodeConnector) GetEvent(eventID string) (*models.Event, error) {
 	eventData, err := c.hyperledgerFabricBaseConnector.Query(EVENT_CC_GET_FUNCTION, eventID)
 	if err != nil {
 		return nil, err
@@ -55,7 +55,7 @@ func (c *eventChaincodeConnector) GetEvent(eventID string) (*event.Event, error)
 		return nil, err
 	}
 
-	event := event.Event{
+	event := models.Event{
 		EventID: payload.EventID,
 	}
 

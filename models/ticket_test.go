@@ -1,4 +1,4 @@
-package ticket_test
+package models_test
 
 import (
 	"github.com/google/uuid"

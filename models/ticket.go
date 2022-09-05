@@ -1,4 +1,4 @@
-package ticket
+package models
 
 import (
 	"fmt"
@@ -12,7 +12,7 @@ type Ticket struct {
 	Section  string `json:"section"`
 }
 
-func New(eventID string, section string) *Ticket {
+func NewTicket(eventID string, section string) *Ticket {
 	return &Ticket{
 		TicketID: uuid.NewString(),
 		EventID:  eventID,
