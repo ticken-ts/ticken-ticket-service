@@ -1,8 +1,6 @@
 package utils
 
-import (
-	"github.com/spf13/viper"
-)
+import "github.com/spf13/viper"
 
 type TickenConfig struct {
 	Config *Config
@@ -32,6 +30,37 @@ const (
 const (
 	MongoDriver = "mongo"
 )
+
+func LoadConfig(path string) (*TickenConfig, error) {
+	tickenConfig := new(TickenConfig)
+
+	env, err := loadEnv(path, ".env")
+	if err != nil {
+		return nil, err
+	}
+
+	config, err := loadConfig(path, "config")
+	if err != nil {
+		return nil, err
+	}
+
+	tickenConfig.Env = env
+	tickenConfig.Config = config
+
+	return tickenConfig, nil
+}
+
+func (config *TickenConfig) IsDev() bool {
+	return config.Env.TickenEnv == devEnv
+}
+
+func (config *TickenConfig) IsProd() bool {
+	return config.Env.TickenEnv == prodEnv
+}
+
+func (config *TickenConfig) IsTest() bool {
+	return config.Env.TickenEnv == testEnv
+}
 
 func loadEnv(path string, filename string) (*Env, error) {
 	viper.AddConfigPath(path)
@@ -71,35 +100,4 @@ func loadConfig(path string, filename string) (*Config, error) {
 	}
 
 	return config, nil
-}
-
-func LoadConfig(path string) (*TickenConfig, error) {
-	tickenConfig := new(TickenConfig)
-
-	env, err := loadEnv(path, ".env")
-	if err != nil {
-		return nil, err
-	}
-
-	config, err := loadConfig(path, "config")
-	if err != nil {
-		return nil, err
-	}
-
-	tickenConfig.Env = env
-	tickenConfig.Config = config
-
-	return tickenConfig, nil
-}
-
-func (config *TickenConfig) IsDev() bool {
-	return config.Env.TickenEnv == devEnv
-}
-
-func (config *TickenConfig) IsProd() bool {
-	return config.Env.TickenEnv == prodEnv
-}
-
-func (config *TickenConfig) IsTest() bool {
-	return config.Env.TickenEnv == testEnv
 }

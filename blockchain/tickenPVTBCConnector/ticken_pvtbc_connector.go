@@ -11,7 +11,7 @@ import (
 	"ticken-ticket-service/models"
 )
 
-const globalPath = "/Users/facundotorraca/Documents/ticken/papers-and-books/repos/fabric-samples"
+const globalPath = "/Users/facundotorraca/Documents/ticken/ticken-dev"
 const cryptoPath = globalPath + "/test-network/organizations/peerOrganizations/org1.example.com"
 
 const (
@@ -54,6 +54,7 @@ func (s *tickenPVTBCConnector) Connect(channel string) error {
 			return err
 		}
 		s.grpcConn = newGrpcConn
+		s.channel = channel
 	}
 
 	err := s.eventChaincodeConnector.Connect(s.grpcConn, s.channel)

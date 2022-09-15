@@ -6,7 +6,7 @@ import (
 	"ticken-ticket-service/models"
 )
 
-const globalPath = "/Users/facundotorraca/Documents/ticken/papers-and-books/repos/fabric-samples"
+const globalPath = "/Users/facundotorraca/Documents/ticken/ticken-dev"
 const cryptoPath = globalPath + "/test-network/organizations/peerOrganizations/org1.example.com"
 
 const (
@@ -20,7 +20,7 @@ const (
 	TickenTickenChaincode    = "ticken-ticket"
 )
 
-type ticketPerBCPayload struct {
+type issueTicketResponse struct {
 	TicketID string `json:"ticket_id"`
 	EventID  string `json:"event_id"`
 	Owner    string `json:"owner"`
@@ -55,14 +55,16 @@ func (c *ticketChaincodeConnector) IssueTicket(ticket *models.Ticket) error {
 		TICKET_CC_ISSUE_FUNCTION,
 		ticket.TicketID,
 		ticket.EventID,
-		ticket.Owner)
+		ticket.Section,
+		ticket.Owner,
+	)
 
 	if err != nil {
 		return err
 	}
 
-	payload := new(ticketPerBCPayload)
-	err = json.Unmarshal(data, &payload)
+	response := new(issueTicketResponse)
+	err = json.Unmarshal(data, &response)
 	if err != nil {
 		return err
 	}

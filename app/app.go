@@ -40,3 +40,11 @@ func (tickenTicketApp *tickenTicketApp) Start() {
 		panic(err)
 	}
 }
+
+func (tickenTicketApp *tickenTicketApp) Populate() {
+	eventManager := tickenTicketApp.serviceProvider.GetEventManager()
+	_, err := eventManager.AddEvent("test-event-id", "organizer", "ticken-test-channel")
+	if err != nil {
+		return // HANDLER DUPLICATES
+	}
+}

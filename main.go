@@ -21,5 +21,9 @@ func main() {
 	router := builder.BuildRouter()
 
 	tickenTicketServer := app.New(router, db, tickenConfig)
+	if tickenConfig.IsDev() {
+		tickenTicketServer.Populate()
+	}
+
 	tickenTicketServer.Start()
 }

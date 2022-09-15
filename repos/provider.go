@@ -1,10 +1,10 @@
-package repositories
+package repos
 
 import (
 	"fmt"
 	"go.mongodb.org/mongo-driver/mongo"
 	"ticken-ticket-service/infra"
-	"ticken-ticket-service/repositories/mongoDBRepositories"
+	"ticken-ticket-service/repos/mongoDBRepositories"
 	"ticken-ticket-service/utils"
 )
 

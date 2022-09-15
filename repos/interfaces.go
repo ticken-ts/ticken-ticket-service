@@ -1,4 +1,4 @@
-package repositories
+package repos
 
 import (
 	"ticken-ticket-service/models"
