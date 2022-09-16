@@ -1,16 +1,15 @@
-package pvtbcConnector
+package pvtbc
 
 import (
 	"container/list"
 	"encoding/json"
-	"google.golang.org/grpc"
 	"ticken-ticket-service/models"
 	"time"
 )
 
 const (
-	EVENT_CC_GET_FUNCTION = "Get"
-	TickenEventChaincode  = "ticken-event"
+	EventCCGetFunction   = "Get"
+	TickenEventChaincode = "ticken-event"
 )
 
 type perBCEvent struct {
@@ -20,30 +19,24 @@ type perBCEvent struct {
 	Sections list.List `json:"sections"`
 }
 
-type EventChaincodeConnector interface {
-	Connect(grpcConn *grpc.ClientConn, channel string) error
-}
-
 type eventChaincodeConnector struct {
-	hyperledgerFabricBaseConnector BaseConnector
+	baseCC ChaincodeConnector
 }
 
-func NewEventChaincodeConnector() EventChaincodeConnector {
-	tts := new(eventChaincodeConnector)
-	return tts
-}
-
-func (c *eventChaincodeConnector) Connect(grpcConn *grpc.ClientConn, channel string) error {
-	c.hyperledgerFabricBaseConnector = NewBaseConnector(mspID, certPath, keyPath)
-	err := c.hyperledgerFabricBaseConnector.Connect(grpcConn, channel, TickenEventChaincode)
+func NewEventChaincodeConnector(hfc HyperledgerFabricConnector, channelName string) (EventChaincodeConnector, error) {
+	cc, err := NewChaincodeConnector(hfc, channelName, TickenEventChaincode)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+
+	eventCC := new(eventChaincodeConnector)
+	eventCC.baseCC = cc
+
+	return eventCC, nil
 }
 
-func (c *eventChaincodeConnector) GetEvent(eventID string) (*models.Event, error) {
-	eventData, err := c.hyperledgerFabricBaseConnector.Query(EVENT_CC_GET_FUNCTION, eventID)
+func (eventCC *eventChaincodeConnector) GetEvent(eventID string) (*models.Event, error) {
+	eventData, err := eventCC.baseCC.Query(EventCCGetFunction, eventID)
 	if err != nil {
 		return nil, err
 	}

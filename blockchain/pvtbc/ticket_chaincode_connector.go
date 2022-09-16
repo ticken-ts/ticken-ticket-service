@@ -1,23 +1,13 @@
-package pvtbcConnector
+package pvtbc
 
 import (
 	"encoding/json"
-	"google.golang.org/grpc"
 	"ticken-ticket-service/models"
 )
 
-const globalPath = "/Users/facundotorraca/Documents/ticken/ticken-dev"
-const cryptoPath = globalPath + "/test-network/organizations/peerOrganizations/org1.example.com"
-
 const (
-	mspID    = "Org1MSP"
-	certPath = cryptoPath + "/users/User1@org1.example.com/msp/signcerts/User1@org1.example.com-cert.pem"
-	keyPath  = cryptoPath + "/users/User1@org1.example.com/msp/keystore/priv_sk"
-)
-
-const (
-	TICKET_CC_ISSUE_FUNCTION = "Issue"
-	TickenTickenChaincode    = "ticken-ticket"
+	TicketCCIssueFunction = "Issue"
+	TickenTicketChaincode = "ticken-ticket"
 )
 
 type issueTicketResponse struct {
@@ -28,31 +18,24 @@ type issueTicketResponse struct {
 }
 
 type ticketChaincodeConnector struct {
-	hyperledgerFabricBaseConnector BaseConnector
+	baseCC ChaincodeConnector
 }
 
-type TicketChaincodeConnector interface {
-	Connect(grpcConn *grpc.ClientConn, channel string) error
-	IssueTicket(ticket *models.Ticket) error
-}
-
-func NewTicketChaincodeConnector() TicketChaincodeConnector {
-	tcc := new(ticketChaincodeConnector)
-	return tcc
-}
-
-func (c *ticketChaincodeConnector) Connect(grpcConn *grpc.ClientConn, channel string) error {
-	c.hyperledgerFabricBaseConnector = NewBaseConnector(mspID, certPath, keyPath)
-	err := c.hyperledgerFabricBaseConnector.Connect(grpcConn, channel, TickenTickenChaincode)
+func NewTicketChaincodeConnector(hfc HyperledgerFabricConnector, channelName string) (TicketChaincodeConnector, error) {
+	cc, err := NewChaincodeConnector(hfc, channelName, TickenTicketChaincode)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+
+	ticketCC := new(ticketChaincodeConnector)
+	ticketCC.baseCC = cc
+
+	return ticketCC, nil
 }
 
-func (c *ticketChaincodeConnector) IssueTicket(ticket *models.Ticket) error {
-	data, err := c.hyperledgerFabricBaseConnector.Submit(
-		TICKET_CC_ISSUE_FUNCTION,
+func (ticketCC *ticketChaincodeConnector) IssueTicket(ticket *models.Ticket) error {
+	data, err := ticketCC.baseCC.Submit(
+		TicketCCIssueFunction,
 		ticket.TicketID,
 		ticket.EventID,
 		ticket.Section,

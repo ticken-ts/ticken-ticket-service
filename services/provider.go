@@ -1,7 +1,7 @@
 package services
 
 import (
-	"ticken-ticket-service/blockchain/tickenPVTBCConnector"
+	"ticken-ticket-service/blockchain/pvtbc"
 	"ticken-ticket-service/infra"
 	"ticken-ticket-service/repos"
 	"ticken-ticket-service/utils"
@@ -20,16 +20,21 @@ func NewProvider(db infra.Db, tickenConfig *utils.TickenConfig) (Provider, error
 		return nil, err
 	}
 
+	pvtbcTickenConnector, err := pvtbc.NewConnector()
+	if err != nil {
+		return nil, err
+	}
+
 	provider.ticketIssuer = NewTicketIssuer(
 		repoProvider.GetEventRepository(),
 		repoProvider.GetTicketRepository(),
-		tickenPVTBCConnector.New(),
+		pvtbcTickenConnector,
 	)
 
 	provider.eventManager = NewEventManager(
 		repoProvider.GetEventRepository(),
 		repoProvider.GetTicketRepository(),
-		tickenPVTBCConnector.New(),
+		pvtbcTickenConnector,
 	)
 
 	return provider, nil

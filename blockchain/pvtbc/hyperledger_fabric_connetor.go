@@ -1,40 +1,47 @@
 package pvtbc
 
 import (
+	"crypto/x509"
 	"fmt"
 	"github.com/hyperledger/fabric-gateway/pkg/client"
 	"github.com/hyperledger/fabric-gateway/pkg/identity"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"io/ioutil"
 	"time"
 )
 
-type baseConnector struct {
+type hyperledgerFabricConnector struct {
 	identity *identity.X509Identity
 	sign     identity.Sign
 	gateway  *client.Gateway
-	network  *client.Network
-	contract *client.Contract
 }
 
-func FabricConnector(mspID string, certPath string, keyPath string) BaseConnector {
-	return &baseConnector{
+func NewHyperledgerFabricConnector(mspID string, certPath string, keyPath string) HyperledgerFabricConnector {
+	return &hyperledgerFabricConnector{
 		identity: newIdentity(certPath, mspID),
 		sign:     newSign(keyPath),
 		gateway:  nil,
-		network:  nil,
-		contract: nil,
 	}
 }
 
-func (bc *baseConnector) Connect(grpcConn *grpc.ClientConn, channel string, chaincode string) error {
-	if bc.gateway != nil {
+func (hfc *hyperledgerFabricConnector) IsConnected() bool {
+	return hfc.gateway != nil
+}
+
+func (hfc *hyperledgerFabricConnector) Connect() error {
+	if hfc.IsConnected() {
 		return fmt.Errorf("gateway is already connected")
 	}
 
+	grpcConn, err := newGrpcConnection()
+	if err != nil {
+		return err
+	}
+
 	gateway, err := client.Connect(
-		bc.identity,
-		client.WithSign(bc.sign),
+		hfc.identity,
+		client.WithSign(hfc.sign),
 		client.WithClientConnection(grpcConn),
 
 		// Default timeouts for different gRPC calls
@@ -43,44 +50,28 @@ func (bc *baseConnector) Connect(grpcConn *grpc.ClientConn, channel string, chai
 		client.WithEndorseTimeout(15*time.Second),
 		client.WithCommitStatusTimeout(1*time.Minute),
 	)
-
 	if err != nil {
 		return err
 	}
 
-	bc.gateway = gateway
-	bc.network = gateway.GetNetwork(channel)
-	bc.contract = bc.network.GetContract(chaincode)
+	hfc.gateway = gateway
+	// hfc.network = gateway.GetNetwork(channel)
+	// hfc.contract = hfc.network.GetContract(chaincode)
 	return nil
 }
 
-func (bc *baseConnector) Query(function string, args ...string) ([]byte, error) {
-	evaluateResult, err := bc.contract.EvaluateTransaction(function, args...)
-
-	if err != nil {
-		return nil, fmt.Errorf("failed to evaluate transaction: %w", err)
+func (hfc *hyperledgerFabricConnector) GetChaincode(channelName string, chaincodeName string) (*client.Contract, error) {
+	network := hfc.gateway.GetNetwork(channelName)
+	if network == nil {
+		return nil, fmt.Errorf("channel %s not exist", channelName)
 	}
 
-	return evaluateResult, nil
-}
-
-func (bc *baseConnector) Submit(function string, args ...string) ([]byte, error) {
-	evaluateResult, err := bc.contract.SubmitTransaction(function, args...)
-
-	if err != nil {
-		return nil, fmt.Errorf("failed to evaluate transaction: %w", err)
+	chaincode := network.GetContract(chaincodeName)
+	if chaincode == nil {
+		return nil, fmt.Errorf("chaincode %s not exist", chaincodeName)
 	}
 
-	return evaluateResult, nil
-}
-
-func (bc *baseConnector) SubmitAsync(function string, args ...string) ([]byte, *client.Commit) {
-	submitResult, commit, err := bc.contract.SubmitAsync(function, client.WithArguments(args...))
-	if err != nil {
-		panic(fmt.Errorf("failed to submit transaction asynchronously: %w", err))
-	}
-
-	return submitResult, commit
+	return chaincode, nil
 }
 
 // newIdentity creates a client identity for this
@@ -124,4 +115,30 @@ func newSign(keyPath string) identity.Sign {
 	}
 
 	return sign
+}
+
+func newGrpcConnection() (*grpc.ClientConn, error) {
+	certificate, err := loadCertificate(tlsCertPath)
+	if err != nil {
+		return nil, err
+	}
+
+	certPool := x509.NewCertPool()
+	certPool.AddCert(certificate)
+	transportCredentials := credentials.NewClientTLSFromCert(certPool, gatewayPeer)
+
+	connection, err := grpc.Dial(peerEndpoint, grpc.WithTransportCredentials(transportCredentials))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create gRPC connection: %w", err)
+	}
+
+	return connection, nil
+}
+
+func loadCertificate(filename string) (*x509.Certificate, error) {
+	certificatePEM, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read certificate file: %w", err)
+	}
+	return identity.CertificateFromPEM(certificatePEM)
 }
