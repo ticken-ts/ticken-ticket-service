@@ -1,4 +1,4 @@
-package hyperledgerFabricConnectors
+package pvtbcConnector
 
 import (
 	"encoding/json"

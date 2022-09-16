@@ -1,4 +1,4 @@
-package tickenPVTBCConnector
+package pvtbcConnector
 
 import (
 	"crypto/x509"
@@ -7,7 +7,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"io/ioutil"
-	"ticken-ticket-service/blockchain/tickenPVTBCConnector/hyperledgerFabricConnectors"
+	"ticken-ticket-service/blockchain/pvtbcConnector/hyperledgerFabricConnectors"
 	"ticken-ticket-service/models"
 )
 

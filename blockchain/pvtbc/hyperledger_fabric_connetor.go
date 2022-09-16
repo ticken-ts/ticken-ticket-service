@@ -1,4 +1,4 @@
-package hyperledgerFabricConnectors
+package pvtbc
 
 import (
 	"fmt"
@@ -9,13 +9,6 @@ import (
 	"time"
 )
 
-type BaseConnector interface {
-	Connect(grpcConn *grpc.ClientConn, channel string, chaincode string) error
-	Query(function string, args ...string) ([]byte, error)
-	Submit(function string, args ...string) ([]byte, error)
-	SubmitAsync(function string, args ...string) ([]byte, *client.Commit)
-}
-
 type baseConnector struct {
 	identity *identity.X509Identity
 	sign     identity.Sign
@@ -24,7 +17,7 @@ type baseConnector struct {
 	contract *client.Contract
 }
 
-func NewBaseConnector(mspID string, certPath string, keyPath string) BaseConnector {
+func FabricConnector(mspID string, certPath string, keyPath string) BaseConnector {
 	return &baseConnector{
 		identity: newIdentity(certPath, mspID),
 		sign:     newSign(keyPath),
