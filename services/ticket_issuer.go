@@ -26,25 +26,32 @@ func NewTicketIssuer(
 }
 
 func (s *ticketIssuer) IssueTicket(eventID string, section string, owner string) (*models.Ticket, error) {
-	event := s.eventRepository.FindEventByID(eventID)
+	event := s.eventRepository.FindEvent(eventID)
 	if event == nil {
 		return nil, fmt.Errorf("could not determine organizer channel")
 	}
-
-	fmt.Printf("channel found %s", event.PvtBCChannel)
 
 	err := s.pvtbcConnector.Connect(event.PvtBCChannel)
 	if err != nil {
 		return nil, err
 	}
 
-	newTicket := models.NewTicket(eventID, section)
-	err = newTicket.AssignTo(owner)
+	newTicket := models.NewTicket(eventID, section, owner)
+
+	ticketResponse, err := s.pvtbcConnector.IssueTicket(
+		newTicket.TicketID,
+		newTicket.EventID,
+		newTicket.Section,
+		newTicket.Owner,
+	)
+
 	if err != nil {
 		return nil, err
 	}
 
-	err = s.pvtbcConnector.IssueTicket(newTicket)
+	newTicket.Status = ticketResponse.Status
+
+	err = s.ticketRepository.AddTicket(newTicket)
 	if err != nil {
 		return nil, err
 	}

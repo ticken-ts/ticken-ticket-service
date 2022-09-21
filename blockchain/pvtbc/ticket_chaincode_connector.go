@@ -2,15 +2,16 @@ package pvtbc
 
 import (
 	"encoding/json"
-	"ticken-ticket-service/models"
+	"fmt"
 )
 
 const (
 	TicketCCIssueFunction = "Issue"
+	TicketCCSignFunction  = "Sign"
 	TickenTicketChaincode = "ticken-ticket"
 )
 
-type issueTicketResponse struct {
+type TicketChaincode struct {
 	TicketID string `json:"ticket_id"`
 	EventID  string `json:"event_id"`
 	Owner    string `json:"owner"`
@@ -33,24 +34,34 @@ func NewTicketChaincodeConnector(hfc HyperledgerFabricConnector, channelName str
 	return ticketCC, nil
 }
 
-func (ticketCC *ticketChaincodeConnector) IssueTicket(ticket *models.Ticket) error {
-	data, err := ticketCC.baseCC.Submit(
-		TicketCCIssueFunction,
-		ticket.TicketID,
-		ticket.EventID,
-		ticket.Section,
-		ticket.Owner,
-	)
-
+func (ticketCC *ticketChaincodeConnector) IssueTicket(ticketID string, eventID string, section string, owner string) (*TicketChaincode, error) {
+	data, err := ticketCC.baseCC.Submit(TicketCCIssueFunction, ticketID, eventID, section, owner)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	response := new(issueTicketResponse)
+	response := new(TicketChaincode)
 	err = json.Unmarshal(data, &response)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return response, nil
+}
+
+func (ticketCC *ticketChaincodeConnector) SignTicket(ticketID string, eventID string, signer string, signature []byte) (*TicketChaincode, error) {
+	hexSignature := fmt.Sprintf("%x", signature)
+
+	data, err := ticketCC.baseCC.Submit(TicketCCSignFunction, ticketID, eventID, signer, hexSignature)
+	if err != nil {
+		return nil, err
+	}
+
+	response := new(TicketChaincode)
+	err = json.Unmarshal(data, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	return response, nil
 }

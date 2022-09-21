@@ -9,6 +9,7 @@ import (
 
 type provider struct {
 	ticketIssuer TicketIssuer
+	ticketSigner TicketSigner
 	eventManager EventManager
 }
 
@@ -37,6 +38,13 @@ func NewProvider(db infra.Db, tickenConfig *utils.TickenConfig) (Provider, error
 		pvtbcTickenConnector,
 	)
 
+	provider.ticketSigner = NewTicketSigner(
+		repoProvider.GetEventRepository(),
+		repoProvider.GetTicketRepository(),
+		pvtbcTickenConnector,
+		NewUserManager(), // TODO -> integrate
+	)
+
 	return provider, nil
 }
 
@@ -47,4 +55,8 @@ func (provider *provider) GetTicketIssuer() TicketIssuer {
 
 func (provider *provider) GetEventManager() EventManager {
 	return provider.eventManager
+}
+
+func (provider *provider) GetTicketSigner() TicketSigner {
+	return provider.ticketSigner
 }

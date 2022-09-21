@@ -8,13 +8,13 @@ import (
 	"ticken-ticket-service/utils"
 )
 
-type tickenTicketApp struct {
+type TickenTicketApp struct {
 	router          infra.Router
 	serviceProvider services.Provider
 }
 
-func New(router infra.Router, db infra.Db, tickenConfig *utils.TickenConfig) *tickenTicketApp {
-	tickenTicketApp := new(tickenTicketApp)
+func New(router infra.Router, db infra.Db, tickenConfig *utils.TickenConfig) *TickenTicketApp {
+	tickenTicketApp := new(TickenTicketApp)
 
 	// this provider is going to provide all services
 	// needed by the controllers to execute it operations
@@ -34,14 +34,14 @@ func New(router infra.Router, db infra.Db, tickenConfig *utils.TickenConfig) *ti
 	return tickenTicketApp
 }
 
-func (tickenTicketApp *tickenTicketApp) Start() {
+func (tickenTicketApp *TickenTicketApp) Start() {
 	err := tickenTicketApp.router.Run("localhost:8080")
 	if err != nil {
 		panic(err)
 	}
 }
 
-func (tickenTicketApp *tickenTicketApp) Populate() {
+func (tickenTicketApp *TickenTicketApp) Populate() {
 	eventManager := tickenTicketApp.serviceProvider.GetEventManager()
 	_, err := eventManager.AddEvent("test-event-id", "organizer", "ticken-test-channel")
 	if err != nil {

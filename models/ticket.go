@@ -1,34 +1,24 @@
 package models
 
 import (
-	"fmt"
 	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Ticket struct {
-	TicketID string `json:"id"`
-	Owner    string `json:"owner"`
-	EventID  string `json:"event_id"`
-	Section  string `json:"section"`
+	mongoID  primitive.ObjectID `bson:"_id"`
+	TicketID string             `json:"ticket_id" bson:"ticket_id"`
+	Owner    string             `json:"owner" bson:"owner"`
+	Section  string             `json:"section" bson:"section"`
+	EventID  string             `json:"event_id" bson:"event_id"`
+	Status   string             `json:"status" bson:"status"`
 }
 
-func NewTicket(eventID string, section string) *Ticket {
+func NewTicket(eventID string, section string, owner string) *Ticket {
 	return &Ticket{
 		TicketID: uuid.NewString(),
 		EventID:  eventID,
 		Section:  section,
+		Owner:    owner,
 	}
-}
-
-func (t *Ticket) AssignTo(owner string) error {
-	if t.HasOwner() {
-		return fmt.Errorf("ticket already has owner")
-	}
-
-	t.Owner = owner
-	return nil
-}
-
-func (t *Ticket) HasOwner() bool {
-	return len(t.Owner) != 0
 }

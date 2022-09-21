@@ -2,7 +2,6 @@ package pvtbc
 
 import (
 	"github.com/hyperledger/fabric-gateway/pkg/client"
-	"ticken-ticket-service/models"
 )
 
 type TickenConnector interface {
@@ -25,7 +24,8 @@ type ChaincodeConnector interface {
 }
 
 type TicketChaincodeConnector interface {
-	IssueTicket(ticket *models.Ticket) error
+	IssueTicket(ticketID string, eventID string, section string, owner string) (*TicketChaincode, error)
+	SignTicket(ticketID string, eventID string, signer string, signature []byte) (*TicketChaincode, error)
 }
 
 type EventChaincodeConnector interface {
