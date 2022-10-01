@@ -9,16 +9,26 @@ type TickenConfig struct {
 
 type Config struct {
 	Database DatabaseConfig `mapstructure:"database"`
+	Pvtbc    PvtbcConfig    `mapstructure:"pvtbc"`
 }
 
-type Env struct {
-	TickenEnv string `mapstructure:"TICKEN_ENV"`
-	MongoUri  string `mapstructure:"MONGO_URI"`
+type PvtbcConfig struct {
+	MspID              string `mapstructure:"msp_id"`
+	PeerEndpoint       string `mapstructure:"peer_endpoint"`
+	GatewayPeer        string `mapstructure:"gateway_peer"`
+	CertificatePath    string `mapstructure:"certificate_path"`
+	PrivateKeyPath     string `mapstructure:"private_key_path"`
+	TLSCertificatePath string `mapstructure:"tls_certificate_path"`
 }
 
 type DatabaseConfig struct {
 	Driver string `mapstructure:"driver"`
 	Name   string `mapstructure:"name"`
+}
+
+type Env struct {
+	TickenEnv string `mapstructure:"TICKEN_ENV"`
+	MongoUri  string `mapstructure:"MONGO_URI"`
 }
 
 const (

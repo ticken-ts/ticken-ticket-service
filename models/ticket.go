@@ -3,6 +3,7 @@ package models
 import (
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"ticken-ticket-service/utils"
 )
 
 type Ticket struct {
@@ -14,6 +15,11 @@ type Ticket struct {
 	Status   string             `json:"status" bson:"status"`
 }
 
+type ticketSignatureFields struct {
+	ticketID string
+	eventID  string
+}
+
 func NewTicket(eventID string, section string, owner string) *Ticket {
 	return &Ticket{
 		TicketID: uuid.NewString(),
@@ -21,4 +27,23 @@ func NewTicket(eventID string, section string, owner string) *Ticket {
 		Section:  section,
 		Owner:    owner,
 	}
+}
+
+func (ticket *Ticket) Sign(ownerPrivateKey string) ([]byte, error) {
+	signerHelper, err := utils.NewSigner(ownerPrivateKey)
+	if err != nil {
+		return nil, err
+	}
+
+	signatureFields := &ticketSignatureFields{
+		ticketID: ticket.TicketID,
+		eventID:  ticket.EventID,
+	}
+
+	signature, err := signerHelper.Sign(signatureFields)
+	if err != nil {
+		return nil, err
+	}
+
+	return signature, nil
 }

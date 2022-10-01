@@ -11,8 +11,8 @@ type EventRepository interface {
 
 type TicketRepository interface {
 	AddTicket(ticket *models.Ticket) error
+	UpdateTicketStatus(ticket *models.Ticket) error
 	FindTicket(eventID string, ticketID string) *models.Ticket
-	UpdateTicketStatus(eventID string, ticketID string, newStatus string) error
 }
 
 type Provider interface {

@@ -52,14 +52,14 @@ func (r *TicketMongoDBRepository) FindTicket(eventID string, ticketID string) *m
 	return &foundTicket
 }
 
-func (r *TicketMongoDBRepository) UpdateTicketStatus(eventID string, ticketID string, newStatus string) error {
+func (r *TicketMongoDBRepository) UpdateTicketStatus(ticket *models.Ticket) error {
 	updateContext, cancel := r.generateOpSubcontext()
 	defer cancel()
 
 	tickets := r.getCollection()
 
-	filter := bson.M{"event_id": eventID, "ticket_id": ticketID}
-	update := bson.M{"status": newStatus}
+	filter := bson.M{"event_id": ticket.EventID, "ticket_id": ticket.TicketID}
+	update := bson.M{"status": ticket.Status}
 
 	_, err := tickets.UpdateOne(updateContext, filter, update)
 	if err != nil {

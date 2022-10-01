@@ -2,7 +2,7 @@ package services
 
 import (
 	"fmt"
-	"ticken-ticket-service/blockchain/pvtbc"
+	pvtbc "github.com/ticken-ts/ticken-pvtbc-connector"
 	"ticken-ticket-service/models"
 	"ticken-ticket-service/repos"
 )
@@ -10,14 +10,10 @@ import (
 type ticketIssuer struct {
 	eventRepository  repos.EventRepository
 	ticketRepository repos.TicketRepository
-	pvtbcConnector   pvtbc.TickenConnector
+	pvtbcConnector   *pvtbc.Caller
 }
 
-func NewTicketIssuer(
-	eventRepository repos.EventRepository,
-	ticketRepository repos.TicketRepository,
-	pvtbcConnector pvtbc.TickenConnector,
-) TicketIssuer {
+func NewTicketIssuer(eventRepository repos.EventRepository, ticketRepository repos.TicketRepository, pvtbcConnector *pvtbc.Caller) TicketIssuer {
 	return &ticketIssuer{
 		eventRepository:  eventRepository,
 		ticketRepository: ticketRepository,
@@ -31,20 +27,14 @@ func (s *ticketIssuer) IssueTicket(eventID string, section string, owner string)
 		return nil, fmt.Errorf("could not determine organizer channel")
 	}
 
-	err := s.pvtbcConnector.Connect(event.PvtBCChannel)
+	err := s.pvtbcConnector.SetChannel(event.PvtBCChannel)
 	if err != nil {
 		return nil, err
 	}
 
 	newTicket := models.NewTicket(eventID, section, owner)
 
-	ticketResponse, err := s.pvtbcConnector.IssueTicket(
-		newTicket.TicketID,
-		newTicket.EventID,
-		newTicket.Section,
-		newTicket.Owner,
-	)
-
+	ticketResponse, err := s.pvtbcConnector.IssueTicket(newTicket.TicketID, newTicket.EventID, newTicket.Section, newTicket.Owner)
 	if err != nil {
 		return nil, err
 	}

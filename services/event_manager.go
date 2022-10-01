@@ -1,26 +1,17 @@
 package services
 
 import (
-	"ticken-ticket-service/blockchain/pvtbc"
 	"ticken-ticket-service/models"
 	"ticken-ticket-service/repos"
 )
 
 type eventManager struct {
-	eventRepository  repos.EventRepository
-	ticketRepository repos.TicketRepository
-	pvtbcConnector   pvtbc.TickenConnector
+	eventRepository repos.EventRepository
 }
 
-func NewEventManager(
-	eventRepository repos.EventRepository,
-	ticketRepository repos.TicketRepository,
-	pvtbcConnector pvtbc.TickenConnector,
-) EventManager {
+func NewEventManager(eventRepository repos.EventRepository) EventManager {
 	return &eventManager{
-		eventRepository:  eventRepository,
-		ticketRepository: ticketRepository,
-		pvtbcConnector:   pvtbcConnector,
+		eventRepository: eventRepository,
 	}
 }
 

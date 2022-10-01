@@ -1,7 +1,7 @@
 package services
 
 import (
-	"ticken-ticket-service/blockchain/pvtbc"
+	pvtbc "github.com/ticken-ts/ticken-pvtbc-connector"
 	"ticken-ticket-service/infra"
 	"ticken-ticket-service/repos"
 	"ticken-ticket-service/utils"
@@ -21,29 +21,26 @@ func NewProvider(db infra.Db, tickenConfig *utils.TickenConfig) (Provider, error
 		return nil, err
 	}
 
-	pvtbcTickenConnector, err := pvtbc.NewConnector()
+	pvtbcCaller, err := pvtbc.NewCaller(
+		tickenConfig.Config.Pvtbc.MspID,
+		tickenConfig.Config.Pvtbc.CertificatePath,
+		tickenConfig.Config.Pvtbc.PrivateKeyPath,
+		tickenConfig.Config.Pvtbc.PeerEndpoint,
+		tickenConfig.Config.Pvtbc.GatewayPeer,
+		tickenConfig.Config.Pvtbc.TLSCertificatePath,
+	)
+
 	if err != nil {
 		return nil, err
 	}
 
-	provider.ticketIssuer = NewTicketIssuer(
-		repoProvider.GetEventRepository(),
-		repoProvider.GetTicketRepository(),
-		pvtbcTickenConnector,
-	)
+	eventRepo := repoProvider.GetEventRepository()
+	ticketRepo := repoProvider.GetTicketRepository()
+	userManager := NewUserManager()
 
-	provider.eventManager = NewEventManager(
-		repoProvider.GetEventRepository(),
-		repoProvider.GetTicketRepository(),
-		pvtbcTickenConnector,
-	)
-
-	provider.ticketSigner = NewTicketSigner(
-		repoProvider.GetEventRepository(),
-		repoProvider.GetTicketRepository(),
-		pvtbcTickenConnector,
-		NewUserManager(), // TODO -> integrate
-	)
+	provider.eventManager = NewEventManager(repoProvider.GetEventRepository())
+	provider.ticketIssuer = NewTicketIssuer(eventRepo, ticketRepo, pvtbcCaller)
+	provider.ticketSigner = NewTicketSigner(eventRepo, ticketRepo, pvtbcCaller, userManager)
 
 	return provider, nil
 }

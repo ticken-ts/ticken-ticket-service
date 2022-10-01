@@ -2,5 +2,14 @@
   "database": {
     "driver": "mongo",
     "name": "ticken-db"
+  },
+
+  "pvtbc": {
+    "msp_id": "Org1MSP",
+    "peer_endpoint": "localhost:7051",
+    "gateway_peer": "peer0.org1.example.com",
+    "certificate_path": "../ticken-dev/test-network/organizations/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/signcerts/User1@org1.example.com-cert.pem",
+    "private_key_path": "../ticken-dev/test-network/organizations/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/keystore/priv_sk",
+    "tlv_certificate_path": "../ticken-dev/test-network/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt"
   }
 }

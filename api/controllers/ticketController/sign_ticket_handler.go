@@ -3,6 +3,7 @@ package ticketController
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"ticken-ticket-service/api/mappers"
 	"ticken-ticket-service/utils"
 )
 
@@ -18,5 +19,7 @@ func (controller *TicketController) SignTicket(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, utils.HttpResponse{Data: signedTicket})
+	ticketDTO := mappers.MapTicketToDTO(signedTicket)
+
+	c.JSON(http.StatusOK, utils.HttpResponse{Data: ticketDTO})
 }

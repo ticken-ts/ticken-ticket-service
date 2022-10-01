@@ -2,28 +2,22 @@ package services
 
 import (
 	"fmt"
-	"ticken-ticket-service/blockchain/pvtbc"
-	"ticken-ticket-service/helpers"
+	pvtbc "github.com/ticken-ts/ticken-pvtbc-connector"
 	"ticken-ticket-service/models"
 	"ticken-ticket-service/repos"
 )
 
-type baseTicket struct {
-	TicketID string `json:"ticket_id"`
-	EventID  string `json:"event_id"`
-}
-
 type ticketSigner struct {
 	eventRepository  repos.EventRepository
 	ticketRepository repos.TicketRepository
-	pvtbcConnector   pvtbc.TickenConnector
+	pvtbcConnector   *pvtbc.Caller
 	userManager      *UserManager
 }
 
 func NewTicketSigner(
 	eventRepository repos.EventRepository,
 	ticketRepository repos.TicketRepository,
-	pvtbcConnector pvtbc.TickenConnector,
+	pvtbcConnector *pvtbc.Caller,
 	userManager *UserManager,
 ) TicketSigner {
 	return &ticketSigner{
@@ -40,7 +34,7 @@ func (s *ticketSigner) SignTicket(eventID string, ticketID string, signer string
 		return nil, fmt.Errorf("could not determine organizer channel")
 	}
 
-	err := s.pvtbcConnector.Connect(event.PvtBCChannel)
+	err := s.pvtbcConnector.SetChannel(event.PvtBCChannel)
 	if err != nil {
 		return nil, err
 	}
@@ -50,14 +44,14 @@ func (s *ticketSigner) SignTicket(eventID string, ticketID string, signer string
 		return nil, err
 	}
 
-	signerHelper, err := helpers.NewSigner(privateKey)
-	if err != nil {
-		return nil, err
+	ticket := s.ticketRepository.FindTicket(eventID, ticketID)
+	if ticket == nil {
+		// TODO - handle this situation with a sync with
+		// pvt blockchain to ensure that the ticket exist or not
+		return nil, fmt.Errorf("ticket %s not found in event %s", ticketID, eventID)
 	}
 
-	// this ticket is only used to sign
-	baseTicket := &baseTicket{TicketID: ticketID, EventID: eventID}
-	signature, err := signerHelper.Sign(baseTicket)
+	signature, err := ticket.Sign(privateKey)
 	if err != nil {
 		return nil, err
 	}
@@ -67,12 +61,11 @@ func (s *ticketSigner) SignTicket(eventID string, ticketID string, signer string
 		return nil, err
 	}
 
-	err = s.ticketRepository.UpdateTicketStatus(ticketID, eventID, ticketResponse.Status)
+	ticket.Status = ticketResponse.Status
+	err = s.ticketRepository.UpdateTicketStatus(ticket)
 	if err != nil {
 		return nil, err
 	}
-
-	ticket := s.ticketRepository.FindTicket(eventID, ticketID)
 
 	return ticket, nil
 }
