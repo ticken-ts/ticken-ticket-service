@@ -3,6 +3,7 @@ package app
 import (
 	"ticken-ticket-service/api"
 	"ticken-ticket-service/api/controllers/ticketController"
+	"ticken-ticket-service/api/middlewares"
 	"ticken-ticket-service/infra"
 	"ticken-ticket-service/services"
 	"ticken-ticket-service/utils"
@@ -18,16 +19,27 @@ func New(router infra.Router, db infra.Db, tickenConfig *utils.TickenConfig) *Ti
 
 	// this provider is going to provide all services
 	// needed by the controllers to execute it operations
-	serviceProvider, _ := services.NewProvider(db, tickenConfig)
+	serviceProvider, err := services.NewProvider(db, tickenConfig)
+	if err != nil {
+		panic(err)
+	}
 
 	tickenTicketApp.router = router
 	tickenTicketApp.serviceProvider = serviceProvider
 
-	var controllers = []api.Controller{
+	var appMiddlewares = []api.Middleware{
+		middlewares.NewAuthMiddleware(serviceProvider),
+	}
+
+	for _, middleware := range appMiddlewares {
+		middleware.Setup(router)
+	}
+
+	var appControllers = []api.Controller{
 		ticketController.NewTicketController(serviceProvider),
 	}
 
-	for _, controller := range controllers {
+	for _, controller := range appControllers {
 		controller.Setup(router)
 	}
 
@@ -35,7 +47,7 @@ func New(router infra.Router, db infra.Db, tickenConfig *utils.TickenConfig) *Ti
 }
 
 func (tickenTicketApp *TickenTicketApp) Start() {
-	err := tickenTicketApp.router.Run("localhost:8080")
+	err := tickenTicketApp.router.Run("localhost:9000")
 	if err != nil {
 		panic(err)
 	}
