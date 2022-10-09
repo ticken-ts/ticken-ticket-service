@@ -68,11 +68,13 @@ func (middleware *AuthMiddleware) isJWTAuthorized() gin.HandlerFunc {
 		}
 
 		verifier := middleware.oidcProvider.Verifier(&oidcConfig)
-		_, err := verifier.Verify(middleware.oidcClientCtx, rawAccessToken)
+		jwt, err := verifier.Verify(middleware.oidcClientCtx, rawAccessToken)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, utils.HttpResponse{Message: "authorisation failed while verifying the token: " + err.Error()})
 			c.Abort()
 			return
 		}
+
+		c.Set("jwt", jwt)
 	}
 }

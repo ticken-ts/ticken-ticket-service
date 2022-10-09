@@ -1,6 +1,7 @@
 package ticketController
 
 import (
+	"github.com/coreos/go-oidc"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"ticken-ticket-service/api/mappers"
@@ -9,6 +10,7 @@ import (
 
 func (controller *TicketController) SignTicket(c *gin.Context) {
 	eventID, ticketID := c.Param("eventID"), c.Param("ticketID")
+	owner := c.MustGet("jwt").(*oidc.IDToken).Subject
 
 	ticketSigner := controller.serviceProvider.GetTicketSigner()
 

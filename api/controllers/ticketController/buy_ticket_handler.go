@@ -1,6 +1,7 @@
 package ticketController
 
 import (
+	"github.com/coreos/go-oidc"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"ticken-ticket-service/api/mappers"
@@ -14,6 +15,7 @@ type buyTicketPayload struct {
 func (controller *TicketController) BuyTicket(c *gin.Context) {
 	var payload buyTicketPayload
 	eventID := c.Param("eventID")
+	owner := c.MustGet("jwt").(*oidc.IDToken).Subject
 
 	err := c.BindJSON(&payload)
 	if err != nil {
