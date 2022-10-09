@@ -7,26 +7,30 @@ package infra
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	pvtbc "github.com/ticken-ts/ticken-pvtbc-connector"
+	"github.com/ticken-ts/ticken-pvtbc-connector/fabric/peerconnector"
 	"ticken-ticket-service/infra/db"
 	"ticken-ticket-service/utils"
 )
 
-type builder struct {
+type Builder struct {
 	tickenConfig *utils.TickenConfig
 }
 
-func NewBuilder(tickenConfig *utils.TickenConfig) (*builder, error) {
+var pc *peerconnector.PeerConnector = nil
+
+func NewBuilder(tickenConfig *utils.TickenConfig) (*Builder, error) {
 	if tickenConfig == nil {
 		return nil, fmt.Errorf("configuration is mandatory")
 	}
 
-	builder := new(builder)
+	builder := new(Builder)
 	builder.tickenConfig = tickenConfig
 
 	return builder, nil
 }
 
-func (builder *builder) BuildDb() Db {
+func (builder *Builder) BuildDb() Db {
 	switch builder.tickenConfig.Config.Database.Driver {
 	case utils.MongoDriver:
 		return buildMongoDb(builder.tickenConfig.Env.MongoUri)
@@ -35,8 +39,24 @@ func (builder *builder) BuildDb() Db {
 	}
 }
 
-func (builder *builder) BuildRouter() Router {
+func (builder *Builder) BuildRouter() Router {
 	return gin.Default()
+}
+
+func (builder *Builder) BuildPvtbcCaller() *pvtbc.Caller {
+	caller, err := pvtbc.NewCaller(buildPeerConnector(builder.tickenConfig.Config.Pvtbc))
+	if err != nil {
+		panic(err)
+	}
+	return caller
+}
+
+func (builder *Builder) BuildPvtbcListener() *pvtbc.Listener {
+	listener, err := pvtbc.NewListener(buildPeerConnector(builder.tickenConfig.Config.Pvtbc))
+	if err != nil {
+		panic(err)
+	}
+	return listener
 }
 
 func buildMongoDb(uri string) Db {
@@ -46,4 +66,19 @@ func buildMongoDb(uri string) Db {
 		panic(err)
 	}
 	return mongoDb
+}
+
+func buildPeerConnector(config utils.PvtbcConfig) *peerconnector.PeerConnector {
+	if pc != nil {
+		return pc
+	}
+
+	pc := peerconnector.New(config.MspID, config.CertificatePath, config.PrivateKeyPath)
+
+	err := pc.Connect(config.PeerEndpoint, config.GatewayPeer, config.TLSCertificatePath)
+	if err != nil {
+		panic(err)
+	}
+
+	return pc
 }

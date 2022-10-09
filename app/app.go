@@ -14,12 +14,16 @@ type TickenTicketApp struct {
 	serviceProvider services.Provider
 }
 
-func New(router infra.Router, db infra.Db, tickenConfig *utils.TickenConfig) *TickenTicketApp {
+func New(builder *infra.Builder, tickenConfig *utils.TickenConfig) *TickenTicketApp {
 	tickenTicketApp := new(TickenTicketApp)
+
+	db := builder.BuildDb()
+	router := builder.BuildRouter()
+	pvtbcCaller := builder.BuildPvtbcCaller()
 
 	// this provider is going to provide all services
 	// needed by the controllers to execute it operations
-	serviceProvider, err := services.NewProvider(db, tickenConfig)
+	serviceProvider, err := services.NewProvider(db, pvtbcCaller, tickenConfig)
 	if err != nil {
 		panic(err)
 	}

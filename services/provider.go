@@ -13,22 +13,13 @@ type provider struct {
 	eventManager EventManager
 }
 
-func NewProvider(db infra.Db, tickenConfig *utils.TickenConfig) (Provider, error) {
+func NewProvider(db infra.Db, pvtbcCaller *pvtbc.Caller, tickenConfig *utils.TickenConfig) (Provider, error) {
 	provider := new(provider)
 
 	repoProvider, err := repos.NewProvider(db, tickenConfig)
 	if err != nil {
 		return nil, err
 	}
-
-	pvtbcCaller, err := pvtbc.NewCaller(
-		tickenConfig.Config.Pvtbc.MspID,
-		tickenConfig.Config.Pvtbc.CertificatePath,
-		tickenConfig.Config.Pvtbc.PrivateKeyPath,
-		tickenConfig.Config.Pvtbc.PeerEndpoint,
-		tickenConfig.Config.Pvtbc.GatewayPeer,
-		tickenConfig.Config.Pvtbc.TLSCertificatePath,
-	)
 
 	if err != nil {
 		return nil, err
