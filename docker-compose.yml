@@ -1,0 +1,20 @@
+version: '3.9'
+
+services:
+  ticken-ticket-service:
+    depends_on:
+      - ticken-ticket-service-db
+    restart: on-failure
+    build: ./
+    ports:
+      - "9000:9000"
+
+  ticken-ticket-service-db:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+    volumes:
+      - ~/apps/mongo:/db

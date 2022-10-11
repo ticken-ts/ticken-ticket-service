@@ -1,5 +1,8 @@
 package services
 
+// TODO
+// * Check lazy build
+
 import (
 	pvtbc "github.com/ticken-ts/ticken-pvtbc-connector"
 	"ticken-ticket-service/infra"
@@ -21,22 +24,17 @@ func NewProvider(db infra.Db, pvtbcCaller *pvtbc.Caller, tickenConfig *utils.Tic
 		return nil, err
 	}
 
-	if err != nil {
-		return nil, err
-	}
-
+	userManager := NewUserManager()
 	eventRepo := repoProvider.GetEventRepository()
 	ticketRepo := repoProvider.GetTicketRepository()
-	userManager := NewUserManager()
 
-	provider.eventManager = NewEventManager(repoProvider.GetEventRepository())
+	provider.eventManager = NewEventManager(eventRepo)
 	provider.ticketIssuer = NewTicketIssuer(eventRepo, ticketRepo, pvtbcCaller)
 	provider.ticketSigner = NewTicketSigner(eventRepo, ticketRepo, pvtbcCaller, userManager)
 
 	return provider, nil
 }
 
-// TODO -> see if it is better to do lazy
 func (provider *provider) GetTicketIssuer() TicketIssuer {
 	return provider.ticketIssuer
 }

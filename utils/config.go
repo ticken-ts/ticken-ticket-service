@@ -10,6 +10,7 @@ type TickenConfig struct {
 type Config struct {
 	Database DatabaseConfig `mapstructure:"database"`
 	Pvtbc    PvtbcConfig    `mapstructure:"pvtbc"`
+	Server   ServerConfig   `mapstructure:"server"`
 }
 
 type PvtbcConfig struct {
@@ -26,15 +27,23 @@ type DatabaseConfig struct {
 	Name   string `mapstructure:"name"`
 }
 
+type ServerConfig struct {
+	Host           string `mapstructure:"host"`
+	Port           string `mapstructure:"port"`
+	ClientID       string `mapstructure:"client_id"`
+	IdentityIssuer string `mapstructure:"identity_issuer"`
+}
+
 type Env struct {
-	TickenEnv string `mapstructure:"TICKEN_ENV"`
-	MongoUri  string `mapstructure:"MONGO_URI"`
+	TickenEnv        string `mapstructure:"TICKEN_ENV"`
+	ConnectionString string `mapstructure:"CONNECTION_STRING"`
 }
 
 const (
-	devEnv  = "dev"
-	prodEnv = "prod"
-	testEnv = "test"
+	devEnv   = "dev"
+	stageEnv = "stage"
+	prodEnv  = "prod"
+	testEnv  = "test"
 )
 
 const (
@@ -70,6 +79,10 @@ func (config *TickenConfig) IsProd() bool {
 
 func (config *TickenConfig) IsTest() bool {
 	return config.Env.TickenEnv == testEnv
+}
+
+func (config *TickenConfig) IsStage() bool {
+	return config.Env.TickenEnv == stageEnv
 }
 
 func loadEnv(path string, filename string) (*Env, error) {

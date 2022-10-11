@@ -17,12 +17,10 @@ func main() {
 		panic(err)
 	}
 
-	db := builder.BuildDb()
-	router := builder.BuildRouter()
-
-	tickenTicketServer := app.New(router, db, tickenConfig)
+	tickenTicketServer := app.New(builder, tickenConfig)
 	if tickenConfig.IsDev() {
 		tickenTicketServer.Populate()
+		tickenTicketServer.EmitFakeJWT()
 	}
 
 	tickenTicketServer.Start()

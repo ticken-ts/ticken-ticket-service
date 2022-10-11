@@ -1,8 +1,8 @@
 package ticketController
 
 import (
+	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	"ticken-ticket-service/infra"
 	"ticken-ticket-service/services"
 )
 
@@ -18,7 +18,7 @@ func NewTicketController(serviceProvider services.Provider) *TicketController {
 	return controller
 }
 
-func (controller *TicketController) Setup(router infra.Router) {
+func (controller *TicketController) Setup(router gin.IRouter) {
 	router.POST("/events/:eventID/tickets", controller.BuyTicket)
-	router.PUT("/events/:eventID/tickets/:ticketID/sign", controller.SignTicket) // <- Es REST LCTM
+	router.PUT("/events/:eventID/tickets/:ticketID/sign", controller.SignTicket)
 }

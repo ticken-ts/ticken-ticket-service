@@ -1,4 +1,11 @@
 {
+  "server": {
+    "host": "localhost",
+    "port": 9000,
+    "client_id": "ticken.ticket.service",
+    "identity_issuer": "http://localhost:8080/realms/attendants"
+  },
+
   "database": {
     "driver": "mongo",
     "name": "ticken-db"

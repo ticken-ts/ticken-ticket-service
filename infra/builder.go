@@ -1,9 +1,5 @@
 package infra
 
-// TODO
-// * Handle more than one service type using config file
-// * Log errors. This include passing a logger
-
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -31,15 +27,24 @@ func NewBuilder(tickenConfig *utils.TickenConfig) (*Builder, error) {
 }
 
 func (builder *Builder) BuildDb() Db {
+	var tickenDb Db = nil
+
 	switch builder.tickenConfig.Config.Database.Driver {
 	case utils.MongoDriver:
-		return buildMongoDb(builder.tickenConfig.Env.MongoUri)
+		tickenDb = db.NewMongoDb()
 	default:
 		panic(fmt.Errorf("database driver %s not implemented", builder.tickenConfig.Config.Database.Driver))
 	}
+
+	err := tickenDb.Connect(builder.tickenConfig.Env.ConnectionString)
+	if err != nil {
+		panic(err)
+	}
+
+	return tickenDb
 }
 
-func (builder *Builder) BuildRouter() Router {
+func (builder *Builder) BuildEngine() *gin.Engine {
 	return gin.Default()
 }
 
@@ -57,15 +62,6 @@ func (builder *Builder) BuildPvtbcListener() *pvtbc.Listener {
 		panic(err)
 	}
 	return listener
-}
-
-func buildMongoDb(uri string) Db {
-	mongoDb := db.NewMongoDb()
-	err := mongoDb.Connect(uri)
-	if err != nil {
-		panic(err)
-	}
-	return mongoDb
 }
 
 func buildPeerConnector(config utils.PvtbcConfig) *peerconnector.PeerConnector {

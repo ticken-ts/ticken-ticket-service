@@ -18,8 +18,7 @@ func NewProvider(db infra.Db, tickenConfig *utils.TickenConfig) (Provider, error
 
 	switch tickenConfig.Config.Database.Driver {
 	case utils.MongoDriver:
-		provider.reposFactory = mongoDBRepos.NewFactory(db, tickenConfig)
-
+		provider.reposFactory = mongoDBRepos.NewFactory(db, &tickenConfig.Config.Database)
 	default:
 		return nil, fmt.Errorf("database driver %s not implemented", tickenConfig.Config.Database.Driver)
 	}
