@@ -98,6 +98,7 @@ func (middleware *AuthMiddleware) isJWTAuthorizedForDev() gin.HandlerFunc {
 			ClientID:          middleware.clientID,
 			SkipClientIDCheck: true,
 			SkipIssuerCheck:   true,
+			SkipExpiryCheck:   true,
 		}
 
 		verifier := middleware.oidcProvider.Verifier(&oidcConfig)

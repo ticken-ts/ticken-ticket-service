@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
-	pvtbc "github.com/ticken-ts/ticken-pvtbc-connector"
 	"ticken-ticket-service/api"
 	"ticken-ticket-service/api/controllers/ticketController"
 	"ticken-ticket-service/api/middlewares"
@@ -24,7 +23,7 @@ func New(builder *infra.Builder, tickenConfig *utils.TickenConfig) *TickenTicket
 
 	db := builder.BuildDb()
 	router := builder.BuildEngine()
-	pvtbcCaller := new(pvtbc.Caller)
+	pvtbcCaller := builder.BuildPvtbcCaller()
 
 	// this provider is going to provide all services
 	// needed by the controllers to execute it operations
@@ -73,7 +72,8 @@ func (ticketTicketApp *TickenTicketApp) Populate() {
 
 func (ticketTicketApp *TickenTicketApp) EmitFakeJWT() {
 	fakeJWT := jwt.NewWithClaims(jwt.SigningMethodES256, jwt.MapClaims{
-		"sub": "290c641a-55a1-40f5-acc3-d4ebe3626fdd",
+		"sub":   "290c641a-55a1-40f5-acc3-d4ebe3626fdd",
+		"email": "user@ticken.com",
 	})
 
 	signedJWT, err := fakeJWT.SigningString()
