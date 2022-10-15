@@ -2,7 +2,7 @@ package services
 
 import "ticken-ticket-service/models"
 
-type Provider interface {
+type IProvider interface {
 	GetTicketIssuer() TicketIssuer
 	GetTicketSigner() TicketSigner
 	GetEventManager() EventManager

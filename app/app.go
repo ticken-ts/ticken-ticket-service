@@ -16,7 +16,7 @@ import (
 type TickenTicketApp struct {
 	engine          *gin.Engine
 	config          *config.Config
-	serviceProvider services.Provider
+	serviceProvider services.IProvider
 }
 
 func New(builder *infra.Builder, tickenConfig *config.Config) *TickenTicketApp {

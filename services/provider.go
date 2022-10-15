@@ -10,14 +10,14 @@ import (
 	"ticken-ticket-service/repos"
 )
 
-type provider struct {
+type Provider struct {
 	ticketIssuer TicketIssuer
 	ticketSigner TicketSigner
 	eventManager EventManager
 }
 
-func NewProvider(db infra.Db, pvtbcCaller *pvtbc.Caller, tickenConfig *config.Config) (Provider, error) {
-	provider := new(provider)
+func NewProvider(db infra.Db, pvtbcCaller *pvtbc.Caller, tickenConfig *config.Config) (*Provider, error) {
+	provider := new(Provider)
 
 	repoProvider, err := repos.NewProvider(db, &tickenConfig.Database)
 	if err != nil {
@@ -35,14 +35,14 @@ func NewProvider(db infra.Db, pvtbcCaller *pvtbc.Caller, tickenConfig *config.Co
 	return provider, nil
 }
 
-func (provider *provider) GetTicketIssuer() TicketIssuer {
+func (provider *Provider) GetTicketIssuer() TicketIssuer {
 	return provider.ticketIssuer
 }
 
-func (provider *provider) GetEventManager() EventManager {
+func (provider *Provider) GetEventManager() EventManager {
 	return provider.eventManager
 }
 
-func (provider *provider) GetTicketSigner() TicketSigner {
+func (provider *Provider) GetTicketSigner() TicketSigner {
 	return provider.ticketSigner
 }

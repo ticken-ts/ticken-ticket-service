@@ -16,7 +16,7 @@ import (
 
 type AuthMiddleware struct {
 	validator       *validator.Validate
-	serviceProvider services.Provider
+	serviceProvider services.IProvider
 	oidcClientCtx   context.Context
 	oidcProvider    *oidc.Provider
 
@@ -24,7 +24,7 @@ type AuthMiddleware struct {
 	identityIssuer string
 }
 
-func NewAuthMiddleware(serviceProvider services.Provider, serverConfig *config.ServerConfig) *AuthMiddleware {
+func NewAuthMiddleware(serviceProvider services.IProvider, serverConfig *config.ServerConfig) *AuthMiddleware {
 	middleware := new(AuthMiddleware)
 
 	middleware.validator = validator.New()

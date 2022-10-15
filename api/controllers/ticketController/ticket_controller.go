@@ -8,10 +8,10 @@ import (
 
 type TicketController struct {
 	validator       *validator.Validate
-	serviceProvider services.Provider
+	serviceProvider services.IProvider
 }
 
-func NewTicketController(serviceProvider services.Provider) *TicketController {
+func NewTicketController(serviceProvider services.IProvider) *TicketController {
 	controller := new(TicketController)
 	controller.validator = validator.New()
 	controller.serviceProvider = serviceProvider
