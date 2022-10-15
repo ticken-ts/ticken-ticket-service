@@ -1,11 +1,12 @@
-package config
+package env
 
 import (
 	"fmt"
 	"github.com/joho/godotenv"
 	"os"
-	"path"
 )
+
+var TickenEnv *Env = nil
 
 const envFilename = ".env"
 
@@ -26,18 +27,14 @@ type Env struct {
 	ConnString string
 }
 
-func LoadEnvFromFile(envFilePath string) (*Env, error) {
-	filename := path.Join(envFilePath, envFilename)
-
-	err := godotenv.Load(filename)
-	if err != nil {
-		return nil, err
+func Load() (*Env, error) {
+	if fileExists(envFilename) {
+		err := godotenv.Load(envFilename)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	return LoadEnv()
-}
-
-func LoadEnv() (*Env, error) {
 	execEnv, err := getEnvOrError(ExecEnvKey)
 	if err != nil {
 		return nil, err
@@ -53,6 +50,7 @@ func LoadEnv() (*Env, error) {
 		ConnString: connString,
 	}
 
+	TickenEnv = env
 	return env, nil
 }
 
@@ -78,4 +76,12 @@ func (env *Env) IsTest() bool {
 
 func (env *Env) IsStage() bool {
 	return env.Env == StageEnv
+}
+
+func fileExists(filename string) bool {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return !info.IsDir()
 }

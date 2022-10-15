@@ -7,6 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"net/http"
+	"ticken-ticket-service/config"
+	"ticken-ticket-service/env"
 	"ticken-ticket-service/services"
 	"ticken-ticket-service/utils"
 	"time"
@@ -20,19 +22,17 @@ type AuthMiddleware struct {
 
 	clientID       string
 	identityIssuer string
-	isDev          bool
 }
 
-func NewAuthMiddleware(serviceProvider services.Provider, config *utils.TickenConfig) *AuthMiddleware {
+func NewAuthMiddleware(serviceProvider services.Provider, serverConfig *config.ServerConfig) *AuthMiddleware {
 	middleware := new(AuthMiddleware)
 
 	middleware.validator = validator.New()
 	middleware.serviceProvider = serviceProvider
 	middleware.oidcClientCtx = initOIDCClientContext()
 
-	middleware.isDev = config.IsDev()
-	middleware.clientID = config.Config.Server.ClientID
-	middleware.identityIssuer = config.Config.Server.IdentityIssuer
+	middleware.clientID = serverConfig.ClientID
+	middleware.identityIssuer = serverConfig.IdentityIssuer
 
 	middleware.oidcProvider = initOIDCProvider(middleware.oidcClientCtx, middleware.identityIssuer)
 
@@ -62,7 +62,7 @@ func initOIDCProvider(oidcClientCtx context.Context, issuer string) *oidc.Provid
 }
 
 func (middleware *AuthMiddleware) Setup(router gin.IRouter) {
-	if middleware.isDev {
+	if env.TickenEnv.IsDev() {
 		router.Use(middleware.isJWTAuthorizedForDev())
 	} else {
 		router.Use(middleware.isJWTAuthorized())

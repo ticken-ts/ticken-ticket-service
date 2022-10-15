@@ -7,23 +7,24 @@ import (
 	"ticken-ticket-service/api"
 	"ticken-ticket-service/api/controllers/ticketController"
 	"ticken-ticket-service/api/middlewares"
+	"ticken-ticket-service/config"
+	"ticken-ticket-service/env"
 	"ticken-ticket-service/infra"
 	"ticken-ticket-service/services"
-	"ticken-ticket-service/utils"
 )
 
 type TickenTicketApp struct {
 	engine          *gin.Engine
+	config          *config.Config
 	serviceProvider services.Provider
-	config          *utils.TickenConfig
 }
 
-func New(builder *infra.Builder, tickenConfig *utils.TickenConfig) *TickenTicketApp {
+func New(builder *infra.Builder, tickenConfig *config.Config) *TickenTicketApp {
 	tickenTicketApp := new(TickenTicketApp)
 
-	db := builder.BuildDb()
 	router := builder.BuildEngine()
 	pvtbcCaller := builder.BuildPvtbcCaller()
+	db := builder.BuildDb(env.TickenEnv.ConnString)
 
 	// this provider is going to provide all services
 	// needed by the controllers to execute it operations
@@ -36,7 +37,7 @@ func New(builder *infra.Builder, tickenConfig *utils.TickenConfig) *TickenTicket
 	tickenTicketApp.serviceProvider = serviceProvider
 
 	var appMiddlewares = []api.Middleware{
-		middlewares.NewAuthMiddleware(serviceProvider, tickenConfig),
+		middlewares.NewAuthMiddleware(serviceProvider, &tickenConfig.Server),
 	}
 
 	for _, middleware := range appMiddlewares {
@@ -55,7 +56,7 @@ func New(builder *infra.Builder, tickenConfig *utils.TickenConfig) *TickenTicket
 }
 
 func (ticketTicketApp *TickenTicketApp) Start() {
-	url := getServerURL(&ticketTicketApp.config.Config.Server)
+	url := ticketTicketApp.config.Server.GetServerURL()
 	err := ticketTicketApp.engine.Run(url)
 	if err != nil {
 		panic(err)
@@ -82,8 +83,4 @@ func (ticketTicketApp *TickenTicketApp) EmitFakeJWT() {
 	}
 
 	fmt.Printf("DEV JWT: %s \n", signedJWT)
-}
-
-func getServerURL(serverConfig *utils.ServerConfig) string {
-	return serverConfig.Host + ":" + serverConfig.Port
 }

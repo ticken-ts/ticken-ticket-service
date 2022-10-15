@@ -2,23 +2,29 @@ package main
 
 import (
 	"ticken-ticket-service/app"
+	"ticken-ticket-service/config"
+	"ticken-ticket-service/env"
 	"ticken-ticket-service/infra"
-	"ticken-ticket-service/utils"
 )
 
 func main() {
-	tickenConfig, err := utils.LoadConfig(".")
+	tickenEnv, err := env.Load()
 	if err != nil {
 		panic(err)
 	}
 
-	builder, err := infra.NewBuilder(tickenConfig)
+	tickenConfig, err := config.Load(".")
 	if err != nil {
 		panic(err)
 	}
 
-	tickenTicketServer := app.New(builder, tickenConfig)
-	if tickenConfig.IsDev() {
+	infraBuilder, err := infra.NewBuilder(tickenConfig)
+	if err != nil {
+		panic(err)
+	}
+
+	tickenTicketServer := app.New(infraBuilder, tickenConfig)
+	if tickenEnv.IsDev() {
 		tickenTicketServer.Populate()
 		tickenTicketServer.EmitFakeJWT()
 	}

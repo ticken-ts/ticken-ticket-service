@@ -5,17 +5,17 @@ import (
 	"github.com/gin-gonic/gin"
 	pvtbc "github.com/ticken-ts/ticken-pvtbc-connector"
 	"github.com/ticken-ts/ticken-pvtbc-connector/fabric/peerconnector"
+	"ticken-ticket-service/config"
 	"ticken-ticket-service/infra/db"
-	"ticken-ticket-service/utils"
 )
 
 type Builder struct {
-	tickenConfig *utils.TickenConfig
+	tickenConfig *config.Config
 }
 
 var pc *peerconnector.PeerConnector = nil
 
-func NewBuilder(tickenConfig *utils.TickenConfig) (*Builder, error) {
+func NewBuilder(tickenConfig *config.Config) (*Builder, error) {
 	if tickenConfig == nil {
 		return nil, fmt.Errorf("configuration is mandatory")
 	}
@@ -26,17 +26,17 @@ func NewBuilder(tickenConfig *utils.TickenConfig) (*Builder, error) {
 	return builder, nil
 }
 
-func (builder *Builder) BuildDb() Db {
+func (builder *Builder) BuildDb(connString string) Db {
 	var tickenDb Db = nil
 
-	switch builder.tickenConfig.Config.Database.Driver {
-	case utils.MongoDriver:
+	switch builder.tickenConfig.Database.Driver {
+	case config.MongoDriver:
 		tickenDb = db.NewMongoDb()
 	default:
-		panic(fmt.Errorf("database driver %s not implemented", builder.tickenConfig.Config.Database.Driver))
+		panic(fmt.Errorf("database driver %s not implemented", builder.tickenConfig.Database.Driver))
 	}
 
-	err := tickenDb.Connect(builder.tickenConfig.Env.ConnectionString)
+	err := tickenDb.Connect(connString)
 	if err != nil {
 		panic(err)
 	}
@@ -49,7 +49,7 @@ func (builder *Builder) BuildEngine() *gin.Engine {
 }
 
 func (builder *Builder) BuildPvtbcCaller() *pvtbc.Caller {
-	caller, err := pvtbc.NewCaller(buildPeerConnector(builder.tickenConfig.Config.Pvtbc))
+	caller, err := pvtbc.NewCaller(buildPeerConnector(builder.tickenConfig.Pvtbc))
 	if err != nil {
 		panic(err)
 	}
@@ -57,14 +57,14 @@ func (builder *Builder) BuildPvtbcCaller() *pvtbc.Caller {
 }
 
 func (builder *Builder) BuildPvtbcListener() *pvtbc.Listener {
-	listener, err := pvtbc.NewListener(buildPeerConnector(builder.tickenConfig.Config.Pvtbc))
+	listener, err := pvtbc.NewListener(buildPeerConnector(builder.tickenConfig.Pvtbc))
 	if err != nil {
 		panic(err)
 	}
 	return listener
 }
 
-func buildPeerConnector(config utils.PvtbcConfig) *peerconnector.PeerConnector {
+func buildPeerConnector(config config.PvtbcConfig) *peerconnector.PeerConnector {
 	if pc != nil {
 		return pc
 	}

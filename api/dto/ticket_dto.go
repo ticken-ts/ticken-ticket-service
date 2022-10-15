@@ -6,5 +6,3 @@ type Ticket struct {
 	Status   string `json:"status"`
 	Section  string `json:"section"`
 }
-
-// --- blockchain

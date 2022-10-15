@@ -2,8 +2,8 @@ package mongoDBRepos
 
 import (
 	"go.mongodb.org/mongo-driver/mongo"
+	"ticken-ticket-service/config"
 	"ticken-ticket-service/infra"
-	"ticken-ticket-service/utils"
 )
 
 type Factory struct {
@@ -11,7 +11,7 @@ type Factory struct {
 	dbName   string
 }
 
-func NewFactory(db infra.Db, dbConfig *utils.DatabaseConfig) *Factory {
+func NewFactory(db infra.Db, dbConfig *config.DatabaseConfig) *Factory {
 	return &Factory{
 		dbClient: db.GetClient().(*mongo.Client),
 		dbName:   dbConfig.Name,
