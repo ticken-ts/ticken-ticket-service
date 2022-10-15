@@ -1,5 +1,10 @@
 package infra
 
+import (
+	"github.com/gin-gonic/gin"
+	pvtbc "github.com/ticken-ts/ticken-pvtbc-connector"
+)
+
 type Db interface {
 	Connect(connString string) error
 	IsConnected() bool
@@ -9,4 +14,11 @@ type Db interface {
 	// into the correct client depending on the
 	// driver
 	GetClient() interface{}
+}
+
+type IBuilder interface {
+	BuildDb(connString string) Db
+	BuildEngine() *gin.Engine
+	BuildPvtbcCaller() *pvtbc.Caller
+	BuildPvtbcListener() *pvtbc.Listener
 }

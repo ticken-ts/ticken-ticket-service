@@ -19,7 +19,7 @@ type TickenTicketApp struct {
 	serviceProvider services.IProvider
 }
 
-func New(builder *infra.Builder, tickenConfig *config.Config) *TickenTicketApp {
+func New(builder infra.IBuilder, tickenConfig *config.Config) *TickenTicketApp {
 	tickenTicketApp := new(TickenTicketApp)
 
 	router := builder.BuildEngine()
