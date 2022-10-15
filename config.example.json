@@ -18,5 +18,6 @@
     "certificate_path": "/Users/facundotorraca/Documents/ticken/ticken-dev/test-pvtbc/test-network/organizations/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/signcerts/User1@org1.example.com-cert.pem",
     "private_key_path": "/Users/facundotorraca/Documents/ticken/ticken-dev/test-pvtbc/test-network/organizations/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/keystore/priv_sk",
     "tls_certificate_path": "/Users/facundotorraca/Documents/ticken/ticken-dev/test-pvtbc/test-network/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt"
+
   }
 }
