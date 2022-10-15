@@ -13,7 +13,7 @@ type provider struct {
 	ticketRepository TicketRepository
 }
 
-func NewProvider(db infra.Db, dbConfig *config.DatabaseConfig) (Provider, error) {
+func NewProvider(db infra.Db, dbConfig *config.DatabaseConfig) (IProvider, error) {
 	provider := new(provider)
 
 	switch dbConfig.Driver {

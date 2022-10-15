@@ -5,8 +5,6 @@ package services
 
 import (
 	pvtbc "github.com/ticken-ts/ticken-pvtbc-connector"
-	"ticken-ticket-service/config"
-	"ticken-ticket-service/infra"
 	"ticken-ticket-service/repos"
 )
 
@@ -16,15 +14,11 @@ type Provider struct {
 	eventManager EventManager
 }
 
-func NewProvider(db infra.Db, pvtbcCaller *pvtbc.Caller, tickenConfig *config.Config) (*Provider, error) {
+func NewProvider(repoProvider repos.IProvider, pvtbcCaller *pvtbc.Caller) (*Provider, error) {
 	provider := new(Provider)
 
-	repoProvider, err := repos.NewProvider(db, &tickenConfig.Database)
-	if err != nil {
-		return nil, err
-	}
-
 	userManager := NewUserManager()
+
 	eventRepo := repoProvider.GetEventRepository()
 	ticketRepo := repoProvider.GetTicketRepository()
 

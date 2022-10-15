@@ -10,6 +10,7 @@ import (
 	"ticken-ticket-service/config"
 	"ticken-ticket-service/env"
 	"ticken-ticket-service/infra"
+	"ticken-ticket-service/repos"
 	"ticken-ticket-service/services"
 )
 
@@ -26,9 +27,16 @@ func New(builder infra.IBuilder, tickenConfig *config.Config) *TickenTicketApp {
 	pvtbcCaller := builder.BuildPvtbcCaller()
 	db := builder.BuildDb(env.TickenEnv.ConnString)
 
+	// this provider is going to provider all repositories
+	// to the services
+	repoProvider, err := repos.NewProvider(db, &tickenConfig.Database)
+	if err != nil {
+		panic(err)
+	}
+
 	// this provider is going to provide all services
 	// needed by the controllers to execute it operations
-	serviceProvider, err := services.NewProvider(db, pvtbcCaller, tickenConfig)
+	serviceProvider, err := services.NewProvider(repoProvider, pvtbcCaller)
 	if err != nil {
 		panic(err)
 	}
