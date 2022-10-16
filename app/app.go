@@ -17,13 +17,14 @@ import (
 type TickenTicketApp struct {
 	engine          *gin.Engine
 	config          *config.Config
+	reposProvider   repos.IProvider
 	serviceProvider services.IProvider
 }
 
 func New(builder infra.IBuilder, tickenConfig *config.Config) *TickenTicketApp {
 	tickenTicketApp := new(TickenTicketApp)
 
-	router := builder.BuildEngine()
+	engine := builder.BuildEngine()
 	pvtbcCaller := builder.BuildPvtbcCaller()
 	db := builder.BuildDb(env.TickenEnv.ConnString)
 
@@ -41,7 +42,8 @@ func New(builder infra.IBuilder, tickenConfig *config.Config) *TickenTicketApp {
 		panic(err)
 	}
 
-	tickenTicketApp.engine = router
+	tickenTicketApp.engine = engine
+	tickenTicketApp.reposProvider = repoProvider
 	tickenTicketApp.serviceProvider = serviceProvider
 
 	var appMiddlewares = []api.Middleware{
@@ -49,7 +51,7 @@ func New(builder infra.IBuilder, tickenConfig *config.Config) *TickenTicketApp {
 	}
 
 	for _, middleware := range appMiddlewares {
-		middleware.Setup(router)
+		middleware.Setup(engine)
 	}
 
 	var appControllers = []api.Controller{
@@ -57,7 +59,7 @@ func New(builder infra.IBuilder, tickenConfig *config.Config) *TickenTicketApp {
 	}
 
 	for _, controller := range appControllers {
-		controller.Setup(router)
+		controller.Setup(engine)
 	}
 
 	return tickenTicketApp
