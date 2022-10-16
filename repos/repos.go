@@ -20,7 +20,7 @@ type IProvider interface {
 	GetTicketRepository() TicketRepository
 }
 
-type Factory interface {
+type IFactory interface {
 	BuildEventRepository() any
 	BuildTicketRepository() any
 }

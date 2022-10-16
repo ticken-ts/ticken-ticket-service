@@ -7,14 +7,14 @@ import (
 	"ticken-ticket-service/repos/mongoDBRepos"
 )
 
-type provider struct {
-	reposFactory     Factory
+type Provider struct {
+	reposFactory     IFactory
 	eventRepository  EventRepository
 	ticketRepository TicketRepository
 }
 
-func NewProvider(db infra.Db, dbConfig *config.DatabaseConfig) (IProvider, error) {
-	provider := new(provider)
+func NewProvider(db infra.Db, dbConfig *config.DatabaseConfig) (*Provider, error) {
+	provider := new(Provider)
 
 	switch dbConfig.Driver {
 	case config.MongoDriver:
@@ -26,14 +26,14 @@ func NewProvider(db infra.Db, dbConfig *config.DatabaseConfig) (IProvider, error
 	return provider, nil
 }
 
-func (provider *provider) GetEventRepository() EventRepository {
+func (provider *Provider) GetEventRepository() EventRepository {
 	if provider.eventRepository == nil {
 		provider.eventRepository = provider.reposFactory.BuildEventRepository().(EventRepository)
 	}
 	return provider.eventRepository
 }
 
-func (provider *provider) GetTicketRepository() TicketRepository {
+func (provider *Provider) GetTicketRepository() TicketRepository {
 	if provider.ticketRepository == nil {
 		provider.ticketRepository = provider.reposFactory.BuildTicketRepository().(TicketRepository)
 	}
