@@ -17,7 +17,7 @@ import (
 type TickenTicketApp struct {
 	engine          *gin.Engine
 	config          *config.Config
-	reposProvider   repos.IProvider
+	repoProvider    repos.IProvider
 	serviceProvider services.IProvider
 }
 
@@ -43,7 +43,7 @@ func New(builder infra.IBuilder, tickenConfig *config.Config) *TickenTicketApp {
 	}
 
 	tickenTicketApp.engine = engine
-	tickenTicketApp.reposProvider = repoProvider
+	tickenTicketApp.repoProvider = repoProvider
 	tickenTicketApp.serviceProvider = serviceProvider
 
 	var appMiddlewares = []api.Middleware{
