@@ -13,7 +13,7 @@ func main() {
 		panic(err)
 	}
 
-	tickenConfig, err := config.Load(".")
+	tickenConfig, err := config.Load(tickenEnv.ConfigFilePath, tickenEnv.ConfigFileName)
 	if err != nil {
 		panic(err)
 	}

@@ -20,11 +20,15 @@ const (
 const (
 	ExecEnvKey       = "ENV"
 	ConnStringEnvKey = "CONN_STRING"
+	ConfigFilePath   = "CONFIG_FILE_PATH"
+	ConfigFileName   = "CONFIG_FILE_NAME"
 )
 
 type Env struct {
-	Env        string
-	ConnString string
+	Env            string
+	ConnString     string
+	ConfigFilePath string
+	ConfigFileName string
 }
 
 func Load() (*Env, error) {
@@ -35,31 +39,23 @@ func Load() (*Env, error) {
 		}
 	}
 
-	execEnv, err := getEnvOrError(ExecEnvKey)
-	if err != nil {
-		return nil, err
-	}
-
-	connString, err := getEnvOrError(ConnStringEnvKey)
-	if err != nil {
-		return nil, err
-	}
-
 	env := &Env{
-		Env:        execEnv,
-		ConnString: connString,
+		Env:            getEnvOrPanic(ExecEnvKey),
+		ConnString:     getEnvOrPanic(ConnStringEnvKey),
+		ConfigFilePath: getEnvOrPanic(ConfigFilePath),
+		ConfigFileName: getEnvOrPanic(ConfigFileName),
 	}
 
 	TickenEnv = env
 	return env, nil
 }
 
-func getEnvOrError(key string) (string, error) {
+func getEnvOrPanic(key string) string {
 	envVal := os.Getenv(key)
 	if len(envVal) == 0 {
-		return "", fmt.Errorf("env var %s is mandatory", key)
+		panic(fmt.Errorf("env var %s is mandatory", key))
 	}
-	return envVal, nil
+	return envVal
 }
 
 func (env *Env) IsDev() bool {
