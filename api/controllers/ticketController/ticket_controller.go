@@ -11,7 +11,7 @@ type TicketController struct {
 	serviceProvider services.IProvider
 }
 
-func NewTicketController(serviceProvider services.IProvider) *TicketController {
+func New(serviceProvider services.IProvider) *TicketController {
 	controller := new(TicketController)
 	controller.validator = validator.New()
 	controller.serviceProvider = serviceProvider

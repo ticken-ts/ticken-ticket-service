@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 	"ticken-ticket-service/api"
+	"ticken-ticket-service/api/controllers/healthController"
 	"ticken-ticket-service/api/controllers/ticketController"
 	"ticken-ticket-service/api/middlewares"
 	"ticken-ticket-service/config"
@@ -55,7 +56,8 @@ func New(builder infra.IBuilder, tickenConfig *config.Config) *TickenTicketApp {
 	}
 
 	var appControllers = []api.Controller{
-		ticketController.NewTicketController(serviceProvider),
+		healthController.New(serviceProvider),
+		ticketController.New(serviceProvider),
 	}
 
 	for _, controller := range appControllers {
