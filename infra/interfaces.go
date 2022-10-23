@@ -1,8 +1,10 @@
 package infra
 
 import (
+	"context"
 	"github.com/gin-gonic/gin"
 	pvtbc "github.com/ticken-ts/ticken-pvtbc-connector"
+	"ticken-ticket-service/infra/bus"
 )
 
 type Db interface {
@@ -25,7 +27,7 @@ type BusSubscriber interface {
 type BusPublisher interface {
 	Connect(connString string, qName string) error
 	IsConnected() bool
-	Listen(handler func([]byte)) error
+	Publish(ctx context.Context, msg bus.Message) error
 }
 
 type IBuilder interface {

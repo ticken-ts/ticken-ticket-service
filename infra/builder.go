@@ -63,6 +63,24 @@ func (builder *Builder) BuildBusSubscriber(connString string) BusSubscriber {
 	return tickenBus
 }
 
+func (builder *Builder) BuildBusPublisher(connString string) BusPublisher {
+	var tickenBus BusPublisher = nil
+
+	switch builder.tickenConfig.Bus.Driver {
+	case config.RabbitMQDriver:
+		tickenBus = bus.NewRabbitMQPublisher()
+	default:
+		panic(fmt.Errorf("bus driver %s not implemented", builder.tickenConfig.Bus.Driver))
+	}
+
+	err := tickenBus.Connect(connString, builder.tickenConfig.Bus.Exchange)
+	if err != nil {
+		panic(err)
+	}
+
+	return tickenBus
+}
+
 func (builder *Builder) BuildEngine() *gin.Engine {
 	return gin.Default()
 }
