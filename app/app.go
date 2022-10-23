@@ -8,6 +8,7 @@ import (
 	"ticken-ticket-service/api/controllers/healthController"
 	"ticken-ticket-service/api/controllers/ticketController"
 	"ticken-ticket-service/api/middlewares"
+	"ticken-ticket-service/async"
 	"ticken-ticket-service/config"
 	"ticken-ticket-service/env"
 	"ticken-ticket-service/infra"
@@ -20,6 +21,7 @@ type TickenTicketApp struct {
 	config          *config.Config
 	repoProvider    repos.IProvider
 	serviceProvider services.IProvider
+	asyncProcessor  *async.Processor
 }
 
 func New(builder infra.IBuilder, tickenConfig *config.Config) *TickenTicketApp {
@@ -27,7 +29,8 @@ func New(builder infra.IBuilder, tickenConfig *config.Config) *TickenTicketApp {
 
 	engine := builder.BuildEngine()
 	pvtbcCaller := builder.BuildPvtbcCaller()
-	db := builder.BuildDb(env.TickenEnv.ConnString)
+	db := builder.BuildDb(env.TickenEnv.DbConnString)
+	busSubscriber := builder.BuildBusSubscriber(env.TickenEnv.BusConnString)
 
 	// this provider is going to provider all repositories
 	// to the services
@@ -43,9 +46,20 @@ func New(builder infra.IBuilder, tickenConfig *config.Config) *TickenTicketApp {
 		panic(err)
 	}
 
+	asyncProcessor, err := async.NewProcessor(busSubscriber, repoProvider)
+	if err != nil {
+		panic(err)
+	}
+
+	err = asyncProcessor.Start()
+	if err != nil {
+		panic(err)
+	}
+
 	tickenTicketApp.engine = engine
 	tickenTicketApp.config = tickenConfig
 	tickenTicketApp.repoProvider = repoProvider
+	tickenTicketApp.asyncProcessor = asyncProcessor
 	tickenTicketApp.serviceProvider = serviceProvider
 
 	var appMiddlewares = []api.Middleware{

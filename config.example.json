@@ -11,6 +11,11 @@
     "name": "ticken-db"
   },
 
+  "bus": {
+    "driver": "rabbitmq",
+    "exchangeName": "ticken-queues"
+  },
+
   "pvtbc": {
     "msp_id": "Org1MSP",
     "peer_endpoint": "localhost:7051",

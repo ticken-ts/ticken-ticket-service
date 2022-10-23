@@ -16,9 +16,23 @@ type Db interface {
 	GetClient() interface{}
 }
 
+type BusSubscriber interface {
+	Connect(connString string, exchangeName string) error
+	IsConnected() bool
+	Listen(handler func([]byte)) error
+}
+
+type BusPublisher interface {
+	Connect(connString string, qName string) error
+	IsConnected() bool
+	Listen(handler func([]byte)) error
+}
+
 type IBuilder interface {
-	BuildDb(connString string) Db
 	BuildEngine() *gin.Engine
 	BuildPvtbcCaller() *pvtbc.Caller
 	BuildPvtbcListener() *pvtbc.Listener
+	BuildDb(connString string) Db
+	BuildBusPublisher(connString string) BusPublisher
+	BuildBusSubscriber(connString string) BusSubscriber
 }

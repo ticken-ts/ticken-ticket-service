@@ -8,6 +8,7 @@ type Config struct {
 	Database DatabaseConfig `mapstructure:"database"`
 	Pvtbc    PvtbcConfig    `mapstructure:"pvtbc"`
 	Server   ServerConfig   `mapstructure:"server"`
+	Bus      BusConfig      `mapstructure:"bus"`
 }
 
 func Load(path string, filename string) (*Config, error) {

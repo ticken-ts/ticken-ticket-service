@@ -18,15 +18,17 @@ const (
 )
 
 const (
-	ExecEnvKey       = "ENV"
-	ConnStringEnvKey = "CONN_STRING"
-	ConfigFilePath   = "CONFIG_FILE_PATH"
-	ConfigFileName   = "CONFIG_FILE_NAME"
+	ExecEnvKey         = "ENV"
+	DbConnStringEnvKey = "DB_CONN_STRING"
+	BusConnStringKey   = "BUS_CONN_STRING"
+	ConfigFilePath     = "CONFIG_FILE_PATH"
+	ConfigFileName     = "CONFIG_FILE_NAME"
 )
 
 type Env struct {
 	Env            string
-	ConnString     string
+	DbConnString   string
+	BusConnString  string
 	ConfigFilePath string
 	ConfigFileName string
 }
@@ -41,7 +43,8 @@ func Load() (*Env, error) {
 
 	env := &Env{
 		Env:            getEnvOrPanic(ExecEnvKey),
-		ConnString:     getEnvOrPanic(ConnStringEnvKey),
+		DbConnString:   getEnvOrPanic(DbConnStringEnvKey),
+		BusConnString:  getEnvOrPanic(BusConnStringKey),
 		ConfigFilePath: getEnvOrPanic(ConfigFilePath),
 		ConfigFileName: getEnvOrPanic(ConfigFileName),
 	}

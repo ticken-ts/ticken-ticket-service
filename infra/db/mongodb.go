@@ -9,16 +9,16 @@ import (
 	"time"
 )
 
-type mongoDb struct {
+type MongoDB struct {
 	connString string
 	client     *mongo.Client
 }
 
-func NewMongoDb() *mongoDb {
-	return new(mongoDb)
+func NewMongoDb() *MongoDB {
+	return new(MongoDB)
 }
 
-func (mongoDb *mongoDb) Connect(connString string) error {
+func (mongoDb *MongoDB) Connect(connString string) error {
 	if mongoDb.IsConnected() {
 		return fmt.Errorf("DB is already connected")
 	}
@@ -49,10 +49,10 @@ func (mongoDb *mongoDb) Connect(connString string) error {
 	return nil
 }
 
-func (mongoDb *mongoDb) IsConnected() bool {
+func (mongoDb *MongoDB) IsConnected() bool {
 	return mongoDb.client != nil
 }
 
-func (mongoDb *mongoDb) GetClient() interface{} {
+func (mongoDb *MongoDB) GetClient() interface{} {
 	return mongoDb.client
 }
