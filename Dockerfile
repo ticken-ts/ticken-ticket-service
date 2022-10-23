@@ -28,8 +28,6 @@ RUN CGO_ENABLED=0 go build -o /service .
 FROM scratch AS final
 
 COPY --from=build /service /service
-COPY --from=build /src/.env /.env
-COPY --from=build /src/config.json /config.json
 
 # tells Docker that the container listens on specified network ports at runtime
 EXPOSE 9000
