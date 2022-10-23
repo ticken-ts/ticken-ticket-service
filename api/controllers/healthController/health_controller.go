@@ -20,7 +20,7 @@ func New(serviceProvider services.IProvider) *HealthController {
 }
 
 func (controller *HealthController) Setup(router gin.IRouter) {
-	router.POST("/healthz", controller.Healthz)
+	router.GET("/healthz", controller.Healthz)
 }
 
 func (controller *HealthController) Healthz(c *gin.Context) {
