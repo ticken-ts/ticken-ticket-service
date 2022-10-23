@@ -44,6 +44,7 @@ func New(builder infra.IBuilder, tickenConfig *config.Config) *TickenTicketApp {
 	}
 
 	tickenTicketApp.engine = engine
+	tickenTicketApp.config = tickenConfig
 	tickenTicketApp.repoProvider = repoProvider
 	tickenTicketApp.serviceProvider = serviceProvider
 
