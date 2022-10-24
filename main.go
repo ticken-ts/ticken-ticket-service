@@ -5,6 +5,7 @@ import (
 	"ticken-ticket-service/config"
 	"ticken-ticket-service/env"
 	"ticken-ticket-service/infra"
+	"ticken-ticket-service/log"
 )
 
 func main() {
@@ -13,13 +14,17 @@ func main() {
 		panic(err)
 	}
 
+	log.InitGlobalLogger()
+
 	tickenConfig, err := config.Load(tickenEnv.ConfigFilePath, tickenEnv.ConfigFileName)
 	if err != nil {
+		log.TickenLogger.Log().Err(err)
 		panic(err)
 	}
 
 	infraBuilder, err := infra.NewBuilder(tickenConfig)
 	if err != nil {
+		log.TickenLogger.Log().Err(err)
 		panic(err)
 	}
 
