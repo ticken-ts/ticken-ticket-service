@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	CreateEventMessageType = "create_event"
+	NewEventMessageType = "new_event"
 )
 
 type eventDTO struct {
@@ -16,15 +16,15 @@ type eventDTO struct {
 	PvtBCChannel string `json:"pvt_bc_channel"`
 }
 
-type EventProcessor struct {
+type EventReceiver struct {
 	eventRepo repos.EventRepository
 }
 
-func NewEventProcessor(eventRepo repos.EventRepository) *EventProcessor {
-	return &EventProcessor{eventRepo: eventRepo}
+func NewEventReceiver(eventRepo repos.EventRepository) *EventReceiver {
+	return &EventReceiver{eventRepo: eventRepo}
 }
 
-func (processor *EventProcessor) CreateEvent(rawEvent []byte) error {
+func (processor *EventReceiver) NewEventHandler(rawEvent []byte) error {
 	dto := new(eventDTO)
 
 	err := json.Unmarshal(rawEvent, dto)

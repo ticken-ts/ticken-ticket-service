@@ -21,7 +21,7 @@ type TickenTicketApp struct {
 	config          *config.Config
 	repoProvider    repos.IProvider
 	serviceProvider services.IProvider
-	asyncProcessor  *async.Processor
+	subscriber      *async.Subscriber
 }
 
 func New(builder infra.IBuilder, tickenConfig *config.Config) *TickenTicketApp {
@@ -46,12 +46,12 @@ func New(builder infra.IBuilder, tickenConfig *config.Config) *TickenTicketApp {
 		panic(err)
 	}
 
-	asyncProcessor, err := async.NewProcessor(busSubscriber, repoProvider)
+	subscriber, err := async.NewSubscriber(busSubscriber, repoProvider)
 	if err != nil {
 		panic(err)
 	}
 
-	err = asyncProcessor.Start()
+	err = subscriber.Start()
 	if err != nil {
 		panic(err)
 	}
@@ -59,7 +59,7 @@ func New(builder infra.IBuilder, tickenConfig *config.Config) *TickenTicketApp {
 	tickenTicketApp.engine = engine
 	tickenTicketApp.config = tickenConfig
 	tickenTicketApp.repoProvider = repoProvider
-	tickenTicketApp.asyncProcessor = asyncProcessor
+	tickenTicketApp.subscriber = subscriber
 	tickenTicketApp.serviceProvider = serviceProvider
 
 	var appMiddlewares = []api.Middleware{

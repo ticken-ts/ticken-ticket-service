@@ -4,31 +4,29 @@ import (
 	"encoding/json"
 	"fmt"
 	"ticken-ticket-service/infra"
+	"ticken-ticket-service/infra/bus"
 	"ticken-ticket-service/repos"
 )
 
-type Message struct {
-	Type string `json:"type"`
-	Data []byte `json:"data"`
-}
-
-type Processor struct {
+type Subscriber struct {
 	busSubscriber  infra.BusSubscriber
-	eventProcessor *EventProcessor
+	eventProcessor *EventReceiver
 }
 
-func NewProcessor(busSubscriber infra.BusSubscriber, repoProvider repos.IProvider) (*Processor, error) {
+func NewSubscriber(busSubscriber infra.BusSubscriber, repoProvider repos.IProvider) (*Subscriber, error) {
 	if !busSubscriber.IsConnected() {
 		return nil, fmt.Errorf("bus subscriber is not connected")
 	}
 
-	return &Processor{
+	subscriber := &Subscriber{
 		busSubscriber:  busSubscriber,
-		eventProcessor: NewEventProcessor(repoProvider.GetEventRepository()),
-	}, nil
+		eventProcessor: NewEventReceiver(repoProvider.GetEventRepository()),
+	}
+
+	return subscriber, nil
 }
 
-func (processor *Processor) Start() error {
+func (processor *Subscriber) Start() error {
 	err := processor.busSubscriber.Listen(processor.handler)
 	if err != nil {
 		return err
@@ -36,8 +34,8 @@ func (processor *Processor) Start() error {
 	return nil
 }
 
-func (processor *Processor) handler(rawmsg []byte) {
-	msg := new(Message)
+func (processor *Subscriber) handler(rawmsg []byte) {
+	msg := new(bus.Message)
 	err := json.Unmarshal(rawmsg, msg)
 	if err != nil {
 		println("error processing message")
@@ -45,8 +43,8 @@ func (processor *Processor) handler(rawmsg []byte) {
 
 	var processingError error = nil
 	switch msg.Type {
-	case CreateEventMessageType:
-		processingError = processor.eventProcessor.CreateEvent(msg.Data)
+	case NewEventMessageType:
+		processingError = processor.eventProcessor.NewEventHandler(msg.Data)
 	default:
 		processingError = fmt.Errorf("message type %s not supportaed\n", msg.Type)
 	}
