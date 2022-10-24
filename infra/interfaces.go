@@ -25,7 +25,7 @@ type BusSubscriber interface {
 }
 
 type BusPublisher interface {
-	Connect(connString string, qName string) error
+	Connect(connString string, exchangeName string) error
 	IsConnected() bool
 	Publish(ctx context.Context, msg bus.Message) error
 }
