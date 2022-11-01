@@ -6,6 +6,7 @@ import (
 	pvtbc "github.com/ticken-ts/ticken-pvtbc-connector"
 	"github.com/ticken-ts/ticken-pvtbc-connector/fabric/peerconnector"
 	"ticken-ticket-service/config"
+	"ticken-ticket-service/env"
 	"ticken-ticket-service/infra/bus"
 	"ticken-ticket-service/infra/db"
 	"ticken-ticket-service/log"
@@ -52,7 +53,15 @@ func (builder *Builder) BuildDb(connString string) Db {
 func (builder *Builder) BuildBusSubscriber(connString string) BusSubscriber {
 	var tickenBus BusSubscriber = nil
 
-	switch builder.tickenConfig.Bus.Driver {
+	driverToUse := builder.tickenConfig.Bus.Driver
+	if env.TickenEnv.IsDev() {
+		driverToUse = config.DevBusDriver
+	}
+
+	switch driverToUse {
+	case config.DevBusDriver:
+		log.TickenLogger.Info().Msg("using bus publisher: " + config.DevBusDriver)
+		tickenBus = bus.NewTickenDevBusSubscriber()
 	case config.RabbitMQDriver:
 		log.TickenLogger.Info().Msg("using bus subscriber: " + config.RabbitMQDriver)
 		tickenBus = bus.NewRabbitMQSubscriber()
@@ -73,7 +82,15 @@ func (builder *Builder) BuildBusSubscriber(connString string) BusSubscriber {
 func (builder *Builder) BuildBusPublisher(connString string) BusPublisher {
 	var tickenBus BusPublisher = nil
 
-	switch builder.tickenConfig.Bus.Driver {
+	driverToUse := builder.tickenConfig.Bus.Driver
+	if env.TickenEnv.IsDev() {
+		driverToUse = config.DevBusDriver
+	}
+
+	switch driverToUse {
+	case config.DevBusDriver:
+		log.TickenLogger.Info().Msg("using bus publisher: " + config.DevBusDriver)
+		tickenBus = bus.NewTickenDevBusPublisher()
 	case config.RabbitMQDriver:
 		log.TickenLogger.Info().Msg("using bus publisher: " + config.RabbitMQDriver)
 		tickenBus = bus.NewRabbitMQPublisher()

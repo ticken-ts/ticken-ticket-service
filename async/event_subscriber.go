@@ -2,8 +2,7 @@ package async
 
 import (
 	"encoding/json"
-	"ticken-ticket-service/models"
-	"ticken-ticket-service/repos"
+	"ticken-ticket-service/services"
 )
 
 const (
@@ -16,15 +15,15 @@ type eventDTO struct {
 	PvtBCChannel string `json:"pvt_bc_channel"`
 }
 
-type EventReceiver struct {
-	eventRepo repos.EventRepository
+type EventSubscriber struct {
+	eventManager services.EventManager
 }
 
-func NewEventReceiver(eventRepo repos.EventRepository) *EventReceiver {
-	return &EventReceiver{eventRepo: eventRepo}
+func NewEventSubscriber(eventManager services.EventManager) *EventSubscriber {
+	return &EventSubscriber{eventManager: eventManager}
 }
 
-func (processor *EventReceiver) NewEventHandler(rawEvent []byte) error {
+func (s *EventSubscriber) NewEventHandler(rawEvent []byte) error {
 	dto := new(eventDTO)
 
 	err := json.Unmarshal(rawEvent, dto)
@@ -32,9 +31,7 @@ func (processor *EventReceiver) NewEventHandler(rawEvent []byte) error {
 		return err
 	}
 
-	event := models.NewEvent(dto.EventID, dto.OrganizerID, dto.PvtBCChannel)
-
-	err = processor.eventRepo.AddEvent(event)
+	_, err = s.eventManager.AddEvent(dto.EventID, dto.OrganizerID, dto.PvtBCChannel)
 	if err != nil {
 		return err
 	}

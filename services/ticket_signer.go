@@ -5,26 +5,27 @@ import (
 	pvtbc "github.com/ticken-ts/ticken-pvtbc-connector"
 	"ticken-ticket-service/models"
 	"ticken-ticket-service/repos"
+	"ticken-ticket-service/sync"
 )
 
 type ticketSigner struct {
-	eventRepository  repos.EventRepository
-	ticketRepository repos.TicketRepository
-	pvtbcConnector   *pvtbc.Caller
-	userManager      *UserManager
+	eventRepository   repos.EventRepository
+	ticketRepository  repos.TicketRepository
+	pvtbcConnector    *pvtbc.Caller
+	userServiceClient *sync.UserServiceClient
 }
 
 func NewTicketSigner(
 	eventRepository repos.EventRepository,
 	ticketRepository repos.TicketRepository,
 	pvtbcConnector *pvtbc.Caller,
-	userManager *UserManager,
+	userManager *sync.UserServiceClient,
 ) TicketSigner {
 	return &ticketSigner{
-		eventRepository:  eventRepository,
-		ticketRepository: ticketRepository,
-		pvtbcConnector:   pvtbcConnector,
-		userManager:      userManager,
+		eventRepository:   eventRepository,
+		ticketRepository:  ticketRepository,
+		pvtbcConnector:    pvtbcConnector,
+		userServiceClient: userManager,
 	}
 }
 
@@ -39,10 +40,7 @@ func (s *ticketSigner) SignTicket(eventID string, ticketID string, signer string
 		return nil, err
 	}
 
-	privateKey, err := s.userManager.GetUserPrivateKey(signer)
-	if err != nil {
-		return nil, err
-	}
+	userKeys := s.userServiceClient.GetUserKeys(signer)
 
 	ticket := s.ticketRepository.FindTicket(eventID, ticketID)
 	if ticket == nil {
@@ -51,7 +49,7 @@ func (s *ticketSigner) SignTicket(eventID string, ticketID string, signer string
 		return nil, fmt.Errorf("ticket %s not found in event %s", ticketID, eventID)
 	}
 
-	signature, err := ticket.Sign(privateKey)
+	signature, err := ticket.Sign(userKeys.PrivateKey)
 	if err != nil {
 		return nil, err
 	}

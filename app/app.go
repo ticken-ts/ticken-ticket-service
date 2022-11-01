@@ -15,6 +15,7 @@ import (
 	"ticken-ticket-service/log"
 	"ticken-ticket-service/repos"
 	"ticken-ticket-service/services"
+	"ticken-ticket-service/sync"
 )
 
 const ServiceName = "ticken-ticket-service"
@@ -46,12 +47,12 @@ func New(builder infra.IBuilder, tickenConfig *config.Config) *TickenTicketApp {
 
 	// this provider is going to provide all services
 	// needed by the controllers to execute it operations
-	serviceProvider, err := services.NewProvider(repoProvider, pvtbcCaller)
+	serviceProvider, err := services.NewProvider(repoProvider, pvtbcCaller, sync.NewUserServiceClient())
 	if err != nil {
 		panic(err)
 	}
 
-	subscriber, err := async.NewSubscriber(busSubscriber, repoProvider)
+	subscriber, err := async.NewSubscriber(busSubscriber, serviceProvider)
 	if err != nil {
 		panic(err)
 	}

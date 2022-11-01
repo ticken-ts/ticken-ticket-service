@@ -2,6 +2,7 @@ package config
 
 const (
 	RabbitMQDriver = "rabbitmq"
+	DevBusDriver   = "devbus"
 )
 
 type BusConfig struct {

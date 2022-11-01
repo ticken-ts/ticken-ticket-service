@@ -5,22 +5,22 @@ import (
 	"fmt"
 	"ticken-ticket-service/infra"
 	"ticken-ticket-service/infra/bus"
-	"ticken-ticket-service/repos"
+	"ticken-ticket-service/services"
 )
 
 type Subscriber struct {
 	busSubscriber  infra.BusSubscriber
-	eventProcessor *EventReceiver
+	eventProcessor *EventSubscriber
 }
 
-func NewSubscriber(busSubscriber infra.BusSubscriber, repoProvider repos.IProvider) (*Subscriber, error) {
+func NewSubscriber(busSubscriber infra.BusSubscriber, serviceProvider services.IProvider) (*Subscriber, error) {
 	if !busSubscriber.IsConnected() {
 		return nil, fmt.Errorf("bus subscriber is not connected")
 	}
 
 	subscriber := &Subscriber{
 		busSubscriber:  busSubscriber,
-		eventProcessor: NewEventReceiver(repoProvider.GetEventRepository()),
+		eventProcessor: NewEventSubscriber(serviceProvider.GetEventManager()),
 	}
 
 	return subscriber, nil
