@@ -12,9 +12,12 @@ import (
 	"ticken-ticket-service/config"
 	"ticken-ticket-service/env"
 	"ticken-ticket-service/infra"
+	"ticken-ticket-service/log"
 	"ticken-ticket-service/repos"
 	"ticken-ticket-service/services"
 )
+
+const ServiceName = "ticken-ticket-service"
 
 type TickenTicketApp struct {
 	engine          *gin.Engine
@@ -25,6 +28,8 @@ type TickenTicketApp struct {
 }
 
 func New(builder infra.IBuilder, tickenConfig *config.Config) *TickenTicketApp {
+	log.TickenLogger.Info().Msg("initializing " + ServiceName)
+
 	tickenTicketApp := new(TickenTicketApp)
 
 	engine := builder.BuildEngine()
