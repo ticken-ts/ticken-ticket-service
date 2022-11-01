@@ -85,7 +85,7 @@ func isFreeURI(uri string) bool {
 
 func (middleware *AuthMiddleware) isJWTAuthorized() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if isFreeURI(c.FullPath()) {
+		if isFreeURI(c.Request.URL.Path) {
 			return
 		}
 

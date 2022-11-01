@@ -8,6 +8,7 @@ import (
 	"ticken-ticket-service/config"
 	"ticken-ticket-service/infra/bus"
 	"ticken-ticket-service/infra/db"
+	"ticken-ticket-service/log"
 )
 
 type Builder struct {
@@ -32,15 +33,18 @@ func (builder *Builder) BuildDb(connString string) Db {
 
 	switch builder.tickenConfig.Database.Driver {
 	case config.MongoDriver:
+		log.TickenLogger.Info().Msg("using db: " + config.MongoDriver)
 		tickenDb = db.NewMongoDb()
 	default:
-		panic(fmt.Errorf("database driver %s not implemented", builder.tickenConfig.Database.Driver))
+		err := fmt.Errorf("database driver %s not implemented", builder.tickenConfig.Database.Driver)
+		log.TickenLogger.Panic().Err(err)
 	}
 
 	err := tickenDb.Connect(connString)
 	if err != nil {
-		panic(err)
+		log.TickenLogger.Panic().Err(err)
 	}
+	log.TickenLogger.Info().Msg("db connection established")
 
 	return tickenDb
 }
@@ -50,15 +54,18 @@ func (builder *Builder) BuildBusSubscriber(connString string) BusSubscriber {
 
 	switch builder.tickenConfig.Bus.Driver {
 	case config.RabbitMQDriver:
+		log.TickenLogger.Info().Msg("using bus subscriber: " + config.RabbitMQDriver)
 		tickenBus = bus.NewRabbitMQSubscriber()
 	default:
-		panic(fmt.Errorf("bus driver %s not implemented", builder.tickenConfig.Bus.Driver))
+		err := fmt.Errorf("bus driver %s not implemented", builder.tickenConfig.Bus.Driver)
+		log.TickenLogger.Panic().Err(err)
 	}
 
 	err := tickenBus.Connect(connString, builder.tickenConfig.Bus.Exchange)
 	if err != nil {
-		panic(err)
+		log.TickenLogger.Panic().Err(err)
 	}
+	log.TickenLogger.Info().Msg("bus subscriber connection established")
 
 	return tickenBus
 }
@@ -68,15 +75,18 @@ func (builder *Builder) BuildBusPublisher(connString string) BusPublisher {
 
 	switch builder.tickenConfig.Bus.Driver {
 	case config.RabbitMQDriver:
+		log.TickenLogger.Info().Msg("using bus publisher: " + config.RabbitMQDriver)
 		tickenBus = bus.NewRabbitMQPublisher()
 	default:
-		panic(fmt.Errorf("bus driver %s not implemented", builder.tickenConfig.Bus.Driver))
+		err := fmt.Errorf("bus driver %s not implemented", builder.tickenConfig.Bus.Driver)
+		log.TickenLogger.Panic().Err(err)
 	}
 
 	err := tickenBus.Connect(connString, builder.tickenConfig.Bus.Exchange)
 	if err != nil {
-		panic(err)
+		log.TickenLogger.Panic().Err(err)
 	}
+	log.TickenLogger.Info().Msg("bus publisher connection established")
 
 	return tickenBus
 }
@@ -88,16 +98,18 @@ func (builder *Builder) BuildEngine() *gin.Engine {
 func (builder *Builder) BuildPvtbcCaller() *pvtbc.Caller {
 	caller, err := pvtbc.NewCaller(buildPeerConnector(builder.tickenConfig.Pvtbc))
 	if err != nil {
-		panic(err)
+		log.TickenLogger.Panic().Err(err)
 	}
+	log.TickenLogger.Info().Msg("pvtbc caller created successfully")
 	return caller
 }
 
 func (builder *Builder) BuildPvtbcListener() *pvtbc.Listener {
 	listener, err := pvtbc.NewListener(buildPeerConnector(builder.tickenConfig.Pvtbc))
 	if err != nil {
-		panic(err)
+		log.TickenLogger.Panic().Err(err)
 	}
+	log.TickenLogger.Info().Msg("pvtbc listener created successfully")
 	return listener
 }
 
@@ -107,11 +119,13 @@ func buildPeerConnector(config config.PvtbcConfig) *peerconnector.PeerConnector 
 	}
 
 	pc := peerconnector.New(config.MspID, config.CertificatePath, config.PrivateKeyPath)
+	log.TickenLogger.Info().Msg("pvtbc peer connector created for org " + config.MspID)
 
 	err := pc.Connect(config.PeerEndpoint, config.GatewayPeer, config.TLSCertificatePath)
 	if err != nil {
-		panic(err)
+		log.TickenLogger.Panic().Err(err)
 	}
 
+	log.TickenLogger.Info().Msg("pvtbc peer connection established on " + config.PeerEndpoint)
 	return pc
 }

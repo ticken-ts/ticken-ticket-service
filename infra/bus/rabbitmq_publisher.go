@@ -46,6 +46,11 @@ func (publisher *RabbitMQPublisher) Connect(connString string, exchangeName stri
 	publisher.conn = conn
 	publisher.channel = channel
 
+	err = publisher.ensureIsConnected()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -92,14 +97,6 @@ func (publisher *RabbitMQPublisher) ensureIsConnected() error {
 
 	if publisher.conn.IsClosed() {
 		return fmt.Errorf("RabbitMQ: connection is closed")
-	}
-
-	if publisher.channel == nil {
-		return fmt.Errorf("RabbitMQ: channel is not set")
-	}
-
-	if publisher.channel.IsClosed() {
-		return fmt.Errorf("RabbitMQ: channeld is closed")
 	}
 
 	return nil

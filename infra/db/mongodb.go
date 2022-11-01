@@ -45,7 +45,6 @@ func (mongoDb *MongoDB) Connect(connString string) error {
 	mongoDb.client = client
 	mongoDb.connString = connString
 
-	fmt.Println("Connected to MongoDB")
 	return nil
 }
 

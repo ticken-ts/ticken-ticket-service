@@ -73,6 +73,11 @@ func (subscriber *RabbitMQSubscriber) Connect(connString string, exchangeName st
 	subscriber.channel = channel
 	subscriber.queue = queue
 
+	err = subscriber.ensureIsConnected()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -105,24 +110,17 @@ func (subscriber *RabbitMQSubscriber) Listen(handler func([]byte)) error {
 }
 
 func (subscriber *RabbitMQSubscriber) IsConnected() bool {
+	fmt.Printf("why is not connected: %s", subscriber.ensureIsConnected())
 	return subscriber.ensureIsConnected() == nil
 }
 
 func (subscriber *RabbitMQSubscriber) ensureIsConnected() error {
-	if subscriber.conn == nil {
-		return fmt.Errorf("RabbitMQ: connection is not stablished")
-	}
-
-	if subscriber.channel == nil {
-		return fmt.Errorf("RabbitMQ: channel is not set")
-	}
+	//if subscriber.conn == nil {
+	//	return fmt.Errorf("RabbitMQ: connection is not stablished")
+	//}
 
 	if subscriber.conn.IsClosed() {
 		return fmt.Errorf("RabbitMQ: connection is closed")
-	}
-
-	if subscriber.channel.IsClosed() {
-		return fmt.Errorf("RabbitMQ: channeld is closed")
 	}
 
 	return nil

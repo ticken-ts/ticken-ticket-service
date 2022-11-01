@@ -18,14 +18,12 @@ func main() {
 
 	tickenConfig, err := config.Load(tickenEnv.ConfigFilePath, tickenEnv.ConfigFileName)
 	if err != nil {
-		log.TickenLogger.Log().Err(err)
-		panic(err)
+		log.TickenLogger.Panic().Err(err)
 	}
 
 	infraBuilder, err := infra.NewBuilder(tickenConfig)
 	if err != nil {
-		log.TickenLogger.Log().Err(err)
-		panic(err)
+		log.TickenLogger.Panic().Err(err)
 	}
 
 	tickenTicketServer := app.New(infraBuilder, tickenConfig)
