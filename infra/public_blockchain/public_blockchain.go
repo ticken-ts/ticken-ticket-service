@@ -54,22 +54,22 @@ func (pb *PublicBlockchain) getTransactor(pk string) (*bind.TransactOpts, error)
 }
 
 // DeployContract Deploy contract using Geth generated bindings, returns contract address
-func (pb *PublicBlockchain) DeployContract() (*string, error) {
+func (pb *PublicBlockchain) DeployContract() (string, error) {
 	addr, tx, _, err := public_blockchain.DeployTickenEvent(pb.auth, pb.conn)
 	if err != nil {
 		println(err.Error())
-		return nil, err
+		return "", err
 	}
 
 	_, err = bind.WaitDeployed(pb.auth.Context, pb.conn, tx)
 	if err != nil {
 		println(err.Error())
-		return nil, err
+		return "", err
 	}
 
 	addrString := addr.String()
 
-	return &addrString, nil
+	return addrString, nil
 }
 
 // GetContract Get contract instance from contract address
