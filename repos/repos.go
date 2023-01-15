@@ -7,6 +7,7 @@ import (
 type EventRepository interface {
 	AddEvent(event *models.Event) error
 	FindEvent(eventID string) *models.Event
+	GetActiveEvents() ([]*models.Event, error)
 }
 
 type TicketRepository interface {

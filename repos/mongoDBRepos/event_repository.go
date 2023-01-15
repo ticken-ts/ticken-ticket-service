@@ -51,3 +51,22 @@ func (r *EventMongoDBRepository) FindEvent(eventID string) *models.Event {
 
 	return &foundEvent
 }
+
+func (r *EventMongoDBRepository) GetActiveEvents() ([]*models.Event, error) {
+	findContext, cancel := r.generateOpSubcontext()
+	defer cancel()
+
+	events := r.getCollection()
+	cursor, err := events.Find(findContext, bson.M{})
+	if err != nil {
+		return nil, err
+	}
+
+	var foundEvents []*models.Event
+	err = cursor.All(findContext, &foundEvents)
+	if err != nil {
+		return nil, err
+	}
+
+	return foundEvents, nil
+}
