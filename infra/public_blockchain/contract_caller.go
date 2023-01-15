@@ -9,6 +9,7 @@ import (
 )
 
 type ContractCaller struct {
+	addr       string
 	instance   *public_blockchain.TickenEvent
 	conn       Connection
 	transactor *bind.TransactOpts
@@ -72,10 +73,11 @@ func (cc *ContractCaller) WatchTicketCreatedEvent(
 			select {
 			case event := <-channel:
 				ticketData := &CreatedTicket{
-					Section:   event.Section,
-					Owner:     event.OwnerAddress.String(),
-					TokenID:   event.TokenID.Uint64(),
-					TxAddress: event.Raw.TxHash.String(),
+					ContractAddr: cc.addr,
+					Section:      event.Section,
+					Owner:        event.OwnerAddress.String(),
+					TokenID:      event.TokenID.Uint64(),
+					TxAddress:    event.Raw.TxHash.String(),
 				}
 				callback(ticketData)
 			}
