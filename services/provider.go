@@ -16,7 +16,12 @@ type Provider struct {
 	eventManager EventManager
 }
 
-func NewProvider(repoProvider repos.IProvider, pvtbcCaller *pvtbc.Caller, userServiceClient *sync.UserServiceClient, publicBlockchain *public_blockchain.PublicBlockchain) (*Provider, error) {
+func NewProvider(
+	repoProvider repos.IProvider,
+	pvtbcCaller *pvtbc.Caller,
+	userServiceClient *sync.UserServiceClient,
+	publicBlockchain *public_blockchain.PublicBlockchain,
+) (*Provider, error) {
 	provider := new(Provider)
 
 	eventRepo := repoProvider.GetEventRepository()
