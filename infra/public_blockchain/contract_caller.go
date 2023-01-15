@@ -3,6 +3,7 @@ package public_blockchain
 import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	"math/big"
 	public_blockchain "ticken-ticket-service/infra/public_blockchain/contract"
 	"ticken-ticket-service/models"
 )
@@ -48,4 +49,38 @@ func (cc *ContractCaller) GenerateTicket(
 
 	transactionAddress := tx.Hash().String()
 	return &transactionAddress, nil
+}
+
+// WatchTicketCreatedEvent watch for ticket created event and send it to callback
+func (cc *ContractCaller) WatchTicketCreatedEvent(
+	callback func(ticketData *CreatedTicket),
+) error {
+	// Watch for TicketCreated event
+	channel := make(chan *public_blockchain.TickenEventTicketCreated)
+	_, err := cc.instance.WatchTicketCreated(
+		&bind.WatchOpts{},
+		channel,
+		[]*big.Int{},
+	)
+	if err != nil {
+		return err
+	}
+
+	// Wait for event
+	go func() {
+		for {
+			select {
+			case event := <-channel:
+				ticketData := &CreatedTicket{
+					Section:   event.Section,
+					Owner:     event.OwnerAddress.String(),
+					TokenID:   event.TokenID.Uint64(),
+					TxAddress: event.Raw.TxHash.String(),
+				}
+				callback(ticketData)
+			}
+		}
+	}()
+
+	return nil
 }

@@ -28,6 +28,6 @@
   "public_blockchain": {
     "address_pk": "0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d",
     "chain_id": 1337,
-    "chain_url": "http://localhost:8545"
+    "chain_url": "ws://localhost:8545"
   }
 }
