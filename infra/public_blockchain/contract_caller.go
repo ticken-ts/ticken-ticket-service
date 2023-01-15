@@ -19,9 +19,15 @@ func NewContractCaller(contractAddr string, conn Connection) (*ContractCaller, e
 	return &ContractCaller{instance: instance}, nil
 }
 
-//GenerateTicket generate ticket and assign the buyer as owner
-func (cc *ContractCaller) GenerateTicket(transactor *bind.TransactOpts, buyerAddress string, infoUrl string) (*string, error) {
+//GenerateTicket BLOCKING generate ticket and assign the buyer as owner
+func (cc *ContractCaller) GenerateTicket(conn Connection, transactor *bind.TransactOpts, buyerAddress string, infoUrl string) (*string, error) {
 	tx, err := cc.instance.SafeMint(transactor, common.HexToAddress(buyerAddress), infoUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	// Wait for transaction to be mined
+	_, err = bind.WaitMined(transactor.Context, conn, tx)
 	if err != nil {
 		return nil, err
 	}

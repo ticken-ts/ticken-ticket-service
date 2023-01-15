@@ -1,7 +1,6 @@
 package public_blockchain
 
 import (
-	"context"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -62,8 +61,7 @@ func (pb *PublicBlockchain) DeployContract() (*string, error) {
 		return nil, err
 	}
 
-	ctx := context.Background()
-	_, err = bind.WaitDeployed(ctx, pb.conn, tx)
+	_, err = bind.WaitDeployed(pb.auth.Context, pb.conn, tx)
 	if err != nil {
 		println(err.Error())
 		return nil, err
