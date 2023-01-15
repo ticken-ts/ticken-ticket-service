@@ -4,6 +4,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	public_blockchain "ticken-ticket-service/infra/public_blockchain/contract"
+	"ticken-ticket-service/models"
 )
 
 type ContractCaller struct {
@@ -26,8 +27,15 @@ func NewContractCaller(contractAddr string, conn Connection, transactor *bind.Tr
 }
 
 //GenerateTicket BLOCKING generate ticket and assign the buyer as owner
-func (cc *ContractCaller) GenerateTicket(buyerAddress string, infoUrl string) (*string, error) {
-	tx, err := cc.instance.SafeMint(cc.transactor, common.HexToAddress(buyerAddress), infoUrl)
+func (cc *ContractCaller) GenerateTicket(
+	buyerAddress string,
+	ticketData *models.Ticket,
+) (*string, error) {
+	tx, err := cc.instance.SafeMint(
+		cc.transactor,
+		common.HexToAddress(buyerAddress),
+		ticketData.Section,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -39,6 +47,5 @@ func (cc *ContractCaller) GenerateTicket(buyerAddress string, infoUrl string) (*
 	}
 
 	transactionAddress := tx.Hash().String()
-
 	return &transactionAddress, nil
 }

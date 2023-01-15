@@ -7,10 +7,25 @@ import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-contract TickenEvent is ERC721, ERC721URIStorage, Pausable, Ownable {
+struct Ticket {
+    string  section;
+    bool    scanned;
+}
+
+contract TickenEvent is ERC721, Pausable, Ownable {
+
+    event TicketCreated(
+        address ownerAddress,
+        uint256 indexed tokenID,
+        string section
+    );
+
     using Counters for Counters.Counter;
 
     Counters.Counter private _tokenIdCounter;
+
+    // Mapping from token ID to ticket
+    mapping(uint256 => Ticket) private _tickets;
 
     constructor() ERC721("TickenEvent", "TE") {}
 
@@ -22,11 +37,22 @@ contract TickenEvent is ERC721, ERC721URIStorage, Pausable, Ownable {
         _unpause();
     }
 
-    function safeMint(address to, string memory uri) public whenNotPaused onlyOwner {
+    function safeMint(address to, string memory section) public whenNotPaused onlyOwner {
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _safeMint(to, tokenId);
-        _setTokenURI(tokenId, uri);
+        _tickets[tokenId] = Ticket(section, false);
+        emit TicketCreated(to, tokenId, section);
+    }
+
+    function scanTicket(uint256 tokenId) public whenNotPaused onlyOwner {
+        require(_exists(tokenId), "ERC721: operator query for nonexistent token");
+        _tickets[tokenId].scanned = true;
+    }
+
+    function getTicket(uint256 tokenId) public view returns (Ticket memory) {
+        require(_exists(tokenId), "ERC721: operator query for nonexistent token");
+        return _tickets[tokenId];
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId, uint256 batchSize)
@@ -35,20 +61,5 @@ contract TickenEvent is ERC721, ERC721URIStorage, Pausable, Ownable {
     override
     {
         super._beforeTokenTransfer(from, to, tokenId, batchSize);
-    }
-
-    // The following functions are overrides required by Solidity.
-
-    function _burn(uint256 tokenId) internal override(ERC721, ERC721URIStorage) {
-        super._burn(tokenId);
-    }
-
-    function tokenURI(uint256 tokenId)
-    public
-    view
-    override(ERC721, ERC721URIStorage)
-    returns (string memory)
-    {
-        return super.tokenURI(tokenId);
     }
 }
