@@ -74,5 +74,5 @@ func (pb *PublicBlockchain) DeployContract() (*string, error) {
 
 // GetContract Get contract instance from contract address
 func (pb *PublicBlockchain) GetContract(contractAddress string) (*ContractCaller, error) {
-	return NewContractCaller(contractAddress, pb.conn)
+	return NewContractCaller(contractAddress, pb.conn, pb.auth)
 }
