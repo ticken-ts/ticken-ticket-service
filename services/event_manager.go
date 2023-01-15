@@ -7,17 +7,20 @@ import (
 )
 
 type eventManager struct {
-	eventRepository repos.EventRepository
-	blockchain      *public_blockchain.PublicBlockchain
+	eventRepository  repos.EventRepository
+	ticketRepository repos.TicketRepository
+	blockchain       *public_blockchain.PublicBlockchain
 }
 
 func NewEventManager(
 	eventRepository repos.EventRepository,
+	ticketRepository repos.TicketRepository,
 	blockchain *public_blockchain.PublicBlockchain,
 ) EventManager {
 	return &eventManager{
-		eventRepository: eventRepository,
-		blockchain:      blockchain,
+		ticketRepository: ticketRepository,
+		eventRepository:  eventRepository,
+		blockchain:       blockchain,
 	}
 }
 

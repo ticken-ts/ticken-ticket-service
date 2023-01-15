@@ -27,7 +27,7 @@ func NewProvider(
 	eventRepo := repoProvider.GetEventRepository()
 	ticketRepo := repoProvider.GetTicketRepository()
 
-	provider.eventManager = NewEventManager(eventRepo, publicBlockchain)
+	provider.eventManager = NewEventManager(eventRepo, ticketRepo, publicBlockchain)
 	provider.ticketIssuer = NewTicketIssuer(eventRepo, ticketRepo, pvtbcCaller, publicBlockchain)
 	provider.ticketSigner = NewTicketSigner(eventRepo, ticketRepo, pvtbcCaller, userServiceClient, publicBlockchain)
 
