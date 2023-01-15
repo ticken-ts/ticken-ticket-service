@@ -4,6 +4,25 @@
 
 * App > API > 
 
+## Smart contract
+
+The Go bindings for the NFT smart contract are committed, but if any changes to the smart contract are made, these need to be updated.
+
+### Requirements
+
+For building the smart contract and regenerating the go bindings.
+
+- Solidity compiler "solc" present in PATH
+- Abigen (go-ethereum) "https://geth.ethereum.org/docs/getting-started/installing-geth"
+
+### Build smart contract and go bindings
+
+To compile the smart contract, go to the `infra/public_blockchain/contract` directory and run `npm install`.
+
+Run `npm run build` to compile the smart contract.
+
+Run `npm run abigen` to generate the Go bindings for the smart contract.
+
 ## Running locally
 
 This is project is built in way that it can be run locally. 
