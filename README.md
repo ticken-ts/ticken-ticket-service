@@ -2,7 +2,7 @@
 
 ## Architectural design
 
-* App > API > 
+* App > API >
 
 ## Smart contract
 
@@ -60,6 +60,12 @@ sh ./start-pvtbc.sh
 
 This is going to start all the images needed to run an hyperledger fabric peer and it
 will deploy all necessary chaincodes.
+
+### Running local public blockchain
+
+```bash
+sh ./start-public-blockchain.sh
+```
 
 ### Running ticken-ticket-service
 
