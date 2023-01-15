@@ -9,6 +9,7 @@ import (
 	"ticken-ticket-service/env"
 	"ticken-ticket-service/infra/bus"
 	"ticken-ticket-service/infra/db"
+	"ticken-ticket-service/infra/public_blockchain"
 	"ticken-ticket-service/log"
 )
 
@@ -128,6 +129,17 @@ func (builder *Builder) BuildPvtbcListener() *pvtbc.Listener {
 	}
 	log.TickenLogger.Info().Msg("pvtbc listener created successfully")
 	return listener
+}
+
+func (builder *Builder) BuildPublicBlockchain() *public_blockchain.PublicBlockchain {
+	pbConfig := builder.tickenConfig.PublicBlockchain
+	pbbc := public_blockchain.NewPublicBlockchain(pbConfig.ChainURL, pbConfig.ChainID, pbConfig.AddressPK)
+	err := pbbc.Connect()
+	if err != nil {
+		log.TickenLogger.Panic().Err(err)
+	}
+	log.TickenLogger.Info().Msg("public blockchain connection established")
+	return pbbc
 }
 
 func buildPeerConnector(config config.PvtbcConfig) *peerconnector.PeerConnector {

@@ -3,6 +3,7 @@ package services
 import (
 	"fmt"
 	pvtbc "github.com/ticken-ts/ticken-pvtbc-connector"
+	"ticken-ticket-service/infra/public_blockchain"
 	"ticken-ticket-service/models"
 	"ticken-ticket-service/repos"
 	"ticken-ticket-service/sync"
@@ -13,6 +14,7 @@ type ticketSigner struct {
 	ticketRepository  repos.TicketRepository
 	pvtbcConnector    *pvtbc.Caller
 	userServiceClient *sync.UserServiceClient
+	blockchain        *public_blockchain.PublicBlockchain
 }
 
 func NewTicketSigner(
@@ -20,12 +22,14 @@ func NewTicketSigner(
 	ticketRepository repos.TicketRepository,
 	pvtbcConnector *pvtbc.Caller,
 	userManager *sync.UserServiceClient,
+	blockchain *public_blockchain.PublicBlockchain,
 ) TicketSigner {
 	return &ticketSigner{
 		eventRepository:   eventRepository,
 		ticketRepository:  ticketRepository,
 		pvtbcConnector:    pvtbcConnector,
 		userServiceClient: userManager,
+		blockchain:        blockchain,
 	}
 }
 

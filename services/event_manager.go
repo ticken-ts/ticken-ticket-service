@@ -1,17 +1,23 @@
 package services
 
 import (
+	"ticken-ticket-service/infra/public_blockchain"
 	"ticken-ticket-service/models"
 	"ticken-ticket-service/repos"
 )
 
 type eventManager struct {
 	eventRepository repos.EventRepository
+	blockchain      *public_blockchain.PublicBlockchain
 }
 
-func NewEventManager(eventRepository repos.EventRepository) EventManager {
+func NewEventManager(
+	eventRepository repos.EventRepository,
+	blockchain *public_blockchain.PublicBlockchain,
+) EventManager {
 	return &eventManager{
 		eventRepository: eventRepository,
+		blockchain:      blockchain,
 	}
 }
 

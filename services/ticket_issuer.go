@@ -3,6 +3,7 @@ package services
 import (
 	"fmt"
 	pvtbc "github.com/ticken-ts/ticken-pvtbc-connector"
+	"ticken-ticket-service/infra/public_blockchain"
 	"ticken-ticket-service/models"
 	"ticken-ticket-service/repos"
 )
@@ -11,13 +12,20 @@ type ticketIssuer struct {
 	eventRepository  repos.EventRepository
 	ticketRepository repos.TicketRepository
 	pvtbcConnector   *pvtbc.Caller
+	blockchain       *public_blockchain.PublicBlockchain
 }
 
-func NewTicketIssuer(eventRepository repos.EventRepository, ticketRepository repos.TicketRepository, pvtbcConnector *pvtbc.Caller) TicketIssuer {
+func NewTicketIssuer(
+	eventRepository repos.EventRepository,
+	ticketRepository repos.TicketRepository,
+	pvtbcConnector *pvtbc.Caller,
+	blockchain *public_blockchain.PublicBlockchain,
+) TicketIssuer {
 	return &ticketIssuer{
 		eventRepository:  eventRepository,
 		ticketRepository: ticketRepository,
 		pvtbcConnector:   pvtbcConnector,
+		blockchain:       blockchain,
 	}
 }
 

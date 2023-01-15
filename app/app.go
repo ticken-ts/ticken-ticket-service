@@ -35,6 +35,7 @@ func New(builder infra.IBuilder, tickenConfig *config.Config) *TickenTicketApp {
 
 	engine := builder.BuildEngine()
 	pvtbcCaller := builder.BuildPvtbcCaller()
+	publicBlockchain := builder.BuildPublicBlockchain()
 	db := builder.BuildDb(env.TickenEnv.DbConnString)
 	busSubscriber := builder.BuildBusSubscriber(env.TickenEnv.BusConnString)
 
@@ -47,7 +48,7 @@ func New(builder infra.IBuilder, tickenConfig *config.Config) *TickenTicketApp {
 
 	// this provider is going to provide all services
 	// needed by the controllers to execute it operations
-	serviceProvider, err := services.NewProvider(repoProvider, pvtbcCaller, sync.NewUserServiceClient())
+	serviceProvider, err := services.NewProvider(repoProvider, pvtbcCaller, sync.NewUserServiceClient(), publicBlockchain)
 	if err != nil {
 		panic(err)
 	}

@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	pvtbc "github.com/ticken-ts/ticken-pvtbc-connector"
 	"ticken-ticket-service/infra/bus"
+	"ticken-ticket-service/infra/public_blockchain"
 )
 
 type Db interface {
@@ -37,4 +38,5 @@ type IBuilder interface {
 	BuildDb(connString string) Db
 	BuildBusPublisher(connString string) BusPublisher
 	BuildBusSubscriber(connString string) BusSubscriber
+	BuildPublicBlockchain() *public_blockchain.PublicBlockchain
 }

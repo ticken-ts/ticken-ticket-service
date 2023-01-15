@@ -23,5 +23,11 @@
     "certificate_path": "",
     "private_key_path": "",
     "tls_certificate_path": ""
+  },
+
+  "public_blockchain": {
+    "address_pk": "d110e942ed2ef98dbf54f3e171dc4a6980057f38d3e7b649e9ddc488f6ae3f01",
+    "chain_id": 5777,
+    "chain_url": "http://localhost:7545"
   }
 }

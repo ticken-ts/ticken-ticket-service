@@ -5,10 +5,11 @@ import "github.com/spf13/viper"
 const DefaultConfigFilename = "config"
 
 type Config struct {
-	Database DatabaseConfig `mapstructure:"database"`
-	Pvtbc    PvtbcConfig    `mapstructure:"pvtbc"`
-	Server   ServerConfig   `mapstructure:"server"`
-	Bus      BusConfig      `mapstructure:"bus"`
+	Database         DatabaseConfig         `mapstructure:"database"`
+	Pvtbc            PvtbcConfig            `mapstructure:"pvtbc"`
+	Server           ServerConfig           `mapstructure:"server"`
+	Bus              BusConfig              `mapstructure:"bus"`
+	PublicBlockchain PublicBlockchainConfig `mapstructure:"public_blockchain"`
 }
 
 func Load(path string, filename string) (*Config, error) {
