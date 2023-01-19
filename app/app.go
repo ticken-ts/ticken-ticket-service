@@ -83,7 +83,7 @@ func New(builder infra.IBuilder, tickenConfig *config.Config) *TickenTicketApp {
 	tickenTicketApp.serviceProvider = serviceProvider
 
 	var appMiddlewares = []api.Middleware{
-		middlewares.NewAuthMiddleware(serviceProvider, &tickenConfig.Server),
+		middlewares.NewAuthMiddleware(serviceProvider, &tickenConfig.Server, &tickenConfig.Dev),
 	}
 
 	for _, middleware := range appMiddlewares {
