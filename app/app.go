@@ -26,6 +26,12 @@ type TickenTicketApp struct {
 	repoProvider    repos.IProvider
 	serviceProvider services.IProvider
 	subscriber      *async.Subscriber
+
+	// populators are intended to populate
+	// useful data. It can be testdata or
+	// data that should be present on the db
+	// before the service is available
+	populators []Populator
 }
 
 func New(builder infra.IBuilder, tickenConfig *config.Config) *TickenTicketApp {
@@ -33,10 +39,10 @@ func New(builder infra.IBuilder, tickenConfig *config.Config) *TickenTicketApp {
 
 	tickenTicketApp := new(TickenTicketApp)
 
+	db := builder.BuildDb(env.TickenEnv.DbConnString)
 	engine := builder.BuildEngine()
 	pvtbcCaller := builder.BuildPvtbcCaller()
 	publicBlockchain := builder.BuildPublicBlockchain()
-	db := builder.BuildDb(env.TickenEnv.DbConnString)
 	busSubscriber := builder.BuildBusSubscriber(env.TickenEnv.BusConnString)
 
 	// this provider is going to provider all repositories
