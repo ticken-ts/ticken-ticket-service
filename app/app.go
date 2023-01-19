@@ -8,6 +8,7 @@ import (
 	"ticken-ticket-service/api/controllers/healthController"
 	"ticken-ticket-service/api/controllers/ticketController"
 	"ticken-ticket-service/api/middlewares"
+	"ticken-ticket-service/api/security"
 	"ticken-ticket-service/async"
 	"ticken-ticket-service/config"
 	"ticken-ticket-service/env"
@@ -16,6 +17,7 @@ import (
 	"ticken-ticket-service/repos"
 	"ticken-ticket-service/services"
 	"ticken-ticket-service/sync"
+	"ticken-ticket-service/utils"
 )
 
 const ServiceName = "ticken-ticket-service"
@@ -109,20 +111,28 @@ func (ticketTicketApp *TickenTicketApp) Start() {
 }
 
 func (ticketTicketApp *TickenTicketApp) Populate() {
-	eventManager := ticketTicketApp.serviceProvider.GetEventManager()
-	_, err := eventManager.AddEvent("test-event-id", "organizer", "ticken-test-channel")
-	if err != nil {
-		return // HANDLER DUPLICATES
+	for _, populator := range ticketTicketApp.populators {
+		err := populator.Populate()
+		if err != nil {
+			panic(err)
+		}
 	}
 }
 
 func (ticketTicketApp *TickenTicketApp) EmitFakeJWT() {
-	fakeJWT := jwt.NewWithClaims(jwt.SigningMethodES256, jwt.MapClaims{
-		"sub":   "290c641a-55a1-40f5-acc3-d4ebe3626fdd",
-		"email": "user@ticken.com",
+	rsaPrivKey, err := utils.LoadRSA(ticketTicketApp.config.Dev.JWTPrivateKey, ticketTicketApp.config.Dev.JWTPublicKey)
+	if err != nil {
+		panic(err)
+	}
+
+	fakeJWT := jwt.NewWithClaims(jwt.SigningMethodRS256, &security.Claims{
+		Subject:           ticketTicketApp.config.Dev.User.UserID,
+		Email:             ticketTicketApp.config.Dev.User.Email,
+		PreferredUsername: ticketTicketApp.config.Dev.User.Username,
 	})
 
-	signedJWT, err := fakeJWT.SigningString()
+	signedJWT, err := fakeJWT.SignedString(rsaPrivKey)
+
 	if err != nil {
 		panic(fmt.Errorf("error generation fake JWT: %s", err.Error()))
 	}

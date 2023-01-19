@@ -10,6 +10,10 @@ type Config struct {
 	Server           ServerConfig           `mapstructure:"server"`
 	Bus              BusConfig              `mapstructure:"bus"`
 	PublicBlockchain PublicBlockchainConfig `mapstructure:"public_blockchain"`
+
+	// this field is going to be
+	// loaded only during dev or test env
+	Dev DevConfig `mapstructure:"dev"`
 }
 
 func Load(path string, filename string) (*Config, error) {
