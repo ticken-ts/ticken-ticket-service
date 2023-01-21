@@ -8,8 +8,14 @@ type DevUser struct {
 	Lastname  string `mapstructure:"lastname"`
 }
 
+type MockInfo struct {
+	DisablePVTBCMock bool `mapstructure:"disable_pvtbc_mock"`
+	DisableBusMock   bool `mapstructure:"disable_buc_mock"`
+}
+
 type DevConfig struct {
-	User          DevUser `mapstructure:"user"`
-	JWTPublicKey  string  `mapstructure:"jwt_public_key"`
-	JWTPrivateKey string  `mapstructure:"jwt_private_key"`
+	User          DevUser  `mapstructure:"user"`
+	Mock          MockInfo `mapstructure:"mock"`
+	JWTPublicKey  string   `mapstructure:"jwt_public_key"`
+	JWTPrivateKey string   `mapstructure:"jwt_private_key"`
 }

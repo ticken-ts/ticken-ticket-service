@@ -55,7 +55,7 @@ func (builder *Builder) BuildBusSubscriber(connString string) BusSubscriber {
 	var tickenBus BusSubscriber = nil
 
 	driverToUse := builder.tickenConfig.Bus.Driver
-	if env.TickenEnv.IsDev() {
+	if env.TickenEnv.IsDev() && !builder.tickenConfig.Dev.Mock.DisableBusMock {
 		driverToUse = config.DevBusDriver
 	}
 
@@ -84,7 +84,7 @@ func (builder *Builder) BuildBusPublisher(connString string) BusPublisher {
 	var tickenBus BusPublisher = nil
 
 	driverToUse := builder.tickenConfig.Bus.Driver
-	if env.TickenEnv.IsDev() {
+	if env.TickenEnv.IsDev() && !builder.tickenConfig.Dev.Mock.DisableBusMock {
 		driverToUse = config.DevBusDriver
 	}
 
