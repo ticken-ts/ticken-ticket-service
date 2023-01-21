@@ -61,11 +61,6 @@ func New(builder infra.IBuilder, tickenConfig *config.Config) *TickenTicketApp {
 		panic(err)
 	}
 
-	err = serviceProvider.GetEventManager().ListenBlockchainEvents()
-	if err != nil {
-		panic(err)
-	}
-
 	subscriber, err := async.NewSubscriber(busSubscriber, serviceProvider)
 	if err != nil {
 		panic(err)
