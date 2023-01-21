@@ -12,7 +12,7 @@ type ticketIssuer struct {
 	eventRepository  repos.EventRepository
 	ticketRepository repos.TicketRepository
 	pvtbcConnector   *pvtbc.Caller
-	blockchain       *public_blockchain.PublicBlockchain
+	pubBCConnector   *public_blockchain.PublicBlockchain
 }
 
 func NewTicketIssuer(
@@ -25,7 +25,7 @@ func NewTicketIssuer(
 		eventRepository:  eventRepository,
 		ticketRepository: ticketRepository,
 		pvtbcConnector:   pvtbcConnector,
-		blockchain:       blockchain,
+		pubBCConnector:   blockchain,
 	}
 }
 
