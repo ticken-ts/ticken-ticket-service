@@ -20,7 +20,7 @@ func NewProvider(
 	repoProvider repos.IProvider,
 	pvtbcCaller *pvtbc.Caller,
 	userServiceClient *sync.UserServiceClient,
-	publicBlockchain *public_blockchain.PublicBlockchain,
+	publicBlockchain public_blockchain.PublicBC,
 ) (*Provider, error) {
 	provider := new(Provider)
 

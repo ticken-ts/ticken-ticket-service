@@ -14,7 +14,7 @@ type ticketSigner struct {
 	ticketRepository  repos.TicketRepository
 	pvtbcConnector    *pvtbc.Caller
 	userServiceClient *sync.UserServiceClient
-	blockchain        *public_blockchain.PublicBlockchain
+	blockchain        public_blockchain.PublicBC
 }
 
 func NewTicketSigner(
@@ -22,7 +22,7 @@ func NewTicketSigner(
 	ticketRepository repos.TicketRepository,
 	pvtbcConnector *pvtbc.Caller,
 	userManager *sync.UserServiceClient,
-	blockchain *public_blockchain.PublicBlockchain,
+	blockchain public_blockchain.PublicBC,
 ) TicketSigner {
 	return &ticketSigner{
 		eventRepository:   eventRepository,

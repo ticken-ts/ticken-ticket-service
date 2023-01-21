@@ -9,13 +9,13 @@ import (
 type eventManager struct {
 	eventRepository  repos.EventRepository
 	ticketRepository repos.TicketRepository
-	blockchain       *public_blockchain.PublicBlockchain
+	blockchain       public_blockchain.PublicBC
 }
 
 func NewEventManager(
 	eventRepository repos.EventRepository,
 	ticketRepository repos.TicketRepository,
-	blockchain *public_blockchain.PublicBlockchain,
+	blockchain public_blockchain.PublicBC,
 ) EventManager {
 	return &eventManager{
 		ticketRepository: ticketRepository,

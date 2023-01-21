@@ -289,8 +289,6 @@ github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO
 github.com/subosito/gotenv v1.4.1 h1:jyEFiXpy21Wm81FBN71l9VoMMV8H8jG+qIK3GCpY6Qs=
 github.com/subosito/gotenv v1.4.1/go.mod h1:ayKnFf/c6rvx/2iiLrJUk1e6plDbT3edrFNGqEflhK0=
 github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7 h1:epCh84lMvA70Z7CTTCmYQn2CKbY8j86K7/FAIr141uY=
-github.com/ticken-ts/ticken-pvtbc-connector v0.2.11 h1:idhrZ5+N4gBpu3iuazgs/fO0yXs/yNubXFvZaK90Uv8=
-github.com/ticken-ts/ticken-pvtbc-connector v0.2.11/go.mod h1:iMdwcHgXPBUaGj1WYRHJomvpPSQ31QFS7/kVSBjUmiY=
 github.com/ticken-ts/ticken-pvtbc-connector v0.2.31 h1:DeSpQDhUePNyDgNISmzsLs1knTBeE2Phlp0mP/bSpjU=
 github.com/ticken-ts/ticken-pvtbc-connector v0.2.31/go.mod h1:3GilUwFCl2j08pAk3efJUW2G37exPw00/BhDgHDzE24=
 github.com/tidwall/pretty v1.0.0 h1:HsD+QiTn7sK6flMKIvNmpqz1qrpP3Ps6jOKIKMooyg4=

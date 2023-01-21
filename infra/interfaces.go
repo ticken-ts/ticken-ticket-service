@@ -38,5 +38,5 @@ type IBuilder interface {
 	BuildDb(connString string) Db
 	BuildBusPublisher(connString string) BusPublisher
 	BuildBusSubscriber(connString string) BusSubscriber
-	BuildPublicBlockchain() *public_blockchain.PublicBlockchain
+	BuildPublicBlockchain() public_blockchain.PublicBC
 }

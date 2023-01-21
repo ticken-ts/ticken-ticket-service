@@ -63,7 +63,7 @@ func (cc *ContractCaller) GetUserTickets(userAddress string) ([]PubBCTicket, err
 	for _, ticket := range tickets {
 		result = append(result, PubBCTicket{
 			Section:         ticket.Section,
-			TokenID:         ticket.TokenID.String(),
+			TokenID:         ticket.TokenID,
 			OwnerAddress:    userAddress,
 			ContractAddress: cc.addr,
 		})

@@ -17,7 +17,7 @@ type Builder struct {
 	tickenConfig *config.Config
 }
 
-var pc *peerconnector.PeerConnector = nil
+var pc peerconnector.PeerConnector = nil
 
 func NewBuilder(tickenConfig *config.Config) (*Builder, error) {
 	if tickenConfig == nil {
@@ -131,8 +131,14 @@ func (builder *Builder) BuildPvtbcListener() *pvtbc.Listener {
 	return listener
 }
 
-func (builder *Builder) BuildPublicBlockchain() *public_blockchain.PublicBlockchain {
+func (builder *Builder) BuildPublicBlockchain() public_blockchain.PublicBC {
 	pbConfig := builder.tickenConfig.PublicBlockchain
+
+	//If is dev, generate a dev blockchain connector
+	if env.TickenEnv.IsDev() {
+		return public_blockchain.NewDevPublicBlockchain()
+	}
+
 	pbbc := public_blockchain.NewPublicBlockchain(pbConfig.ChainURL, pbConfig.ChainID, pbConfig.AddressPK)
 	//err := pbbc.Connect()
 	//if err != nil {
@@ -142,7 +148,7 @@ func (builder *Builder) BuildPublicBlockchain() *public_blockchain.PublicBlockch
 	return pbbc
 }
 
-func buildPeerConnector(config config.PvtbcConfig) *peerconnector.PeerConnector {
+func buildPeerConnector(config config.PvtbcConfig) peerconnector.PeerConnector {
 	if pc != nil {
 		return pc
 	}
