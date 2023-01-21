@@ -134,10 +134,10 @@ func (builder *Builder) BuildPvtbcListener() *pvtbc.Listener {
 func (builder *Builder) BuildPublicBlockchain() *public_blockchain.PublicBlockchain {
 	pbConfig := builder.tickenConfig.PublicBlockchain
 	pbbc := public_blockchain.NewPublicBlockchain(pbConfig.ChainURL, pbConfig.ChainID, pbConfig.AddressPK)
-	err := pbbc.Connect()
-	if err != nil {
-		log.TickenLogger.Panic().Err(err)
-	}
+	//err := pbbc.Connect()
+	//if err != nil {
+	//	log.TickenLogger.Panic().Err(err)
+	//}
 	log.TickenLogger.Info().Msg("public blockchain connection established")
 	return pbbc
 }
