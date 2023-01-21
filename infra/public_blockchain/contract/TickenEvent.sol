@@ -13,7 +13,7 @@ struct Ticket {
 }
 
 struct TicketDTO {
-    uint256 id;
+    uint256 tokenID;
     string  section;
     bool    scanned;
 }
