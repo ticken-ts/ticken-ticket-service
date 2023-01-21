@@ -136,6 +136,7 @@ func (builder *Builder) BuildPublicBlockchain() public_blockchain.PublicBC {
 
 	//If is dev, generate a dev blockchain connector
 	if env.TickenEnv.IsDev() {
+		log.TickenLogger.Info().Msg("dev public blockchain connection established")
 		return public_blockchain.NewDevPublicBlockchain()
 	}
 
