@@ -6,7 +6,7 @@ import (
 	"github.com/coreos/go-oidc"
 	"github.com/google/uuid"
 	"net/http"
-	"ticken-event-service/env"
+	"ticken-ticket-service/env"
 	"time"
 )
 
