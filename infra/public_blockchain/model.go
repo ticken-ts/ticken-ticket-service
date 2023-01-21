@@ -1,9 +1,8 @@
 package public_blockchain
 
-type CreatedTicket struct {
-	ContractAddr string
-	Section      string
-	Owner        string
-	TokenID      uint64
-	TxAddress    string
+type PubBCTicket struct {
+	Section         string
+	OwnerAddress    string
+	TokenID         string
+	ContractAddress string
 }

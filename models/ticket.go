@@ -3,12 +3,14 @@ package models
 import (
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"math/big"
 	"ticken-ticket-service/utils"
 )
 
 type Ticket struct {
 	mongoID  primitive.ObjectID `bson:"_id"`
 	TicketID string             `json:"ticket_id" bson:"ticket_id"`
+	TokenID  big.Int            `json:"token_id" bson:"token_id"`
 	Owner    string             `json:"owner" bson:"owner"`
 	Section  string             `json:"section" bson:"section"`
 	EventID  string             `json:"event_id" bson:"event_id"`

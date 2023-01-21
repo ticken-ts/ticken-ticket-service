@@ -3,7 +3,6 @@ package public_blockchain
 import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
-	"math/big"
 	public_blockchain "ticken-ticket-service/infra/public_blockchain/contract"
 	"ticken-ticket-service/models"
 )
@@ -25,6 +24,7 @@ func NewContractCaller(contractAddr string, conn Connection, transactor *bind.Tr
 		instance:   instance,
 		conn:       conn,
 		transactor: transactor,
+		addr:       contractAddr,
 	}, nil
 }
 
@@ -52,37 +52,22 @@ func (cc *ContractCaller) GenerateTicket(
 	return &transactionAddress, nil
 }
 
-// WatchTicketCreatedEvent watch for ticket created event and send it to callback
-func (cc *ContractCaller) WatchTicketCreatedEvent(
-	callback func(ticketData *CreatedTicket),
-) error {
-	// Watch for TicketCreated event
-	channel := make(chan *public_blockchain.TickenEventTicketCreated)
-	_, err := cc.instance.WatchTicketCreated(
-		&bind.WatchOpts{},
-		channel,
-		[]*big.Int{},
-	)
+// GetUserTickets returns all tickets owned by the given user
+func (cc *ContractCaller) GetUserTickets(userAddress string) ([]PubBCTicket, error) {
+	tickets, err := cc.instance.GetTicketsByOwner(nil, common.HexToAddress(userAddress))
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	// Wait for event
-	go func() {
-		for {
-			select {
-			case event := <-channel:
-				ticketData := &CreatedTicket{
-					ContractAddr: cc.addr,
-					Section:      event.Section,
-					Owner:        event.OwnerAddress.String(),
-					TokenID:      event.TokenID.Uint64(),
-					TxAddress:    event.Raw.TxHash.String(),
-				}
-				callback(ticketData)
-			}
-		}
-	}()
+	var result []PubBCTicket
+	for _, ticket := range tickets {
+		result = append(result, PubBCTicket{
+			Section:         ticket.Section,
+			TokenID:         ticket.TokenID.String(),
+			OwnerAddress:    userAddress,
+			ContractAddress: cc.addr,
+		})
+	}
 
-	return nil
+	return result, nil
 }
