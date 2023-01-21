@@ -153,14 +153,17 @@ func buildPeerConnector(config config.PvtbcConfig) peerconnector.PeerConnector {
 		return pc
 	}
 
-	pc := peerconnector.New(config.MspID, config.CertificatePath, config.PrivateKeyPath)
-	log.TickenLogger.Info().Msg("pvtbc peer connector created for org " + config.MspID)
+	var pc peerconnector.PeerConnector
+	if env.TickenEnv.IsDev() {
+		pc = peerconnector.NewDev(config.MspID, "admin")
+	} else {
+		pc = peerconnector.New(config.MspID, config.CertificatePath, config.PrivateKeyPath)
+	}
 
 	err := pc.Connect(config.PeerEndpoint, config.GatewayPeer, config.TLSCertificatePath)
 	if err != nil {
-		log.TickenLogger.Panic().Err(err)
+		panic(err)
 	}
 
-	log.TickenLogger.Info().Msg("pvtbc peer connection established on " + config.PeerEndpoint)
 	return pc
 }
