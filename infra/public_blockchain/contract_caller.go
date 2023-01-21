@@ -28,7 +28,7 @@ func NewContractCaller(contractAddr string, conn Connection, transactor *bind.Tr
 	}, nil
 }
 
-//GenerateTicket BLOCKING generate ticket and assign the buyer as owner
+// GenerateTicket BLOCKING generate ticket and assign the buyer as owner
 func (cc *ContractCaller) GenerateTicket(
 	buyerAddress string,
 	ticketData *models.Ticket,
