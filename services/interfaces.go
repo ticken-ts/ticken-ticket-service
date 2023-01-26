@@ -1,6 +1,9 @@
 package services
 
-import "ticken-ticket-service/models"
+import (
+	"github.com/google/uuid"
+	"ticken-ticket-service/models"
+)
 
 type IProvider interface {
 	GetTicketIssuer() TicketIssuer
@@ -9,7 +12,7 @@ type IProvider interface {
 }
 
 type TicketIssuer interface {
-	IssueTicket(eventID string, section string, owner string) (*models.Ticket, error)
+	IssueTicket(eventID uuid.UUID, section string, owner uuid.UUID) (*models.Ticket, error)
 }
 
 type TicketSigner interface {

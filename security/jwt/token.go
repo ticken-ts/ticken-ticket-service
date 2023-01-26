@@ -1,4 +1,4 @@
-package security
+package jwt
 
 import "github.com/google/uuid"
 
@@ -7,7 +7,7 @@ import "github.com/google/uuid"
 // jwt validation.
 // Missing properties can be added on demand
 
-type JWT struct {
+type Token struct {
 	Email    string
 	Subject  uuid.UUID
 	Username string

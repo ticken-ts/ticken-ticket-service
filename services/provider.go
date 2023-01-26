@@ -7,7 +7,6 @@ import (
 	pvtbc "github.com/ticken-ts/ticken-pvtbc-connector"
 	"ticken-ticket-service/infra/public_blockchain"
 	"ticken-ticket-service/repos"
-	"ticken-ticket-service/sync"
 )
 
 type Provider struct {
@@ -16,12 +15,7 @@ type Provider struct {
 	eventManager EventManager
 }
 
-func NewProvider(
-	repoProvider repos.IProvider,
-	pvtbcCaller *pvtbc.Caller,
-	userServiceClient *sync.UserServiceClient,
-	publicBlockchain public_blockchain.PublicBC,
-) (*Provider, error) {
+func NewProvider(repoProvider repos.IProvider, pvtbcCaller *pvtbc.Caller, publicBlockchain public_blockchain.PublicBC) (*Provider, error) {
 	provider := new(Provider)
 
 	eventRepo := repoProvider.GetEventRepository()
@@ -29,7 +23,7 @@ func NewProvider(
 
 	provider.eventManager = NewEventManager(eventRepo, ticketRepo, publicBlockchain)
 	provider.ticketIssuer = NewTicketIssuer(eventRepo, ticketRepo, pvtbcCaller, publicBlockchain)
-	provider.ticketSigner = NewTicketSigner(eventRepo, ticketRepo, pvtbcCaller, userServiceClient, publicBlockchain)
+	provider.ticketSigner = NewTicketSigner(eventRepo, ticketRepo, pvtbcCaller, publicBlockchain)
 
 	return provider, nil
 }

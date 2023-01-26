@@ -1,4 +1,4 @@
-package security
+package jwt
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-type JWTOnlineVerifier struct {
+type OnlineVerifier struct {
 	oidcClientCtx context.Context
 	oidcProvider  *oidc.Provider
 
@@ -20,8 +20,8 @@ type JWTOnlineVerifier struct {
 	verifier *oidc.IDTokenVerifier
 }
 
-func NewJWTOnlineVerifier(issuer string, clientID string) *JWTOnlineVerifier {
-	jwtVerifier := new(JWTOnlineVerifier)
+func NewOnlineVerifier(issuer string, clientID string) *OnlineVerifier {
+	jwtVerifier := new(OnlineVerifier)
 
 	jwtVerifier.oidcClientCtx = initOIDCClientContext()
 	jwtVerifier.oidcProvider = initOIDCProvider(jwtVerifier.oidcClientCtx, issuer)
@@ -44,7 +44,7 @@ func NewJWTOnlineVerifier(issuer string, clientID string) *JWTOnlineVerifier {
 	return jwtVerifier
 }
 
-func (jwtVerifier *JWTOnlineVerifier) Verify(rawJWT string) (*JWT, error) {
+func (jwtVerifier *OnlineVerifier) Verify(rawJWT string) (*Token, error) {
 	jwt, err := jwtVerifier.verifier.Verify(jwtVerifier.oidcClientCtx, rawJWT)
 	if err != nil {
 		return nil, err
@@ -61,7 +61,7 @@ func (jwtVerifier *JWTOnlineVerifier) Verify(rawJWT string) (*JWT, error) {
 		return nil, err
 	}
 
-	token := &JWT{
+	token := &Token{
 		Subject:  uuidSubject,
 		Email:    claims.Email,
 		Username: claims.PreferredUsername,

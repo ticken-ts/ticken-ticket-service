@@ -23,14 +23,16 @@ const (
 	BusConnStringKey   = "BUS_CONN_STRING"
 	ConfigFilePath     = "CONFIG_FILE_PATH"
 	ConfigFileName     = "CONFIG_FILE_NAME"
+	HSMEncryptionKey   = "HSM_ENCRYPTION_KEY"
 )
 
 type Env struct {
-	Env            string
-	DbConnString   string
-	BusConnString  string
-	ConfigFilePath string
-	ConfigFileName string
+	Env              string
+	DbConnString     string
+	BusConnString    string
+	ConfigFilePath   string
+	ConfigFileName   string
+	HSMEncryptionKey string
 }
 
 func Load() (*Env, error) {
@@ -42,11 +44,12 @@ func Load() (*Env, error) {
 	}
 
 	env := &Env{
-		Env:            getEnvOrPanic(ExecEnvKey),
-		DbConnString:   getEnvOrPanic(DbConnStringEnvKey),
-		BusConnString:  getEnvOrPanic(BusConnStringKey),
-		ConfigFilePath: getEnvOrPanic(ConfigFilePath),
-		ConfigFileName: getEnvOrPanic(ConfigFileName),
+		Env:              getEnvOrPanic(ExecEnvKey),
+		DbConnString:     getEnvOrPanic(DbConnStringEnvKey),
+		BusConnString:    getEnvOrPanic(BusConnStringKey),
+		ConfigFilePath:   getEnvOrPanic(ConfigFilePath),
+		ConfigFileName:   getEnvOrPanic(ConfigFileName),
+		HSMEncryptionKey: getEnvOrPanic(HSMEncryptionKey),
 	}
 
 	TickenEnv = env

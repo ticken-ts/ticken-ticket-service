@@ -291,6 +291,10 @@ github.com/subosito/gotenv v1.4.1/go.mod h1:ayKnFf/c6rvx/2iiLrJUk1e6plDbT3edrFNG
 github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7 h1:epCh84lMvA70Z7CTTCmYQn2CKbY8j86K7/FAIr141uY=
 github.com/ticken-ts/ticken-pvtbc-connector v0.2.31 h1:DeSpQDhUePNyDgNISmzsLs1knTBeE2Phlp0mP/bSpjU=
 github.com/ticken-ts/ticken-pvtbc-connector v0.2.31/go.mod h1:3GilUwFCl2j08pAk3efJUW2G37exPw00/BhDgHDzE24=
+github.com/ticken-ts/ticken-pvtbc-connector v0.2.32 h1:KnW+nhCkijShTpp+Yvt2xtVyXJbSrU8+PxdDm7EGisY=
+github.com/ticken-ts/ticken-pvtbc-connector v0.2.32/go.mod h1:rK1J3x+qeLeGTzjwqYVqI/9AKL0vseqrlwJNZoZXr3o=
+github.com/ticken-ts/ticken-pvtbc-connector v0.2.34 h1:Adw6UtAIFxcWyuHaUHQTn5z1NfxhF1UvyGNKJ/UxuaU=
+github.com/ticken-ts/ticken-pvtbc-connector v0.2.34/go.mod h1:rK1J3x+qeLeGTzjwqYVqI/9AKL0vseqrlwJNZoZXr3o=
 github.com/tidwall/pretty v1.0.0 h1:HsD+QiTn7sK6flMKIvNmpqz1qrpP3Ps6jOKIKMooyg4=
 github.com/tidwall/pretty v1.0.0/go.mod h1:XNkn88O1ChpSDQmQeStsy+sBenx6DDtFZJxhVysOjyk=
 github.com/tklauser/go-sysconf v0.3.5 h1:uu3Xl4nkLzQfXNsWn15rPc/HQCJKObbt1dKJeWp3vU4=

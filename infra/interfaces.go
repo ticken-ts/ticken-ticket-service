@@ -6,6 +6,7 @@ import (
 	pvtbc "github.com/ticken-ts/ticken-pvtbc-connector"
 	"ticken-ticket-service/infra/bus"
 	"ticken-ticket-service/infra/public_blockchain"
+	"ticken-ticket-service/security/jwt"
 )
 
 type Db interface {
@@ -17,6 +18,11 @@ type Db interface {
 	// into the correct client depending on the
 	// driver
 	GetClient() interface{}
+}
+
+type HSM interface {
+	Store(data []byte) (string, error)
+	Retrieve(key string) ([]byte, error)
 }
 
 type BusSubscriber interface {
@@ -32,11 +38,16 @@ type BusPublisher interface {
 }
 
 type IBuilder interface {
+	BuildDb(connString string) Db
+	BuildHSM(encryptionKey string) HSM
 	BuildEngine() *gin.Engine
+	BuildJWTVerifier() jwt.Verifier
 	BuildPvtbcCaller() *pvtbc.Caller
 	BuildPvtbcListener() *pvtbc.Listener
-	BuildDb(connString string) Db
 	BuildBusPublisher(connString string) BusPublisher
 	BuildBusSubscriber(connString string) BusSubscriber
 	BuildPublicBlockchain() public_blockchain.PublicBC
+
+	// atomic buildings
+	BuildAtomicPvtbcCaller(mspID, user, peerAddr string, userCert, userPriv, tlsCert []byte) (*pvtbc.Caller, error)
 }

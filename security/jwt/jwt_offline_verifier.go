@@ -1,4 +1,4 @@
-package security
+package jwt
 
 import (
 	"crypto/rsa"
@@ -6,17 +6,17 @@ import (
 	"github.com/google/uuid"
 )
 
-type JWTOfflineVerifier struct {
+type OfflineVerifier struct {
 	key *rsa.PrivateKey
 }
 
-func NewJWTOfflineVerifier(key *rsa.PrivateKey) *JWTOfflineVerifier {
-	return &JWTOfflineVerifier{key: key}
+func NewOfflineVerifier(key *rsa.PrivateKey) *OfflineVerifier {
+	return &OfflineVerifier{key: key}
 }
 
-func (jwtVerifier *JWTOfflineVerifier) Verify(rawJWT string) (*JWT, error) {
+func (jwtVerifier *OfflineVerifier) Verify(rawJWT string) (*Token, error) {
 	keyFunc := func(token *jwt.Token) (interface{}, error) {
-		// here we are assuming that the JWT
+		// here we are assuming that the Token
 		// is generated with the correct key
 		return &jwtVerifier.key.PublicKey, nil
 	}
@@ -32,7 +32,7 @@ func (jwtVerifier *JWTOfflineVerifier) Verify(rawJWT string) (*JWT, error) {
 		return nil, err
 	}
 
-	token := &JWT{
+	token := &Token{
 		Subject:  uuidSubject,
 		Email:    claims.Email,
 		Username: claims.PreferredUsername,

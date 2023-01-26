@@ -9,8 +9,11 @@ import (
 	"ticken-ticket-service/env"
 	"ticken-ticket-service/infra/bus"
 	"ticken-ticket-service/infra/db"
+	"ticken-ticket-service/infra/hsm"
 	"ticken-ticket-service/infra/public_blockchain"
 	"ticken-ticket-service/log"
+	"ticken-ticket-service/security/jwt"
+	"ticken-ticket-service/utils"
 )
 
 type Builder struct {
@@ -35,49 +38,72 @@ func (builder *Builder) BuildDb(connString string) Db {
 
 	switch builder.tickenConfig.Database.Driver {
 	case config.MongoDriver:
-		log.TickenLogger.Info().Msg("using db: " + config.MongoDriver)
 		tickenDb = db.NewMongoDb()
 	default:
-		err := fmt.Errorf("database driver %s not implemented", builder.tickenConfig.Database.Driver)
-		log.TickenLogger.Panic().Err(err)
+		panic(fmt.Errorf("database driver %s not implemented", builder.tickenConfig.Database.Driver))
 	}
 
 	err := tickenDb.Connect(connString)
 	if err != nil {
-		log.TickenLogger.Panic().Err(err)
+		panic(err)
 	}
-	log.TickenLogger.Info().Msg("db connection established")
 
 	return tickenDb
 }
 
-func (builder *Builder) BuildBusSubscriber(connString string) BusSubscriber {
-	var tickenBus BusSubscriber = nil
-
-	driverToUse := builder.tickenConfig.Bus.Driver
-	if env.TickenEnv.IsDev() && !builder.tickenConfig.Dev.Mock.DisableBusMock {
-		driverToUse = config.DevBusDriver
-	}
-
-	switch driverToUse {
-	case config.DevBusDriver:
-		log.TickenLogger.Info().Msg("using bus publisher: " + config.DevBusDriver)
-		tickenBus = bus.NewTickenDevBusSubscriber()
-	case config.RabbitMQDriver:
-		log.TickenLogger.Info().Msg("using bus subscriber: " + config.RabbitMQDriver)
-		tickenBus = bus.NewRabbitMQSubscriber()
-	default:
-		err := fmt.Errorf("bus driver %s not implemented", builder.tickenConfig.Bus.Driver)
-		log.TickenLogger.Panic().Err(err)
-	}
-
-	err := tickenBus.Connect(connString, builder.tickenConfig.Bus.Exchange)
+func (builder *Builder) BuildHSM(encryptingKey string) HSM {
+	rootPath, err := utils.GetServiceRootPath()
 	if err != nil {
-		log.TickenLogger.Panic().Err(err)
+		panic(err)
 	}
-	log.TickenLogger.Info().Msg("bus subscriber connection established")
 
-	return tickenBus
+	localFileSystemHSM, err := hsm.NewLocalFileSystemHSM(encryptingKey, rootPath)
+	if err != nil {
+		panic(err)
+	}
+	return localFileSystemHSM
+}
+
+func (builder *Builder) BuildEngine() *gin.Engine {
+	return gin.Default()
+}
+
+func (builder *Builder) BuildJWTVerifier() jwt.Verifier {
+	var jwtVerifier jwt.Verifier
+
+	if env.TickenEnv.IsDev() || env.TickenEnv.IsTest() {
+		jwtPublicKey := builder.tickenConfig.Dev.JWTPublicKey
+		jwtPrivateKey := builder.tickenConfig.Dev.JWTPrivateKey
+
+		rsaPrivKey, err := utils.LoadRSA(jwtPrivateKey, jwtPublicKey)
+		if err != nil {
+			log.TickenLogger.Panic().Err(err)
+		}
+
+		jwtVerifier = jwt.NewOfflineVerifier(rsaPrivKey)
+	} else {
+		appClientID := builder.tickenConfig.Server.ClientID
+		identityIssuer := builder.tickenConfig.Server.IdentityIssuer
+		jwtVerifier = jwt.NewOnlineVerifier(identityIssuer, appClientID)
+	}
+
+	return jwtVerifier
+}
+
+func (builder *Builder) BuildPvtbcCaller() *pvtbc.Caller {
+	caller, err := pvtbc.NewCaller(buildPeerConnector(builder.tickenConfig.Pvtbc, builder.tickenConfig.Dev))
+	if err != nil {
+		panic(err)
+	}
+	return caller
+}
+
+func (builder *Builder) BuildPvtbcListener() *pvtbc.Listener {
+	listener, err := pvtbc.NewListener(buildPeerConnector(builder.tickenConfig.Pvtbc, builder.tickenConfig.Dev))
+	if err != nil {
+		panic(err)
+	}
+	return listener
 }
 
 func (builder *Builder) BuildBusPublisher(connString string) BusPublisher {
@@ -109,26 +135,33 @@ func (builder *Builder) BuildBusPublisher(connString string) BusPublisher {
 	return tickenBus
 }
 
-func (builder *Builder) BuildEngine() *gin.Engine {
-	return gin.Default()
-}
+func (builder *Builder) BuildBusSubscriber(connString string) BusSubscriber {
+	var tickenBus BusSubscriber = nil
 
-func (builder *Builder) BuildPvtbcCaller() *pvtbc.Caller {
-	caller, err := pvtbc.NewCaller(buildPeerConnector(builder.tickenConfig.Pvtbc))
+	driverToUse := builder.tickenConfig.Bus.Driver
+	if env.TickenEnv.IsDev() && !builder.tickenConfig.Dev.Mock.DisableBusMock {
+		driverToUse = config.DevBusDriver
+	}
+
+	switch driverToUse {
+	case config.DevBusDriver:
+		log.TickenLogger.Info().Msg("using bus publisher: " + config.DevBusDriver)
+		tickenBus = bus.NewTickenDevBusSubscriber()
+	case config.RabbitMQDriver:
+		log.TickenLogger.Info().Msg("using bus subscriber: " + config.RabbitMQDriver)
+		tickenBus = bus.NewRabbitMQSubscriber()
+	default:
+		err := fmt.Errorf("bus driver %s not implemented", builder.tickenConfig.Bus.Driver)
+		log.TickenLogger.Panic().Err(err)
+	}
+
+	err := tickenBus.Connect(connString, builder.tickenConfig.Bus.Exchange)
 	if err != nil {
 		log.TickenLogger.Panic().Err(err)
 	}
-	log.TickenLogger.Info().Msg("pvtbc caller created successfully")
-	return caller
-}
+	log.TickenLogger.Info().Msg("bus subscriber connection established")
 
-func (builder *Builder) BuildPvtbcListener() *pvtbc.Listener {
-	listener, err := pvtbc.NewListener(buildPeerConnector(builder.tickenConfig.Pvtbc))
-	if err != nil {
-		log.TickenLogger.Panic().Err(err)
-	}
-	log.TickenLogger.Info().Msg("pvtbc listener created successfully")
-	return listener
+	return tickenBus
 }
 
 func (builder *Builder) BuildPublicBlockchain() public_blockchain.PublicBC {
@@ -149,13 +182,34 @@ func (builder *Builder) BuildPublicBlockchain() public_blockchain.PublicBC {
 	return pbbc
 }
 
-func buildPeerConnector(config config.PvtbcConfig) peerconnector.PeerConnector {
+func (builder *Builder) BuildAtomicPvtbcCaller(mspID, user, peerAddr string, userCert, userPriv, tlsCert []byte) (*pvtbc.Caller, error) {
+	var pc peerconnector.PeerConnector
+	if env.TickenEnv.IsDev() && !builder.tickenConfig.Dev.Mock.DisablePVTBCMock {
+		pc = peerconnector.NewDev(mspID, user)
+	} else {
+		pc = peerconnector.NewWithRawCredentials(mspID, userCert, userPriv)
+	}
+
+	err := pc.ConnectWithRawTlsCert(peerAddr, peerAddr, tlsCert)
+	if err != nil {
+		return nil, err
+	}
+
+	caller, err := pvtbc.NewCaller(buildPeerConnector(builder.tickenConfig.Pvtbc, builder.tickenConfig.Dev))
+	if err != nil {
+		return nil, err
+	}
+
+	return caller, nil
+}
+
+func buildPeerConnector(config config.PvtbcConfig, devConfig config.DevConfig) peerconnector.PeerConnector {
 	if pc != nil {
 		return pc
 	}
 
 	var pc peerconnector.PeerConnector
-	if env.TickenEnv.IsDev() {
+	if env.TickenEnv.IsDev() && !devConfig.Mock.DisablePVTBCMock {
 		pc = peerconnector.NewDev(config.MspID, "admin")
 	} else {
 		pc = peerconnector.New(config.MspID, config.CertificatePath, config.PrivateKeyPath)

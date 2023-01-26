@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"github.com/google/uuid"
 	pvtbc "github.com/ticken-ts/ticken-pvtbc-connector"
 	"ticken-ticket-service/infra/public_blockchain"
 	"ticken-ticket-service/models"
@@ -29,8 +30,8 @@ func NewTicketIssuer(
 	}
 }
 
-func (s *ticketIssuer) IssueTicket(eventID string, section string, owner string) (*models.Ticket, error) {
-	event := s.eventRepository.FindEvent(eventID)
+func (s *ticketIssuer) IssueTicket(eventID uuid.UUID, section string, ownerID uuid.UUID) (*models.Ticket, error) {
+	event := s.eventRepository.FindEvent(eventID.String())
 	if event == nil {
 		return nil, fmt.Errorf("could not determine organizer channel")
 	}
@@ -40,15 +41,17 @@ func (s *ticketIssuer) IssueTicket(eventID string, section string, owner string)
 		return nil, err
 	}
 
-	newTicket := models.NewTicket(eventID, section, owner)
+	newTicket := models.NewTicket(eventID, section, ownerID)
 
-	ticketResponse, err := s.pvtbcConnector.IssueTicket(newTicket.TicketID, newTicket.EventID, newTicket.Section, newTicket.Owner)
+	ticketResponse, err := s.pvtbcConnector.IssueTicket(
+		newTicket.TicketID, newTicket.EventID, newTicket.OwnerID, newTicket.Section,
+	)
+
 	if err != nil {
 		return nil, err
 	}
 
 	newTicket.Status = ticketResponse.Status
-
 	err = s.ticketRepository.AddTicket(newTicket)
 	if err != nil {
 		return nil, err

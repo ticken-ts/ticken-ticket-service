@@ -3,20 +3,19 @@ package app
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt"
+	gojwt "github.com/golang-jwt/jwt"
 	"ticken-ticket-service/api"
 	"ticken-ticket-service/api/controllers/healthController"
 	"ticken-ticket-service/api/controllers/ticketController"
 	"ticken-ticket-service/api/middlewares"
-	"ticken-ticket-service/api/security"
 	"ticken-ticket-service/async"
 	"ticken-ticket-service/config"
 	"ticken-ticket-service/env"
 	"ticken-ticket-service/infra"
 	"ticken-ticket-service/log"
 	"ticken-ticket-service/repos"
+	"ticken-ticket-service/security/jwt"
 	"ticken-ticket-service/services"
-	"ticken-ticket-service/sync"
 	"ticken-ticket-service/utils"
 )
 
@@ -36,16 +35,18 @@ type TickenTicketApp struct {
 	populators []Populator
 }
 
-func New(builder infra.IBuilder, tickenConfig *config.Config) *TickenTicketApp {
+func New(infraBuilder infra.IBuilder, tickenConfig *config.Config) *TickenTicketApp {
 	log.TickenLogger.Info().Msg("initializing " + ServiceName)
 
 	tickenTicketApp := new(TickenTicketApp)
 
-	db := builder.BuildDb(env.TickenEnv.DbConnString)
-	engine := builder.BuildEngine()
-	pvtbcCaller := builder.BuildPvtbcCaller()
-	publicBlockchain := builder.BuildPublicBlockchain()
-	busSubscriber := builder.BuildBusSubscriber(env.TickenEnv.BusConnString)
+	engine := infraBuilder.BuildEngine()
+	pvtbcCaller := infraBuilder.BuildPvtbcCaller()
+	jwtVerifier := infraBuilder.BuildJWTVerifier()
+	db := infraBuilder.BuildDb(env.TickenEnv.DbConnString)
+	publicBlockchain := infraBuilder.BuildPublicBlockchain()
+	_ = infraBuilder.BuildHSM(env.TickenEnv.HSMEncryptionKey)
+	busSubscriber := infraBuilder.BuildBusSubscriber(env.TickenEnv.BusConnString)
 
 	// this provider is going to provider all repositories
 	// to the services
@@ -56,17 +57,12 @@ func New(builder infra.IBuilder, tickenConfig *config.Config) *TickenTicketApp {
 
 	// this provider is going to provide all services
 	// needed by the controllers to execute it operations
-	serviceProvider, err := services.NewProvider(repoProvider, pvtbcCaller, sync.NewUserServiceClient(), publicBlockchain)
+	serviceProvider, err := services.NewProvider(repoProvider, pvtbcCaller, publicBlockchain)
 	if err != nil {
 		panic(err)
 	}
 
 	subscriber, err := async.NewSubscriber(busSubscriber, serviceProvider)
-	if err != nil {
-		panic(err)
-	}
-
-	err = subscriber.Start()
 	if err != nil {
 		panic(err)
 	}
@@ -78,7 +74,7 @@ func New(builder infra.IBuilder, tickenConfig *config.Config) *TickenTicketApp {
 	tickenTicketApp.serviceProvider = serviceProvider
 
 	var appMiddlewares = []api.Middleware{
-		middlewares.NewAuthMiddleware(serviceProvider, &tickenConfig.Server, &tickenConfig.Dev),
+		middlewares.NewAuthMiddleware(serviceProvider, jwtVerifier),
 	}
 
 	for _, middleware := range appMiddlewares {
@@ -99,8 +95,12 @@ func New(builder infra.IBuilder, tickenConfig *config.Config) *TickenTicketApp {
 
 func (ticketTicketApp *TickenTicketApp) Start() {
 	url := ticketTicketApp.config.Server.GetServerURL()
-	err := ticketTicketApp.engine.Run(url)
-	if err != nil {
+
+	if err := ticketTicketApp.subscriber.Start(); err != nil {
+		panic(err)
+	}
+
+	if err := ticketTicketApp.engine.Run(url); err != nil {
 		panic(err)
 	}
 }
@@ -120,7 +120,7 @@ func (ticketTicketApp *TickenTicketApp) EmitFakeJWT() {
 		panic(err)
 	}
 
-	fakeJWT := jwt.NewWithClaims(jwt.SigningMethodRS256, &security.Claims{
+	fakeJWT := gojwt.NewWithClaims(gojwt.SigningMethodRS256, &jwt.Claims{
 		Subject:           ticketTicketApp.config.Dev.User.UserID,
 		Email:             ticketTicketApp.config.Dev.User.Email,
 		PreferredUsername: ticketTicketApp.config.Dev.User.Username,
@@ -129,8 +129,8 @@ func (ticketTicketApp *TickenTicketApp) EmitFakeJWT() {
 	signedJWT, err := fakeJWT.SignedString(rsaPrivKey)
 
 	if err != nil {
-		panic(fmt.Errorf("error generation fake JWT: %s", err.Error()))
+		panic(fmt.Errorf("error generation fake Token: %s", err.Error()))
 	}
 
-	fmt.Printf("DEV JWT: %s \n", signedJWT)
+	fmt.Printf("DEV Token: %s \n", signedJWT)
 }

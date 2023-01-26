@@ -1,10 +1,11 @@
 package ticketController
 
 import (
-	"github.com/coreos/go-oidc"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"net/http"
 	"ticken-ticket-service/api/mappers"
+	"ticken-ticket-service/security/jwt"
 	"ticken-ticket-service/utils"
 )
 
@@ -14,11 +15,17 @@ type buyTicketPayload struct {
 
 func (controller *TicketController) BuyTicket(c *gin.Context) {
 	var payload buyTicketPayload
-	eventID := c.Param("eventID")
-	owner := c.MustGet("jwt").(*oidc.IDToken).Subject
 
-	err := c.BindJSON(&payload)
+	ownerID := c.MustGet("jwt").(*jwt.Token).Subject
+
+	eventID, err := uuid.Parse(c.Param("eventID"))
 	if err != nil {
+		c.JSON(http.StatusBadRequest, utils.HttpResponse{Message: err.Error()})
+		c.Abort()
+		return
+	}
+	
+	if err := c.BindJSON(&payload); err != nil {
 		c.JSON(http.StatusBadRequest, utils.HttpResponse{Message: err.Error()})
 		c.Abort()
 		return
@@ -33,7 +40,7 @@ func (controller *TicketController) BuyTicket(c *gin.Context) {
 
 	ticketIssuer := controller.serviceProvider.GetTicketIssuer()
 
-	newTicket, err := ticketIssuer.IssueTicket(eventID, payload.Section, owner)
+	newTicket, err := ticketIssuer.IssueTicket(eventID, payload.Section, ownerID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.HttpResponse{Message: err.Error()})
 		c.Abort()
