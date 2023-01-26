@@ -10,7 +10,7 @@ type DevUser struct {
 
 type MockInfo struct {
 	DisablePVTBCMock bool `mapstructure:"disable_pvtbc_mock"`
-	DisableBusMock   bool `mapstructure:"disable_buc_mock"`
+	DisableBusMock   bool `mapstructure:"disable_bus_mock"`
 }
 
 type DevConfig struct {

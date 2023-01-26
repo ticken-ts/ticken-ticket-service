@@ -2,6 +2,7 @@ package async
 
 import (
 	"encoding/json"
+	"github.com/google/uuid"
 	"ticken-ticket-service/services"
 )
 
@@ -10,9 +11,9 @@ const (
 )
 
 type eventDTO struct {
-	EventID      string `json:"event_id"`
-	OrganizerID  string `json:"organizer_id"`
-	PvtBCChannel string `json:"pvt_bc_channel"`
+	EventID      uuid.UUID `json:"event_id"`
+	OrganizerID  uuid.UUID `json:"organizer_id"`
+	PvtBCChannel string    `json:"pvt_bc_channel"`
 }
 
 type EventSubscriber struct {
@@ -31,10 +32,12 @@ func (s *EventSubscriber) NewEventHandler(rawEvent []byte) error {
 		return err
 	}
 
-	_, err = s.eventManager.AddEvent(dto.EventID, dto.OrganizerID, dto.PvtBCChannel)
+	_, err = s.eventManager.AddEvent(dto.EventID.String(), dto.OrganizerID.String(), dto.PvtBCChannel)
 	if err != nil {
 		return err
 	}
+
+	println("llegue")
 
 	return nil
 }

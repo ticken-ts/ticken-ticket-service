@@ -110,14 +110,13 @@ func (subscriber *RabbitMQSubscriber) Listen(handler func([]byte)) error {
 }
 
 func (subscriber *RabbitMQSubscriber) IsConnected() bool {
-	fmt.Printf("why is not connected: %s", subscriber.ensureIsConnected())
 	return subscriber.ensureIsConnected() == nil
 }
 
 func (subscriber *RabbitMQSubscriber) ensureIsConnected() error {
-	//if subscriber.conn == nil {
-	//	return fmt.Errorf("RabbitMQ: connection is not stablished")
-	//}
+	if subscriber.conn == nil {
+		return fmt.Errorf("RabbitMQ: connection is not stablished")
+	}
 
 	if subscriber.conn.IsClosed() {
 		return fmt.Errorf("RabbitMQ: connection is closed")
