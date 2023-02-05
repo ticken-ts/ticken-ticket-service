@@ -7,6 +7,7 @@ import (
 	"ticken-ticket-service/api"
 	"ticken-ticket-service/api/controllers/healthController"
 	"ticken-ticket-service/api/controllers/ticketController"
+	"ticken-ticket-service/api/controllers/userController"
 	"ticken-ticket-service/api/middlewares"
 	"ticken-ticket-service/async"
 	"ticken-ticket-service/config"
@@ -84,6 +85,7 @@ func New(infraBuilder infra.IBuilder, tickenConfig *config.Config) *TickenTicket
 	var appControllers = []api.Controller{
 		healthController.New(serviceProvider),
 		ticketController.New(serviceProvider),
+		userController.New(serviceProvider),
 	}
 
 	for _, controller := range appControllers {

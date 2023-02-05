@@ -22,3 +22,7 @@ type TicketSigner interface {
 type EventManager interface {
 	AddEvent(EventID string, OrganizerID string, PvtBCChannel string) (*models.Event, error)
 }
+
+type UserManager interface {
+	CreateUser() (*models.User, error)
+}
