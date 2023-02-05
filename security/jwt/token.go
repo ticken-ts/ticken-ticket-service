@@ -14,15 +14,15 @@ type Token struct {
 }
 
 type Claims struct {
-	Audience          string `json:"aud,omitempty"`
-	ExpiresAt         int64  `json:"exp,omitempty"`
-	Id                string `json:"jti,omitempty"`
-	IssuedAt          int64  `json:"iat,omitempty"`
-	Issuer            string `json:"iss,omitempty"`
-	NotBefore         int64  `json:"nbf,omitempty"`
-	Subject           string `json:"sub,omitempty"`
-	PreferredUsername string `json:"preferred_username,omitempty"`
-	Email             string `json:"email,omitempty"`
+	Audience          []string `json:"aud,omitempty"`
+	ExpiresAt         int64    `json:"exp,omitempty"`
+	Id                string   `json:"jti,omitempty"`
+	IssuedAt          int64    `json:"iat,omitempty"`
+	Issuer            string   `json:"iss,omitempty"`
+	NotBefore         int64    `json:"nbf,omitempty"`
+	Subject           string   `json:"sub,omitempty"`
+	PreferredUsername string   `json:"preferred_username,omitempty"`
+	Email             string   `json:"email,omitempty"`
 }
 
 func (*Claims) Valid() error {
