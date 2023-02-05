@@ -11,6 +11,7 @@ type Provider struct {
 	reposFactory     IFactory
 	eventRepository  EventRepository
 	ticketRepository TicketRepository
+	userRepository   UserRepository
 }
 
 func NewProvider(db infra.Db, dbConfig *config.DatabaseConfig) (*Provider, error) {
@@ -38,4 +39,11 @@ func (provider *Provider) GetTicketRepository() TicketRepository {
 		provider.ticketRepository = provider.reposFactory.BuildTicketRepository().(TicketRepository)
 	}
 	return provider.ticketRepository
+}
+
+func (provider *Provider) GetUserRepository() UserRepository {
+	if provider.userRepository == nil {
+		provider.userRepository = provider.reposFactory.BuildUserRepository().(UserRepository)
+	}
+	return provider.userRepository
 }

@@ -21,11 +21,12 @@ func NewProvider(repoProvider repos.IProvider, pvtbcCaller *pvtbc.Caller, public
 
 	eventRepo := repoProvider.GetEventRepository()
 	ticketRepo := repoProvider.GetTicketRepository()
+	userRepo := repoProvider.GetUserRepository()
 
 	provider.eventManager = NewEventManager(eventRepo, ticketRepo, publicBlockchain)
 	provider.ticketIssuer = NewTicketIssuer(eventRepo, ticketRepo, pvtbcCaller, publicBlockchain)
 	provider.ticketSigner = NewTicketSigner(eventRepo, ticketRepo, pvtbcCaller, publicBlockchain)
-	provider.userManager = NewUserManager(eventRepo, ticketRepo, publicBlockchain)
+	provider.userManager = NewUserManager(eventRepo, ticketRepo, userRepo, publicBlockchain)
 
 	return provider, nil
 }

@@ -25,3 +25,7 @@ func (factory *MongoRepoFactory) BuildEventRepository() any {
 func (factory *MongoRepoFactory) BuildTicketRepository() any {
 	return NewTicketRepository(factory.dbClient, factory.dbName)
 }
+
+func (factory *MongoRepoFactory) BuildUserRepository() any {
+	return NewUserRepository(factory.dbClient, factory.dbName)
+}

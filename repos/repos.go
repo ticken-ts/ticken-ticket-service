@@ -16,12 +16,19 @@ type TicketRepository interface {
 	FindTicket(eventID string, ticketID string) *models.Ticket
 }
 
+type UserRepository interface {
+	AddUser(user *models.User) error
+	FindUser(userID string) *models.User
+}
+
 type IProvider interface {
 	GetEventRepository() EventRepository
 	GetTicketRepository() TicketRepository
+	GetUserRepository() UserRepository
 }
 
 type IFactory interface {
 	BuildEventRepository() any
 	BuildTicketRepository() any
+	BuildUserRepository() any
 }

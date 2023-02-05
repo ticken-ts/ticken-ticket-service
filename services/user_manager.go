@@ -10,21 +10,29 @@ import (
 type userManager struct {
 	eventRepository  repos.EventRepository
 	ticketRepository repos.TicketRepository
+	userRepository   repos.UserRepository
 	blockchain       public_blockchain.PublicBC
 }
 
 func NewUserManager(
 	eventRepository repos.EventRepository,
 	ticketRepository repos.TicketRepository,
+	userRepository repos.UserRepository,
 	blockchain public_blockchain.PublicBC,
 ) UserManager {
 	return &userManager{
 		ticketRepository: ticketRepository,
 		eventRepository:  eventRepository,
+		userRepository:   userRepository,
 		blockchain:       blockchain,
 	}
 }
 
 func (userManager *userManager) CreateUser(uuid uuid.UUID) (*models.User, error) {
-	return models.NewUser(uuid), nil
+	newUser := models.NewUser(uuid)
+	err := userManager.userRepository.AddUser(newUser)
+	if err != nil {
+		return nil, err
+	}
+	return newUser, nil
 }

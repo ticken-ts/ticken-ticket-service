@@ -71,7 +71,8 @@ func (builder *Builder) BuildEngine() *gin.Engine {
 func (builder *Builder) BuildJWTVerifier() jwt.Verifier {
 	var jwtVerifier jwt.Verifier
 
-	if env.TickenEnv.IsDev() || env.TickenEnv.IsTest() {
+	if false {
+		//if env.TickenEnv.IsDev() || env.TickenEnv.IsTest() {
 		jwtPublicKey := builder.tickenConfig.Dev.JWTPublicKey
 		jwtPrivateKey := builder.tickenConfig.Dev.JWTPrivateKey
 
