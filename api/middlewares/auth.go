@@ -43,7 +43,7 @@ func (middleware *AuthMiddleware) isJWTAuthorized() gin.HandlerFunc {
 
 		token, err := middleware.jwtVerifier.Verify(rawAccessToken)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, utils.HttpResponse{Message: "authorisation failed while verifying the token: " + err.Error()})
+			c.JSON(http.StatusUnauthorized, utils.HttpResponse{Message: "authorization failed while verifying the token: " + err.Error()})
 			c.Abort()
 			return
 		}
