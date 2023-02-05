@@ -13,6 +13,7 @@ type Provider struct {
 	ticketIssuer TicketIssuer
 	ticketSigner TicketSigner
 	eventManager EventManager
+	userManager  UserManager
 }
 
 func NewProvider(repoProvider repos.IProvider, pvtbcCaller *pvtbc.Caller, publicBlockchain public_blockchain.PublicBC) (*Provider, error) {
@@ -24,6 +25,7 @@ func NewProvider(repoProvider repos.IProvider, pvtbcCaller *pvtbc.Caller, public
 	provider.eventManager = NewEventManager(eventRepo, ticketRepo, publicBlockchain)
 	provider.ticketIssuer = NewTicketIssuer(eventRepo, ticketRepo, pvtbcCaller, publicBlockchain)
 	provider.ticketSigner = NewTicketSigner(eventRepo, ticketRepo, pvtbcCaller, publicBlockchain)
+	provider.userManager = NewUserManager(eventRepo, ticketRepo, publicBlockchain)
 
 	return provider, nil
 }
@@ -38,4 +40,8 @@ func (provider *Provider) GetEventManager() EventManager {
 
 func (provider *Provider) GetTicketSigner() TicketSigner {
 	return provider.ticketSigner
+}
+
+func (provider *Provider) GetUserManager() UserManager {
+	return provider.userManager
 }

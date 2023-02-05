@@ -1,8 +1,13 @@
 package models
 
+import "github.com/google/uuid"
+
 type User struct {
+	ID uuid.UUID `json:"id"`
 }
 
-func NewUser() *User {
-	return &User{}
+func NewUser(id uuid.UUID) *User {
+	return &User{
+		ID: id,
+	}
 }

@@ -1,6 +1,7 @@
 package services
 
 import (
+	"github.com/google/uuid"
 	"ticken-ticket-service/infra/public_blockchain"
 	"ticken-ticket-service/models"
 	"ticken-ticket-service/repos"
@@ -24,6 +25,6 @@ func NewUserManager(
 	}
 }
 
-func (userManager *userManager) CreateUser() (*models.User, error) {
-	return new(models.User), nil
+func (userManager *userManager) CreateUser(uuid uuid.UUID) (*models.User, error) {
+	return models.NewUser(uuid), nil
 }

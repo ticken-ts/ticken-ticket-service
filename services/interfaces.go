@@ -9,6 +9,7 @@ type IProvider interface {
 	GetTicketIssuer() TicketIssuer
 	GetTicketSigner() TicketSigner
 	GetEventManager() EventManager
+	GetUserManager() UserManager
 }
 
 type TicketIssuer interface {
@@ -24,5 +25,5 @@ type EventManager interface {
 }
 
 type UserManager interface {
-	CreateUser() (*models.User, error)
+	CreateUser(owner uuid.UUID) (*models.User, error)
 }

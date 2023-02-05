@@ -9,6 +9,10 @@ import (
 
 func (controller *UserController) CreateAccount(c *gin.Context) {
 	owner := c.MustGet("jwt").(*jwt.Token).Subject
-
-	c.JSON(http.StatusOK, utils.HttpResponse{Message: "Account created successfully", Data: owner})
+	user, err := controller.serviceProvider.GetUserManager().CreateUser(owner)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.HttpResponse{Message: err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, utils.HttpResponse{Message: "Account created successfully", Data: user})
 }
