@@ -2,6 +2,7 @@ package public_blockchain
 
 import (
 	"encoding/hex"
+	"log"
 	"math/rand"
 )
 
@@ -51,5 +52,11 @@ func (pb *DevPublicBlockchain) GetContract(contractAddress string) (BCContractCa
 // GeneratePrivateKey Generate private key
 func (pb *DevPublicBlockchain) GeneratePrivateKey() (string, error) {
 	pk, _ := randomHex(32)
+	return pk, nil
+}
+
+// GetAddressFromPK Get address from private key
+func (pb *DevPublicBlockchain) GetAddressFromPK(pk string) (string, error) {
+	log.Panic("Not implemented")
 	return pk, nil
 }

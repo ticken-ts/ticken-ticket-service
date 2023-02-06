@@ -89,3 +89,13 @@ func (pb *PublicBlockchain) GeneratePrivateKey() (string, error) {
 
 	return hex.EncodeToString(crypto.FromECDSA(pk)), nil
 }
+
+// GetAddressFromPK Get address from private key
+func (pb *PublicBlockchain) GetAddressFromPK(pk string) (string, error) {
+	ecdsaKey, err := crypto.HexToECDSA(pk)
+	if err != nil {
+		return "", err
+	}
+
+	return crypto.PubkeyToAddress(ecdsaKey.PublicKey).String(), nil
+}
