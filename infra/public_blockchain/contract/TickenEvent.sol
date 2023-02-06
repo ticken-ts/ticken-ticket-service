@@ -36,6 +36,9 @@ contract TickenEvent is ERC721, Pausable, Ownable {
     // Mapping from owner to list of owned token IDs
     mapping(address => uint256[]) private _ownedTokens;
 
+    // Mapping from section to tokenIDs
+    mapping(string => uint256[]) private _sectionTokens;
+
     constructor() ERC721("TickenEvent", "TE") {}
 
     function pause() public onlyOwner {
@@ -56,6 +59,8 @@ contract TickenEvent is ERC721, Pausable, Ownable {
         _tickets[tokenId] = Ticket(section, false);
 
         _ownedTokens[to].push(tokenId);
+
+        _sectionTokens[section].push(tokenId);
 
         emit TicketCreated(to, tokenId, section);
     }
@@ -80,6 +85,27 @@ contract TickenEvent is ERC721, Pausable, Ownable {
     function getTicket(uint256 tokenId) public view returns (Ticket memory) {
         require(_exists(tokenId), "ERC721: operator query for nonexistent token");
         return _tickets[tokenId];
+    }
+
+    function getAllTickets() public view onlyOwner returns (TicketDTO[] memory) {
+        uint256 totalSupply = _tokenIdCounter.current();
+        TicketDTO[] memory tickets = new TicketDTO[](totalSupply);
+        for (uint256 i = 0; i < totalSupply; i++) {
+            Ticket memory ticket = _tickets[i];
+            tickets[i] = TicketDTO(i, ticket.section, ticket.scanned);
+        }
+        return tickets;
+    }
+
+    function getTicketsBySection(string memory section) public view onlyOwner returns (TicketDTO[] memory) {
+        uint256[] memory tokenIds = _sectionTokens[section];
+        TicketDTO[] memory tickets = new TicketDTO[](tokenIds.length);
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            uint256 tokenId = tokenIds[i];
+            Ticket memory ticket = _tickets[tokenId];
+            tickets[i] = TicketDTO(tokenId, ticket.section, ticket.scanned);
+        }
+        return tickets;
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId, uint256 batchSize)
