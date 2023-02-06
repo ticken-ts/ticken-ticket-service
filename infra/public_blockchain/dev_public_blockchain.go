@@ -47,3 +47,9 @@ func (pb *DevPublicBlockchain) DeployContract() (string, error) {
 func (pb *DevPublicBlockchain) GetContract(contractAddress string) (BCContractCaller, error) {
 	return pb.contracts[contractAddress], nil
 }
+
+// GeneratePrivateKey Generate private key
+func (pb *DevPublicBlockchain) GeneratePrivateKey() (string, error) {
+	pk, _ := randomHex(32)
+	return pk, nil
+}

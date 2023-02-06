@@ -3,6 +3,7 @@ package mongoDBRepos
 import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"ticken-ticket-service/models"
 )
 
@@ -13,13 +14,29 @@ type UserMongoDBRepository struct {
 }
 
 func NewUserRepository(dbClient *mongo.Client, dbName string) *UserMongoDBRepository {
-	return &UserMongoDBRepository{
+	userRepo := &UserMongoDBRepository{
 		baseRepository{
 			dbClient:       dbClient,
 			dbName:         dbName,
 			collectionName: UserCollectionName,
 		},
 	}
+	users := userRepo.getCollection()
+	storeContext, cancel := userRepo.generateOpSubcontext()
+	defer cancel()
+	_, err := users.Indexes().CreateOne(storeContext, mongo.IndexModel{
+		Keys: bson.D{
+			{"uuid", 1},
+		},
+		Options: &options.IndexOptions{
+			Unique: &[]bool{true}[0],
+		},
+	})
+	if err != nil {
+		panic("Error creating user repository: " + err.Error())
+	}
+
+	return userRepo
 }
 
 func (r *UserMongoDBRepository) AddUser(user *models.User) error {

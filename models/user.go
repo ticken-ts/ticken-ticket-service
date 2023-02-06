@@ -8,10 +8,15 @@ import (
 type User struct {
 	mongoID primitive.ObjectID `bson:"_id"`
 	UUID    uuid.UUID          `json:"uuid" bson:"uuid"`
+	PubBCPK string             `json:"pubBCPK" bson:"pubBCPK"`
 }
 
 func NewUser(id uuid.UUID) *User {
 	return &User{
 		UUID: id,
 	}
+}
+
+func (u *User) SetPubBCPrivateKey(pk string) {
+	u.PubBCPK = pk
 }

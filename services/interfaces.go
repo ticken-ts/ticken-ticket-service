@@ -25,5 +25,6 @@ type EventManager interface {
 }
 
 type UserManager interface {
-	CreateUser(owner uuid.UUID) (*models.User, error)
+	// Creates a new user and returns it, pubBCPrivateKey is the private key of the user in the public blockchain if the user provided one, if is an empty string, a new key is generated
+	CreateUser(uuid uuid.UUID, pubBCPrivateKey string) (*models.User, error)
 }

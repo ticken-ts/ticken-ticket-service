@@ -28,8 +28,17 @@ func NewUserManager(
 	}
 }
 
-func (userManager *userManager) CreateUser(uuid uuid.UUID) (*models.User, error) {
+func (userManager *userManager) CreateUser(uuid uuid.UUID, providedPK string) (*models.User, error) {
 	newUser := models.NewUser(uuid)
+	if providedPK != "" {
+		newUser.SetPubBCPrivateKey(providedPK)
+	} else {
+		newPK, err := userManager.blockchain.GeneratePrivateKey()
+		if err != nil {
+			return nil, err
+		}
+		newUser.SetPubBCPrivateKey(newPK)
+	}
 	err := userManager.userRepository.AddUser(newUser)
 	if err != nil {
 		return nil, err

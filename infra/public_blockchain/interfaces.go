@@ -19,4 +19,5 @@ type PublicBC interface {
 	Connect() error
 	DeployContract() (string, error)
 	GetContract(contractAddress string) (BCContractCaller, error)
+	GeneratePrivateKey() (string, error)
 }

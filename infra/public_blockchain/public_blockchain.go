@@ -1,6 +1,9 @@
 package public_blockchain
 
 import (
+	"crypto/ecdsa"
+	"crypto/rand"
+	"encoding/hex"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -75,4 +78,14 @@ func (pb *PublicBlockchain) DeployContract() (string, error) {
 // GetContract Get contract instance from contract address
 func (pb *PublicBlockchain) GetContract(contractAddress string) (BCContractCaller, error) {
 	return NewContractCaller(contractAddress, pb.conn, pb.auth)
+}
+
+// GeneratePrivateKey Generate private key
+func (pb *PublicBlockchain) GeneratePrivateKey() (string, error) {
+	pk, err := ecdsa.GenerateKey(crypto.S256(), rand.Reader)
+	if err != nil {
+		return "", err
+	}
+
+	return hex.EncodeToString(crypto.FromECDSA(pk)), nil
 }
