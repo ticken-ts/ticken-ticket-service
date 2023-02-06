@@ -22,3 +22,6 @@ config.json
 # secrets
 .netrc
 .env
+
+# hsm store
+.keystore/
