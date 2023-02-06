@@ -94,3 +94,7 @@ func (s *ticketIssuer) IssueTicket(eventID uuid.UUID, section string, ownerID uu
 
 	return newTicket, nil
 }
+
+func (s *ticketIssuer) GetUserTickets(userID uuid.UUID) ([]*models.Ticket, error) {
+	return s.ticketRepository.GetUserTickets(userID)
+}

@@ -1,8 +1,10 @@
 package mongoDBRepos
 
 import (
+	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"ticken-ticket-service/models"
 )
 
@@ -67,4 +69,27 @@ func (r *TicketMongoDBRepository) UpdateTicketStatus(ticket *models.Ticket) erro
 	}
 
 	return nil
+}
+
+// GetUserTickets Get tickets for a user
+func (r *TicketMongoDBRepository) GetUserTickets(userID uuid.UUID) ([]*models.Ticket, error) {
+	findContext, cancel := r.generateOpSubcontext()
+	defer cancel()
+
+	tickets := r.getCollection()
+	findOptions := options.Find()
+	findOptions.SetLimit(100)
+
+	filter := bson.M{"owner": userID}
+	cursor, err := tickets.Find(findContext, filter, findOptions)
+	if err != nil {
+		return nil, err
+	}
+
+	var foundTickets []*models.Ticket
+	if err = cursor.All(findContext, &foundTickets); err != nil {
+		return nil, err
+	}
+
+	return foundTickets, nil
 }

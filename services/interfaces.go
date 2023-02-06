@@ -14,6 +14,7 @@ type IProvider interface {
 
 type TicketIssuer interface {
 	IssueTicket(eventID uuid.UUID, section string, owner uuid.UUID) (*models.Ticket, error)
+	GetUserTickets(userID uuid.UUID) ([]*models.Ticket, error)
 }
 
 type TicketSigner interface {

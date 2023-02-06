@@ -15,6 +15,7 @@ type TicketRepository interface {
 	AddTicket(ticket *models.Ticket) error
 	UpdateTicketStatus(ticket *models.Ticket) error
 	FindTicket(eventID string, ticketID string) *models.Ticket
+	GetUserTickets(userID uuid.UUID) ([]*models.Ticket, error)
 }
 
 type UserRepository interface {
