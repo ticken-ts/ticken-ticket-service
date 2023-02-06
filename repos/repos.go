@@ -1,6 +1,7 @@
 package repos
 
 import (
+	"github.com/google/uuid"
 	"ticken-ticket-service/models"
 )
 
@@ -18,7 +19,7 @@ type TicketRepository interface {
 
 type UserRepository interface {
 	AddUser(user *models.User) error
-	FindUser(userID string) *models.User
+	FindUser(userID uuid.UUID) *models.User
 }
 
 type IProvider interface {

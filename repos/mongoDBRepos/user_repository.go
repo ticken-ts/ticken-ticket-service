@@ -1,6 +1,7 @@
 package mongoDBRepos
 
 import (
+	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -52,7 +53,7 @@ func (r *UserMongoDBRepository) AddUser(user *models.User) error {
 	return nil
 }
 
-func (r *UserMongoDBRepository) FindUser(userUUID string) *models.User {
+func (r *UserMongoDBRepository) FindUser(userUUID uuid.UUID) *models.User {
 	findContext, cancel := r.generateOpSubcontext()
 	defer cancel()
 

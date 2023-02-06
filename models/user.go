@@ -6,9 +6,9 @@ import (
 )
 
 type User struct {
-	mongoID primitive.ObjectID `bson:"_id"`
-	UUID    uuid.UUID          `json:"uuid" bson:"uuid"`
-	PubBCPK string             `json:"pubBCPK" bson:"pubBCPK"`
+	mongoID           primitive.ObjectID `bson:"_id"`
+	UUID              uuid.UUID          `json:"uuid" bson:"uuid"`
+	AddressPKStoreKey string             `json:"addressPKStore" bson:"addressPKStore"`
 }
 
 func NewUser(id uuid.UUID) *User {
@@ -17,6 +17,6 @@ func NewUser(id uuid.UUID) *User {
 	}
 }
 
-func (u *User) SetPubBCPrivateKey(pk string) {
-	u.PubBCPK = pk
+func (u *User) SetAddressPKStoreKey(store string) {
+	u.AddressPKStoreKey = store
 }
