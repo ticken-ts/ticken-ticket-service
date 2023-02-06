@@ -25,14 +25,13 @@ func NewEventManager(
 }
 
 func (eventManager *eventManager) AddEvent(EventID string, OrganizerID string, PvtBCChannel string) (*models.Event, error) {
-	//addr, err := eventManager.blockchain.DeployContract()
-	//if err != nil {
-	//	return nil, err
-	//}
-	const addr = "0x0000000000000000000000000000000000000000"
+	addr, err := eventManager.blockchain.DeployContract()
+	if err != nil {
+		return nil, err
+	}
 
 	event := models.NewEvent(EventID, OrganizerID, PvtBCChannel, addr)
-	err := eventManager.eventRepository.AddEvent(event)
+	err = eventManager.eventRepository.AddEvent(event)
 	if err != nil {
 		return nil, err
 	}
