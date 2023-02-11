@@ -2,43 +2,47 @@
   "server": {
     "host": "localhost",
     "port": 8000,
-    "client_id": "ticken.ticket.service",
-    "identity_issuer": "http://localhost:8080/realms/attendants"
+    "client_id": "ticken.event.service",
+    "identity_issuer": "http://localhost:8080/realms/organizers"
   },
 
   "database": {
     "driver": "mongo",
-    "name": "ticken-db"
+    "name": "ticken-ticket-svc-db"
   },
 
   "bus": {
     "driver": "rabbitmq",
-    "exchangeName": "ticken-queues"
+    "exchange": "ticken"
   },
 
   "pvtbc": {
-    "msp_id": "Org1MSP",
-    "peer_endpoint": "localhost:7051",
-    "gateway_peer": "peer0.org1.example.com",
-    "certificate_path": "",
-    "private_key_path": "",
-    "tls_certificate_path": ""
+    "msp_id": "tickenMSP",
+    "peer_endpoint": "ticken-peer0.localho.st:443",
+    "gateway_peer": "ticken-peer0.localho.st",
+    "certificate_path": "/tmp/ticken-pv/orgs/peer-orgs/ticken/users/ticken-admin/msp/signcerts/cert.pem",
+    "private_key_path": "/tmp/ticken-pv/orgs/peer-orgs/ticken/users/ticken-admin/msp/keystore/priv.pem",
+    "tls_certificate_path": "/tmp/ticken-pv/orgs/peer-orgs/ticken/nodes/ticken-peer0/tls/signcerts/tls-cert.pem"
   },
 
-  "public_blockchain": {
-    "address_pk": "0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d",
-    "chain_id": 1337,
+  "pubbc": {
     "chain_url": "ws://localhost:8545"
   },
 
   "dev": {
+    "mock": {
+      "disable_pvtbc_mock": false,
+      "disable_bus_mock": true
+    },
+
     "user": {
-      "username": "facundotorraca",
+      "username": "admin",
       "firstname": "facundo",
       "lastname": "torraca",
       "email": "facundo@ticken.com",
       "user_id": "290c641a-55a1-40f5-acc3-d4ebe3626fdd"
     },
+
     "jwt_public_key": "-----BEGIN RSA PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDUqRecbJUp6pVi5cCpB97cxNav\nHxjlPCa4sB/MwcGbo/nuP/iPJf6X4XeRM1xFey5b3STSbhBKmM01+WR6XmUBvzdE\nPntm/3Byn9OfKIZcXJoRP1xpFbwfBcSlpZj0bVX0i+1asWWCvdykjcyNy3CMYCSR\nHzquQ87BNrh7g7nfjwIDAQAB\n-----END RSA PUBLIC KEY-----",
     "jwt_private_key": "-----BEGIN RSA PRIVATE KEY-----\nMIICWwIBAAKBgQDUqRecbJUp6pVi5cCpB97cxNavHxjlPCa4sB/MwcGbo/nuP/iP\nJf6X4XeRM1xFey5b3STSbhBKmM01+WR6XmUBvzdEPntm/3Byn9OfKIZcXJoRP1xp\nFbwfBcSlpZj0bVX0i+1asWWCvdykjcyNy3CMYCSRHzquQ87BNrh7g7nfjwIDAQAB\nAoGAW3URM3O7PtilQHAgyFEbNoTs80mDcmrJGFqegne9pQsDXMRkSGQFtxn/SxH0\nl+kfCeD0ig9NsFdAwfqsjLf15d6KvXZOlV8zeHHB2qLeW+1orNmThYurAPo4+MdU\nEdpYe3bGB8ZidEpDPrg1zhDlePnN9bsKSFOlCzXJRKGBTekCQQD0AiTTF0dNbRmG\nzGRmmJoLDVW32RfNCLg4CnGFIuumAKntglKYNig4ke9hNTd5+sSD/jdWSBnTTYRl\nhnCZpNI1AkEA3xyQC93M7zb4FPKEXhAaZ/XyJGgarRtNr//qGVBypP85Yucd0h5j\nyamh+ArJZouplZX0s7Pi/2bhZl4ne2PjMwJAShDghqa5QPpN1knya+YEVDh+/WhL\nPjRYXsJkxOndp6zp56s4UPWXbdx2UgZqSX9h6ULgHzORiz8rYfnV8f1CxQJAWoFC\nqZ2i2VMKFa0/Js0PeSaawEv+rkQKIqAEfZpVtzrVM5qfTTIItrB6RJ1Tj6aN92Eq\nL4+EQKiiPJ1rFLGzYwJAGpZsgLpoJq6NppNTuuKK1OJj0NSoeIdYl0UftG5pG1V+\nHw09Kn47X96bdsycEaKN/aZUPGVw9Bqtv/gsw/FTQQ==\n-----END RSA PRIVATE KEY-----"
   }
