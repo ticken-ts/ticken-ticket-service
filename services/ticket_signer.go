@@ -1,8 +1,8 @@
 package services
 
 import (
+	pubbc "github.com/ticken-ts/ticken-pubbc-connector"
 	pvtbc "github.com/ticken-ts/ticken-pvtbc-connector"
-	"ticken-ticket-service/infra/public_blockchain"
 	"ticken-ticket-service/models"
 	"ticken-ticket-service/repos"
 )
@@ -11,14 +11,14 @@ type ticketSigner struct {
 	eventRepository  repos.EventRepository
 	ticketRepository repos.TicketRepository
 	pvtbcConnector   *pvtbc.Caller
-	blockchain       public_blockchain.PublicBC
+	blockchain       pubbc.Admin
 }
 
 func NewTicketSigner(
 	eventRepository repos.EventRepository,
 	ticketRepository repos.TicketRepository,
 	pvtbcConnector *pvtbc.Caller,
-	blockchain public_blockchain.PublicBC,
+	blockchain pubbc.Admin,
 ) TicketSigner {
 	return &ticketSigner{
 		eventRepository:  eventRepository,

@@ -11,5 +11,6 @@ func MapTicketToDTO(ticket *models.Ticket) *dto.Ticket {
 		EventID:  ticket.EventID.String(),
 		Status:   ticket.Status,
 		Section:  ticket.Section,
+		TxHash:   ticket.TxHash,
 	}
 }

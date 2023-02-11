@@ -8,7 +8,7 @@ import (
 type IProvider interface {
 	GetTicketIssuer() TicketIssuer
 	GetTicketSigner() TicketSigner
-	GetEventManager() EventManager
+	GetEventManager() IEventManager
 	GetUserManager() UserManager
 }
 
@@ -21,11 +21,15 @@ type TicketSigner interface {
 	SignTicket(eventID string, ticketID string, owner string) (*models.Ticket, error)
 }
 
-type EventManager interface {
-	AddEvent(EventID string, OrganizerID string, PvtBCChannel string) (*models.Event, error)
+type IEventManager interface {
+	AddEvent(eventID, organizerID, pvtBCChannel, pubBCAddress string) (*models.Event, error)
 }
 
 type UserManager interface {
-	// Creates a new user and returns it, pubBCPrivateKey is the private key of the user in the public blockchain if the user provided one, if is an empty string, a new key is generated
+	// CreateUser creates a new user and returns it.
+	// pubBCPrivateKey is the private key of
+	// the user in the public blockchain if the
+	// user provided one, if is an empty string,
+	// a new key is generated
 	CreateUser(uuid uuid.UUID, pubBCPrivateKey string) (*models.User, error)
 }

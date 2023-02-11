@@ -3,6 +3,10 @@ package infra
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	pubbc "github.com/ticken-ts/ticken-pubbc-connector"
+	ethconnector "github.com/ticken-ts/ticken-pubbc-connector/eth-connector"
+
+	ethnode "github.com/ticken-ts/ticken-pubbc-connector/eth-connector/node"
 	pvtbc "github.com/ticken-ts/ticken-pvtbc-connector"
 	"github.com/ticken-ts/ticken-pvtbc-connector/fabric/peerconnector"
 	"ticken-ticket-service/config"
@@ -10,7 +14,6 @@ import (
 	"ticken-ticket-service/infra/bus"
 	"ticken-ticket-service/infra/db"
 	"ticken-ticket-service/infra/hsm"
-	"ticken-ticket-service/infra/public_blockchain"
 	"ticken-ticket-service/log"
 	"ticken-ticket-service/security/jwt"
 	"ticken-ticket-service/utils"
@@ -20,7 +23,10 @@ type Builder struct {
 	tickenConfig *config.Config
 }
 
-var pc peerconnector.PeerConnector = nil
+var (
+	pc    peerconnector.PeerConnector = nil
+	ethnc *ethnode.Connector          = nil
+)
 
 func NewBuilder(tickenConfig *config.Config) (*Builder, error) {
 	if tickenConfig == nil {
@@ -106,6 +112,28 @@ func (builder *Builder) BuildPvtbcListener() *pvtbc.Listener {
 	return listener
 }
 
+func (builder *Builder) BuildPubbcAdmin(privateKey string) pubbc.Admin {
+	admin, err := ethconnector.NewAdmin(
+		buildEthNodeConnector(builder.tickenConfig.Pubbc, builder.tickenConfig.Dev),
+		privateKey,
+	)
+	if err != nil {
+		panic(err)
+	}
+	return admin
+}
+
+func (builder *Builder) BuildPubbcCaller(privateKey string) pubbc.Caller {
+	caller, err := ethconnector.NewCaller(
+		buildEthNodeConnector(builder.tickenConfig.Pubbc, builder.tickenConfig.Dev),
+		privateKey,
+	)
+	if err != nil {
+		panic(err)
+	}
+	return caller
+}
+
 func (builder *Builder) BuildBusPublisher(connString string) BusPublisher {
 	var tickenBus BusPublisher = nil
 
@@ -164,24 +192,6 @@ func (builder *Builder) BuildBusSubscriber(connString string) BusSubscriber {
 	return tickenBus
 }
 
-func (builder *Builder) BuildPublicBlockchain() public_blockchain.PublicBC {
-	pbConfig := builder.tickenConfig.PublicBlockchain
-
-	//If is dev, generate a dev blockchain connector
-	if env.TickenEnv.IsDev() {
-		log.TickenLogger.Info().Msg("dev public blockchain connection established")
-		return public_blockchain.NewDevPublicBlockchain()
-	}
-
-	pbbc := public_blockchain.NewPublicBlockchain(pbConfig.ChainURL, pbConfig.ChainID, pbConfig.AddressPK)
-	//err := pbbc.Connect()
-	//if err != nil {
-	//	log.TickenLogger.Panic().Err(err)
-	//}
-	log.TickenLogger.Info().Msg("public blockchain connection established")
-	return pbbc
-}
-
 func (builder *Builder) BuildAtomicPvtbcCaller(mspID, user, peerAddr string, userCert, userPriv, tlsCert []byte) (*pvtbc.Caller, error) {
 	var pc peerconnector.PeerConnector
 	if env.TickenEnv.IsDev() && !builder.tickenConfig.Dev.Mock.DisablePVTBCMock {
@@ -201,6 +211,20 @@ func (builder *Builder) BuildAtomicPvtbcCaller(mspID, user, peerAddr string, use
 	}
 
 	return caller, nil
+}
+
+func buildEthNodeConnector(config config.PubbcConfig, devConfig config.DevConfig) *ethnode.Connector {
+	if ethnc != nil {
+		return ethnc
+	}
+
+	ethnc = ethnode.New(config.ChainURL)
+	err := ethnc.Connect()
+	if err != nil {
+		panic(err)
+	}
+
+	return ethnc
 }
 
 func buildPeerConnector(config config.PvtbcConfig, devConfig config.DevConfig) peerconnector.PeerConnector {

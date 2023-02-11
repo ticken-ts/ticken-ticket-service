@@ -5,11 +5,11 @@ import "github.com/spf13/viper"
 const DefaultConfigFilename = "config"
 
 type Config struct {
-	Database         DatabaseConfig         `mapstructure:"database"`
-	Pvtbc            PvtbcConfig            `mapstructure:"pvtbc"`
-	Server           ServerConfig           `mapstructure:"server"`
-	Bus              BusConfig              `mapstructure:"bus"`
-	PublicBlockchain PublicBlockchainConfig `mapstructure:"public_blockchain"`
+	Database DatabaseConfig `mapstructure:"database"`
+	Pvtbc    PvtbcConfig    `mapstructure:"pvtbc"`
+	Pubbc    PubbcConfig    `mapstructure:"pubbc"`
+	Server   ServerConfig   `mapstructure:"server"`
+	Bus      BusConfig      `mapstructure:"bus"`
 
 	// this field is going to be
 	// loaded only during dev or test env

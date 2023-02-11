@@ -24,6 +24,7 @@ const (
 	ConfigFilePath     = "CONFIG_FILE_PATH"
 	ConfigFileName     = "CONFIG_FILE_NAME"
 	HSMEncryptionKey   = "HSM_ENCRYPTION_KEY"
+	TickenWalletKey    = "TICKEN_WALLET_KEY"
 )
 
 type Env struct {
@@ -33,6 +34,7 @@ type Env struct {
 	ConfigFilePath   string
 	ConfigFileName   string
 	HSMEncryptionKey string
+	TickenWalletKey  string
 }
 
 func Load() (*Env, error) {
@@ -50,6 +52,7 @@ func Load() (*Env, error) {
 		ConfigFilePath:   getEnvOrPanic(ConfigFilePath),
 		ConfigFileName:   getEnvOrPanic(ConfigFileName),
 		HSMEncryptionKey: getEnvOrPanic(HSMEncryptionKey),
+		TickenWalletKey:  getEnvOrPanic(TickenWalletKey),
 	}
 
 	TickenEnv = env

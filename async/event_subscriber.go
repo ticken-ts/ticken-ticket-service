@@ -14,13 +14,14 @@ type eventDTO struct {
 	EventID      uuid.UUID `json:"event_id"`
 	OrganizerID  uuid.UUID `json:"organizer_id"`
 	PvtBCChannel string    `json:"pvt_bc_channel"`
+	PubBCAddress string    `json:"pub_bc_address"`
 }
 
 type EventSubscriber struct {
-	eventManager services.EventManager
+	eventManager services.IEventManager
 }
 
-func NewEventSubscriber(eventManager services.EventManager) *EventSubscriber {
+func NewEventSubscriber(eventManager services.IEventManager) *EventSubscriber {
 	return &EventSubscriber{eventManager: eventManager}
 }
 
@@ -32,12 +33,12 @@ func (s *EventSubscriber) NewEventHandler(rawEvent []byte) error {
 		return err
 	}
 
-	_, err = s.eventManager.AddEvent(dto.EventID.String(), dto.OrganizerID.String(), dto.PvtBCChannel)
+	_, err = s.eventManager.AddEvent(
+		dto.EventID.String(), dto.OrganizerID.String(), dto.PvtBCChannel, dto.PubBCAddress,
+	)
 	if err != nil {
 		return err
 	}
-
-	println("llegue")
 
 	return nil
 }

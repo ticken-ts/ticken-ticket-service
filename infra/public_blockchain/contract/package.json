@@ -1,9 +1,0 @@
-{
-  "dependencies": {
-    "@openzeppelin/contracts": "^4.8.1"
-  },
-  "scripts": {
-    "abigen": "abigen --abi build/TickenEvent.abi --pkg public_blockchain --type TickenEvent --out TickenEvent.go --bin build/TickenEvent.bin",
-    "build": "solc --overwrite --base-path node_modules --bin --abi TickenEvent.sol -o build"
-  }
-}

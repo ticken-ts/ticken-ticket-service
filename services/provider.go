@@ -4,30 +4,30 @@ package services
 // * Check lazy build
 
 import (
+	pubbc "github.com/ticken-ts/ticken-pubbc-connector"
 	pvtbc "github.com/ticken-ts/ticken-pvtbc-connector"
 	"ticken-ticket-service/infra"
-	"ticken-ticket-service/infra/public_blockchain"
 	"ticken-ticket-service/repos"
 )
 
 type Provider struct {
 	ticketIssuer TicketIssuer
 	ticketSigner TicketSigner
-	eventManager EventManager
+	eventManager IEventManager
 	userManager  UserManager
 }
 
-func NewProvider(repoProvider repos.IProvider, pvtbcCaller *pvtbc.Caller, publicBlockchain public_blockchain.PublicBC, hsm infra.HSM) (*Provider, error) {
+func NewProvider(repoProvider repos.IProvider, pvtbcCaller *pvtbc.Caller, pubbcAdmin pubbc.Admin, pubbcCaller pubbc.Caller, hsm infra.HSM) (*Provider, error) {
 	provider := new(Provider)
 
 	eventRepo := repoProvider.GetEventRepository()
 	ticketRepo := repoProvider.GetTicketRepository()
 	userRepo := repoProvider.GetUserRepository()
 
-	provider.eventManager = NewEventManager(eventRepo, ticketRepo, publicBlockchain)
-	provider.ticketIssuer = NewTicketIssuer(eventRepo, ticketRepo, userRepo, hsm, pvtbcCaller, publicBlockchain)
-	provider.ticketSigner = NewTicketSigner(eventRepo, ticketRepo, pvtbcCaller, publicBlockchain)
-	provider.userManager = NewUserManager(eventRepo, ticketRepo, userRepo, publicBlockchain, hsm)
+	provider.eventManager = NewEventManager(eventRepo, ticketRepo)
+	provider.ticketIssuer = NewTicketIssuer(eventRepo, ticketRepo, userRepo, hsm, pubbcCaller, pvtbcCaller)
+	provider.ticketSigner = NewTicketSigner(eventRepo, ticketRepo, pvtbcCaller, pubbcAdmin)
+	provider.userManager = NewUserManager(eventRepo, ticketRepo, userRepo, pubbcAdmin, hsm)
 
 	return provider, nil
 }
@@ -36,7 +36,7 @@ func (provider *Provider) GetTicketIssuer() TicketIssuer {
 	return provider.ticketIssuer
 }
 
-func (provider *Provider) GetEventManager() EventManager {
+func (provider *Provider) GetEventManager() IEventManager {
 	return provider.eventManager
 }
 

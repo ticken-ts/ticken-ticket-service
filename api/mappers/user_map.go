@@ -7,6 +7,7 @@ import (
 
 func MapUserToDTO(user *models.User) *dto.User {
 	return &dto.User{
-		UserID: user.UUID.String(),
+		UserID:        user.UUID.String(),
+		WalletAddress: user.WalletAddress,
 	}
 }

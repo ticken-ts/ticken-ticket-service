@@ -6,12 +6,13 @@ import (
 )
 
 type Ticket struct {
-	TicketID uuid.UUID `json:"ticket_id" bson:"ticket_id"`
-	TokenID  int       `json:"token_id" bson:"token_id"`
-	OwnerID  uuid.UUID `json:"owner" bson:"owner"`
-	Section  string    `json:"section" bson:"section"`
-	EventID  uuid.UUID `json:"event_id" bson:"event_id"`
-	Status   string    `json:"status" bson:"status"`
+	TicketID uuid.UUID `bson:"ticket_id"`
+	TokenID  int       `bson:"token_id"`
+	OwnerID  uuid.UUID `bson:"owner"`
+	Section  string    `bson:"section"`
+	EventID  uuid.UUID `bson:"event_id"`
+	Status   string    `bson:"status"`
+	TxHash   string    `bson:"tx_hash"`
 }
 
 type ticketSignatureFields struct {

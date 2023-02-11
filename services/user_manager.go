@@ -3,8 +3,8 @@ package services
 import (
 	"errors"
 	"github.com/google/uuid"
+	pubbc "github.com/ticken-ts/ticken-pubbc-connector"
 	"ticken-ticket-service/infra"
-	"ticken-ticket-service/infra/public_blockchain"
 	"ticken-ticket-service/models"
 	"ticken-ticket-service/repos"
 )
@@ -13,7 +13,7 @@ type userManager struct {
 	eventRepository  repos.EventRepository
 	ticketRepository repos.TicketRepository
 	userRepository   repos.UserRepository
-	blockchain       public_blockchain.PublicBC
+	pubbcAdmin       pubbc.Admin
 	hsm              infra.HSM
 }
 
@@ -21,14 +21,14 @@ func NewUserManager(
 	eventRepository repos.EventRepository,
 	ticketRepository repos.TicketRepository,
 	userRepository repos.UserRepository,
-	blockchain public_blockchain.PublicBC,
+	pubbcAdmin pubbc.Admin,
 	hsm infra.HSM,
 ) UserManager {
 	return &userManager{
 		ticketRepository: ticketRepository,
 		eventRepository:  eventRepository,
 		userRepository:   userRepository,
-		blockchain:       blockchain,
+		pubbcAdmin:       pubbcAdmin,
 		hsm:              hsm,
 	}
 }
@@ -36,6 +36,7 @@ func NewUserManager(
 func (userManager *userManager) CreateUser(uuid uuid.UUID, providedPK string) (*models.User, error) {
 	newUser := models.NewUser(uuid)
 	var pkStoreKey string
+	var walletAddr string
 	var err error
 
 	// check if user exists
@@ -50,7 +51,7 @@ func (userManager *userManager) CreateUser(uuid uuid.UUID, providedPK string) (*
 			return nil, err
 		}
 	} else {
-		newPK, err := userManager.blockchain.GeneratePrivateKey()
+		newPK, newWalletAddr, err := userManager.pubbcAdmin.CreateWallet()
 		if err != nil {
 			return nil, err
 		}
@@ -58,9 +59,10 @@ func (userManager *userManager) CreateUser(uuid uuid.UUID, providedPK string) (*
 		if err != nil {
 			return nil, err
 		}
+		walletAddr = newWalletAddr
 	}
 
-	newUser.SetAddressPKStoreKey(pkStoreKey)
+	newUser.SetWallet(pkStoreKey, walletAddr)
 	err = userManager.userRepository.AddUser(newUser)
 	if err != nil {
 		return nil, err
