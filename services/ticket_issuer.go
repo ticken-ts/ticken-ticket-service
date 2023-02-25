@@ -5,6 +5,7 @@ import (
 	"github.com/google/uuid"
 	pubbc "github.com/ticken-ts/ticken-pubbc-connector"
 	pvtbc "github.com/ticken-ts/ticken-pvtbc-connector"
+	"math/big"
 	"ticken-ticket-service/infra"
 	"ticken-ticket-service/models"
 	"ticken-ticket-service/repos"
@@ -50,8 +51,15 @@ func (s *ticketIssuer) IssueTicket(eventID uuid.UUID, section string, ownerID uu
 
 	newTicket := models.NewTicket(eventID, section, ownerID)
 
+	tokenID, err := generateTokenID(newTicket.TicketID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate token ID: %w", err)
+	}
+
+	newTicket.TokenID = tokenID
+
 	ticketResponse, err := s.pvtbcCaller.IssueTicket(
-		newTicket.TicketID, newTicket.EventID, newTicket.OwnerID, newTicket.Section,
+		newTicket.TicketID, newTicket.EventID, newTicket.OwnerID, newTicket.Section, newTicket.TokenID,
 	)
 	if err != nil {
 		return nil, err
@@ -79,4 +87,14 @@ func (s *ticketIssuer) IssueTicket(eventID uuid.UUID, section string, ownerID uu
 
 func (s *ticketIssuer) GetUserTickets(userID uuid.UUID) ([]*models.Ticket, error) {
 	return s.ticketRepository.GetUserTickets(userID)
+}
+
+// GenerateTokenID generates a token ID in uint256 for the ticket by hashing the ticket ID.
+func generateTokenID(ticketID uuid.UUID) (*big.Int, error) {
+	bytes, err := ticketID.MarshalBinary()
+	if err != nil {
+		return nil, err
+	}
+	tokenID := big.NewInt(0).SetBytes(bytes)
+	return tokenID, nil
 }

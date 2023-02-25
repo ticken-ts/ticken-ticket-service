@@ -2,12 +2,13 @@ package models
 
 import (
 	"github.com/google/uuid"
+	"math/big"
 	"ticken-ticket-service/utils"
 )
 
 type Ticket struct {
 	TicketID uuid.UUID `bson:"ticket_id"`
-	TokenID  int       `bson:"token_id"`
+	TokenID  *big.Int  `bson:"token_id"`
 	OwnerID  uuid.UUID `bson:"owner"`
 	Section  string    `bson:"section"`
 	EventID  uuid.UUID `bson:"event_id"`
