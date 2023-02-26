@@ -11,6 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
+	"math/big"
 	"reflect"
 	"time"
 )
@@ -22,7 +23,9 @@ type MongoDB struct {
 
 var (
 	tUUID       = reflect.TypeOf(uuid.UUID{})
-	uuidSubtype = byte(0x04)
+	uuidSubtype = bsontype.BinaryUUID
+
+	tBigInt = reflect.TypeOf(&big.Int{})
 )
 
 func NewMongoDb() *MongoDB {
@@ -37,6 +40,8 @@ func (mongoDb *MongoDB) Connect(connString string) error {
 	mongoRegistry := bson.NewRegistryBuilder().
 		RegisterTypeEncoder(tUUID, bsoncodec.ValueEncoderFunc(uuidEncodeValue)).
 		RegisterTypeDecoder(tUUID, bsoncodec.ValueDecoderFunc(uuidDecodeValue)).
+		RegisterTypeEncoder(tBigInt, bsoncodec.ValueEncoderFunc(bigIntEncodeValue)).
+		RegisterTypeDecoder(tBigInt, bsoncodec.ValueDecoderFunc(bigIntDecodeValue)).
 		Build()
 
 	opt := options.Client().ApplyURI(connString).SetRegistry(mongoRegistry)
@@ -74,13 +79,43 @@ func (mongoDb *MongoDB) GetClient() interface{} {
 	return mongoDb.client
 }
 
-// This is a value (de|en)coder for the github.com/google/uuid UUID type. For best experience, register
-// mongoRegistry to mongo client instance via options, e.g.
-//  clientOptions := options.Client().SetRegistry(mongoRegistry)
-//
-// Only BSON binary subtype 0x04 is supported.
-//
-// Use as you please
+func bigIntEncodeValue(_ bsoncodec.EncodeContext, vw bsonrw.ValueWriter, val reflect.Value) error {
+	if !val.IsValid() || val.Type() != tBigInt {
+		return bsoncodec.ValueEncoderError{Name: "bigIntEncodeValue", Types: []reflect.Type{tBigInt}, Received: val}
+	}
+	b := val.Interface().(*big.Int)
+	// stores big int as base16 (hex) strings
+	return vw.WriteString(b.Text(16))
+}
+
+func bigIntDecodeValue(_ bsoncodec.DecodeContext, vr bsonrw.ValueReader, val reflect.Value) error {
+	if !val.CanSet() || val.Type() != tBigInt {
+		return bsoncodec.ValueDecoderError{Name: "bigIntDecodeValue", Types: []reflect.Type{tBigInt}, Received: val}
+	}
+
+	var data string
+	var err error
+	switch vrType := vr.Type(); vrType {
+	case bsontype.String:
+		data, err = vr.ReadString()
+	case bsontype.Null:
+		err = vr.ReadNull()
+	case bsontype.Undefined:
+		err = vr.ReadUndefined()
+	default:
+		return fmt.Errorf("cannot decode %v into a UUID", vrType)
+	}
+
+	if err != nil {
+		return err
+	}
+	bigInt, ok := new(big.Int).SetString(data, 16)
+	if !ok {
+		return fmt.Errorf("failed to convert base16 string %s to big int", data)
+	}
+	val.Set(reflect.ValueOf(bigInt))
+	return nil
+}
 
 func uuidEncodeValue(_ bsoncodec.EncodeContext, vw bsonrw.ValueWriter, val reflect.Value) error {
 	if !val.IsValid() || val.Type() != tUUID {
