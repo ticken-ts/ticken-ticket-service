@@ -94,7 +94,11 @@ func (r *TicketMongoDBRepository) GetUserTickets(userID uuid.UUID) ([]*models.Ti
 	return foundTickets, nil
 }
 
-// UpdateTicket Replace ticket with new ticket
+// UpdateTicketBlockchainData Updates blockchain related fields
+// in the ticket. These fields are in particular:
+// * status
+// * pvtbc_tx_id
+// * pvtbc_tx_id
 func (r *TicketMongoDBRepository) UpdateTicketBlockchainData(ticket *models.Ticket) error {
 	updateContext, cancel := r.generateOpSubcontext()
 	defer cancel()

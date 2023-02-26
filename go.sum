@@ -295,6 +295,12 @@ github.com/ticken-ts/ticken-pvtbc-connector v0.2.42 h1:VcDkfgG/hv0zWWAOycp1TCuQe
 github.com/ticken-ts/ticken-pvtbc-connector v0.2.42/go.mod h1:rK1J3x+qeLeGTzjwqYVqI/9AKL0vseqrlwJNZoZXr3o=
 github.com/ticken-ts/ticken-pvtbc-connector v0.2.43 h1:Bji4HePax5OC5W1NWqlBmSRYh+/w9y5hfYoFxjd20bo=
 github.com/ticken-ts/ticken-pvtbc-connector v0.2.43/go.mod h1:rK1J3x+qeLeGTzjwqYVqI/9AKL0vseqrlwJNZoZXr3o=
+github.com/ticken-ts/ticken-pvtbc-connector v0.2.44 h1:S0JivuuzLIGNNbjF+zzicF9jRk2cyGJ5DZW81IJn4po=
+github.com/ticken-ts/ticken-pvtbc-connector v0.2.44/go.mod h1:rK1J3x+qeLeGTzjwqYVqI/9AKL0vseqrlwJNZoZXr3o=
+github.com/ticken-ts/ticken-pvtbc-connector v0.2.45 h1:Up673BYRp6AcO2SQG9NQKkDdKwQxN4YljeYpA/uuBoM=
+github.com/ticken-ts/ticken-pvtbc-connector v0.2.45/go.mod h1:rK1J3x+qeLeGTzjwqYVqI/9AKL0vseqrlwJNZoZXr3o=
+github.com/ticken-ts/ticken-pvtbc-connector v0.2.46 h1:U6wjUUyML5xGEhObYRVyJBcqslIi3xKhWmIezmOEJs0=
+github.com/ticken-ts/ticken-pvtbc-connector v0.2.46/go.mod h1:rK1J3x+qeLeGTzjwqYVqI/9AKL0vseqrlwJNZoZXr3o=
 github.com/tidwall/pretty v1.0.0 h1:HsD+QiTn7sK6flMKIvNmpqz1qrpP3Ps6jOKIKMooyg4=
 github.com/tidwall/pretty v1.0.0/go.mod h1:XNkn88O1ChpSDQmQeStsy+sBenx6DDtFZJxhVysOjyk=
 github.com/tklauser/go-sysconf v0.3.5 h1:uu3Xl4nkLzQfXNsWn15rPc/HQCJKObbt1dKJeWp3vU4=
