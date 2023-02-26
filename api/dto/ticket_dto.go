@@ -5,5 +5,7 @@ type Ticket struct {
 	EventID  string `json:"event_id"`
 	Status   string `json:"status"`
 	Section  string `json:"section"`
-	TxHash   string `json:"tx_hash"`
+
+	PubbcTxID string `json:"pubbc_tx_id"`
+	PvtbcTxID string `json:"pvtbc_tx_id"`
 }

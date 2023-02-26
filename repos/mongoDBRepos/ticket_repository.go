@@ -37,7 +37,7 @@ func (r *TicketMongoDBRepository) AddTicket(ticket *models.Ticket) error {
 	return nil
 }
 
-func (r *TicketMongoDBRepository) FindTicket(eventID string, ticketID string) *models.Ticket {
+func (r *TicketMongoDBRepository) FindTicket(eventID uuid.UUID, ticketID uuid.UUID) *models.Ticket {
 	findContext, cancel := r.generateOpSubcontext()
 	defer cancel()
 

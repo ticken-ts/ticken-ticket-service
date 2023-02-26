@@ -39,30 +39,9 @@ func NewTicketIssuer(
 }
 
 func (s *ticketIssuer) IssueTicket(eventID uuid.UUID, section string, ownerID uuid.UUID) (*models.Ticket, error) {
-	event := s.eventRepository.FindEvent(eventID.String())
+	event := s.eventRepository.FindEvent(eventID)
 	if event == nil {
 		return nil, fmt.Errorf("could not determine organizer channel")
-	}
-
-	err := s.pvtbcCaller.SetChannel(event.PvtBCChannel)
-	if err != nil {
-		return nil, err
-	}
-
-	newTicket := models.NewTicket(eventID, section, ownerID)
-
-	tokenID, err := generateTokenID(newTicket.TicketID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to generate token ID: %w", err)
-	}
-
-	newTicket.TokenID = tokenID
-
-	ticketResponse, err := s.pvtbcCaller.IssueTicket(
-		newTicket.TicketID, newTicket.EventID, newTicket.OwnerID, newTicket.Section, newTicket.TokenID,
-	)
-	if err != nil {
-		return nil, err
 	}
 
 	user := s.userRepository.FindUser(ownerID)
@@ -70,17 +49,67 @@ func (s *ticketIssuer) IssueTicket(eventID uuid.UUID, section string, ownerID uu
 		return nil, fmt.Errorf("could not find user")
 	}
 
-	txHash, err := s.pubbcCaller.MintTicket(event.PubBCAddress, user.WalletAddress, newTicket.Section)
-	if err != nil {
-		return nil, fmt.Errorf("could not generate ticket on public address")
-	}
-
-	newTicket.Status = ticketResponse.Status
-	newTicket.TxHash = txHash
-	err = s.ticketRepository.AddTicket(newTicket)
+	err := s.pvtbcCaller.SetChannel(event.PvtBCChannel)
 	if err != nil {
 		return nil, err
 	}
+
+	newTicket := &models.Ticket{
+		TicketID: uuid.New(),
+		EventID:  eventID,
+		Section:  section,
+		OwnerID:  ownerID,
+
+		// this fields will be populated after each
+		// blockchain transaction, indicating if the
+		// ticket is synced with this blockchain
+		PubbcTxID: "",
+		PvtbcTxID: "",
+	}
+
+	tokenID, err := generateTokenID(newTicket.TicketID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate token ID: %w", err)
+	}
+	newTicket.TokenID = tokenID
+
+	if err := s.ticketRepository.AddTicket(newTicket); err != nil {
+		return nil, err
+	}
+
+	// ******************* PVTBC Ticket Issuing ******************* //
+	ticketResponse, pvtbcTxID, err := s.pvtbcCaller.IssueTicket(
+		newTicket.TicketID,
+		newTicket.EventID,
+		newTicket.OwnerID,
+		newTicket.Section,
+		newTicket.TokenID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	newTicket.PvtbcTxID = pvtbcTxID
+	newTicket.Status = ticketResponse.Status
+	if err := s.ticketRepository.UpdateTicketStatus(newTicket); err != nil {
+		return nil, err
+	}
+	// ************************************************************ //
+
+	// ******************* PUBBC Ticket Issuing ******************* //
+	pubbcTxID, err := s.pubbcCaller.MintTicket(
+		event.PubBCAddress,
+		user.WalletAddress,
+		newTicket.Section,
+		newTicket.TokenID,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("could not generate ticket on public blockchain")
+	}
+	newTicket.PubbcTxID = pubbcTxID
+	if err := s.ticketRepository.UpdateTicketStatus(newTicket); err != nil {
+		return nil, err
+	}
+	// ************************************************************ //
 
 	return newTicket, nil
 }

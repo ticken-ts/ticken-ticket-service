@@ -1,6 +1,7 @@
 package services
 
 import (
+	"github.com/google/uuid"
 	"ticken-ticket-service/models"
 	"ticken-ticket-service/repos"
 )
@@ -14,8 +15,14 @@ func NewEventManager(eventRepository repos.EventRepository, ticketRepository rep
 	return &EventManager{ticketRepository: ticketRepository, eventRepository: eventRepository}
 }
 
-func (eventManager *EventManager) AddEvent(eventID, organizerID, pvtBCChannel, pubBCAddress string) (*models.Event, error) {
-	event := models.NewEvent(eventID, organizerID, pvtBCChannel, pubBCAddress)
+func (eventManager *EventManager) AddEvent(eventID, organizerID uuid.UUID, pvtBCChannel, pubBCAddress string) (*models.Event, error) {
+	event := &models.Event{
+		EventID:      eventID,
+		OrganizerID:  organizerID,
+		PvtBCChannel: pvtBCChannel,
+		PubBCAddress: pubBCAddress,
+	}
+
 	if err := eventManager.eventRepository.AddEvent(event); err != nil {
 		return nil, err
 	}

@@ -22,7 +22,7 @@ type TicketSigner interface {
 }
 
 type IEventManager interface {
-	AddEvent(eventID, organizerID, pvtBCChannel, pubBCAddress string) (*models.Event, error)
+	AddEvent(eventID, organizerID uuid.UUID, pvtBCChannel, pubBCAddress string) (*models.Event, error)
 }
 
 type UserManager interface {

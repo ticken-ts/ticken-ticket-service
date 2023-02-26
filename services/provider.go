@@ -25,9 +25,8 @@ func NewProvider(repoProvider repos.IProvider, pvtbcCaller *pvtbc.Caller, pubbcA
 	userRepo := repoProvider.GetUserRepository()
 
 	provider.eventManager = NewEventManager(eventRepo, ticketRepo)
-	provider.ticketIssuer = NewTicketIssuer(eventRepo, ticketRepo, userRepo, hsm, pubbcCaller, pvtbcCaller)
-	provider.ticketSigner = NewTicketSigner(eventRepo, ticketRepo, pvtbcCaller, pubbcAdmin)
 	provider.userManager = NewUserManager(eventRepo, ticketRepo, userRepo, pubbcAdmin, hsm)
+	provider.ticketIssuer = NewTicketIssuer(eventRepo, ticketRepo, userRepo, hsm, pubbcCaller, pvtbcCaller)
 
 	return provider, nil
 }

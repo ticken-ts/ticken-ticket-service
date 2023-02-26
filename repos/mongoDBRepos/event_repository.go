@@ -1,6 +1,7 @@
 package mongoDBRepos
 
 import (
+	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"ticken-ticket-service/models"
@@ -35,7 +36,7 @@ func (r *EventMongoDBRepository) AddEvent(event *models.Event) error {
 	return nil
 }
 
-func (r *EventMongoDBRepository) FindEvent(eventID string) *models.Event {
+func (r *EventMongoDBRepository) FindEvent(eventID uuid.UUID) *models.Event {
 	findContext, cancel := r.generateOpSubcontext()
 	defer cancel()
 

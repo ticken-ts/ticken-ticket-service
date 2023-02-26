@@ -24,15 +24,14 @@ func (controller *TicketController) BuyTicket(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	
+
 	if err := c.BindJSON(&payload); err != nil {
 		c.JSON(http.StatusBadRequest, utils.HttpResponse{Message: err.Error()})
 		c.Abort()
 		return
 	}
 
-	err = controller.validator.Struct(&payload)
-	if err != nil {
+	if err := controller.validator.Struct(&payload); err != nil {
 		c.JSON(http.StatusBadRequest, utils.HttpResponse{Message: err.Error()})
 		c.Abort()
 		return

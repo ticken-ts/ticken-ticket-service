@@ -7,14 +7,14 @@ import (
 
 type EventRepository interface {
 	AddEvent(event *models.Event) error
-	FindEvent(eventID string) *models.Event
+	FindEvent(eventID uuid.UUID) *models.Event
 	GetActiveEvents() ([]*models.Event, error)
 }
 
 type TicketRepository interface {
 	AddTicket(ticket *models.Ticket) error
 	UpdateTicketStatus(ticket *models.Ticket) error
-	FindTicket(eventID string, ticketID string) *models.Ticket
+	FindTicket(eventID uuid.UUID, ticketID uuid.UUID) *models.Ticket
 	GetUserTickets(userID uuid.UUID) ([]*models.Ticket, error)
 }
 

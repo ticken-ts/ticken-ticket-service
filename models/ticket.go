@@ -13,21 +13,16 @@ type Ticket struct {
 	Section  string    `bson:"section"`
 	EventID  uuid.UUID `bson:"event_id"`
 	Status   string    `bson:"status"`
-	TxHash   string    `bson:"tx_hash"`
+
+	/************ blockchain **************/
+	PubbcTxID string `bson:"pubbc_tx_id"`
+	PvtbcTxID string `bson:"pvtbc_tx_id"`
+	/**************************************/
 }
 
 type ticketSignatureFields struct {
 	ticketID uuid.UUID
 	eventID  uuid.UUID
-}
-
-func NewTicket(eventID uuid.UUID, section string, ownerID uuid.UUID) *Ticket {
-	return &Ticket{
-		TicketID: uuid.New(),
-		EventID:  eventID,
-		Section:  section,
-		OwnerID:  ownerID,
-	}
 }
 
 func (ticket *Ticket) Sign(ownerPrivateKey string) ([]byte, error) {

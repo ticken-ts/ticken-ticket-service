@@ -34,7 +34,7 @@ func (s *EventSubscriber) NewEventHandler(rawEvent []byte) error {
 	}
 
 	_, err = s.eventManager.AddEvent(
-		dto.EventID.String(), dto.OrganizerID.String(), dto.PvtBCChannel, dto.PubBCAddress,
+		dto.EventID, dto.OrganizerID, dto.PvtBCChannel, dto.PubBCAddress,
 	)
 	if err != nil {
 		return err

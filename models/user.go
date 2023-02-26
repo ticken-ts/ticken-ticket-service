@@ -7,9 +7,9 @@ import (
 
 type User struct {
 	mongoID           primitive.ObjectID `bson:"_id"`
-	UUID              uuid.UUID          `json:"uuid" bson:"uuid"`
-	AddressPKStoreKey string             `json:"addressPKStore" bson:"addressPKStore"`
-	WalletAddress     string             `json:"wallet_address" bson:"wallet_address"`
+	UUID              uuid.UUID          `bson:"uuid"`
+	AddressPKStoreKey string             `bson:"addressPKStore"`
+	WalletAddress     string             `bson:"wallet_address"`
 }
 
 func NewUser(id uuid.UUID) *User {

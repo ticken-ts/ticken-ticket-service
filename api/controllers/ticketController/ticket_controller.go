@@ -20,6 +20,5 @@ func New(serviceProvider services.IProvider) *TicketController {
 
 func (controller *TicketController) Setup(router gin.IRouter) {
 	router.POST("/events/:eventID/tickets", controller.BuyTicket)
-	router.PUT("/events/:eventID/tickets/:ticketID/sign", controller.SignTicket)
 	router.GET("/events/tickets", controller.GetMyTickets)
 }
