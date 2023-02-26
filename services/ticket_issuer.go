@@ -51,7 +51,7 @@ func (s *ticketIssuer) IssueTicket(eventID uuid.UUID, section string, ownerID uu
 
 	err := s.pvtbcCaller.SetChannel(event.PvtBCChannel)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not set channel: %w", err)
 	}
 
 	newTicket := &models.Ticket{
@@ -86,11 +86,11 @@ func (s *ticketIssuer) IssueTicket(eventID uuid.UUID, section string, ownerID uu
 		newTicket.TokenID,
 	)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to issue ticket to pvtbc: %w", err)
 	}
 	newTicket.PvtbcTxID = pvtbcTxID
 	newTicket.Status = ticketResponse.Status
-	if err := s.ticketRepository.UpdateTicketStatus(newTicket); err != nil {
+	if err := s.ticketRepository.UpdateTicketBlockchainData(newTicket); err != nil {
 		return nil, err
 	}
 	// ************************************************************ //
@@ -106,7 +106,7 @@ func (s *ticketIssuer) IssueTicket(eventID uuid.UUID, section string, ownerID uu
 		return nil, fmt.Errorf("could not generate ticket on public blockchain")
 	}
 	newTicket.PubbcTxID = pubbcTxID
-	if err := s.ticketRepository.UpdateTicketStatus(newTicket); err != nil {
+	if err := s.ticketRepository.UpdateTicketBlockchainData(newTicket); err != nil {
 		return nil, err
 	}
 	// ************************************************************ //

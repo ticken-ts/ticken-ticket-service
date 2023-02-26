@@ -93,3 +93,27 @@ func (r *TicketMongoDBRepository) GetUserTickets(userID uuid.UUID) ([]*models.Ti
 
 	return foundTickets, nil
 }
+
+// UpdateTicket Replace ticket with new ticket
+func (r *TicketMongoDBRepository) UpdateTicketBlockchainData(ticket *models.Ticket) error {
+	updateContext, cancel := r.generateOpSubcontext()
+	defer cancel()
+
+	tickets := r.getCollection()
+
+	filter := bson.M{"event_id": ticket.EventID, "ticket_id": ticket.TicketID}
+	update := bson.M{
+		"$set": bson.M{
+			"status":      ticket.Status,
+			"pubbc_tx_id": ticket.PubbcTxID,
+			"pvtbc_tx_id": ticket.PvtbcTxID,
+		},
+	}
+
+	_, err := tickets.UpdateOne(updateContext, filter, update)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

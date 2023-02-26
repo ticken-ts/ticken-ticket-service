@@ -14,5 +14,6 @@ func MapTicketToDTO(ticket *models.Ticket) *dto.Ticket {
 
 		PubbcTxID: ticket.PubbcTxID,
 		PvtbcTxID: ticket.PvtbcTxID,
+		TokenID:   ticket.TokenID.String(),
 	}
 }

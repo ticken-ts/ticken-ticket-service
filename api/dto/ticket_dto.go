@@ -8,4 +8,5 @@ type Ticket struct {
 
 	PubbcTxID string `json:"pubbc_tx_id"`
 	PvtbcTxID string `json:"pvtbc_tx_id"`
+	TokenID   string `json:"token_id"`
 }

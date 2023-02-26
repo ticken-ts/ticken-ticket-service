@@ -9,6 +9,7 @@ import (
 	"ticken-ticket-service/api/controllers/ticketController"
 	"ticken-ticket-service/api/controllers/userController"
 	"ticken-ticket-service/api/middlewares"
+	"ticken-ticket-service/app/fakes"
 	"ticken-ticket-service/async"
 	"ticken-ticket-service/config"
 	"ticken-ticket-service/env"
@@ -92,6 +93,12 @@ func New(infraBuilder infra.IBuilder, tickenConfig *config.Config) *TickenTicket
 	for _, controller := range appControllers {
 		controller.Setup(engine)
 	}
+
+	var appPopulators = []Populator{
+		&fakes.FakeEventsPopulator{EventRepo: repoProvider.GetEventRepository(), Pubbc: pubbcAdmin},
+		&fakes.FakeUsersPopulator{Repo: repoProvider.GetUserRepository(), Config: tickenConfig.Dev.User, HSM: hsm},
+	}
+	tickenTicketApp.populators = appPopulators
 
 	return tickenTicketApp
 }
