@@ -16,7 +16,7 @@ WORKDIR /src
 # copy Go modules and dependencies to image
 COPY go.mod ./
 
-ENV GOPRIVATE="github.com/ticken-ts/ticken-pvtbc-connector"
+ENV GOPRIVATE="github.com/ticken-ts/ticken-pvtbc-connector,github.com/ticken-ts/ticken-pubbc-connector"
 RUN go mod download
 
 # copy directory files i.e all files ending with .go
