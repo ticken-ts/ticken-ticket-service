@@ -46,7 +46,7 @@ func (processor *Subscriber) handler(rawmsg []byte) {
 	case NewEventMessageType:
 		processingError = processor.eventProcessor.NewEventHandler(msg.Data)
 	default:
-		processingError = fmt.Errorf("message type %s not supportaed\n", msg.Type)
+		processingError = fmt.Errorf("message type %s not supported\n", msg.Type)
 	}
 
 	if processingError != nil {
