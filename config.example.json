@@ -32,7 +32,8 @@
   "dev": {
     "mock": {
       "disable_pvtbc_mock": false,
-      "disable_bus_mock": true
+      "disable_bus_mock": true,
+      "disable_auth_mock": true
     },
 
     "user": {

@@ -77,7 +77,7 @@ func (builder *Builder) BuildEngine() *gin.Engine {
 func (builder *Builder) BuildJWTVerifier() jwt.Verifier {
 	var jwtVerifier jwt.Verifier
 
-	if env.TickenEnv.IsDev() || env.TickenEnv.IsTest() {
+	if (env.TickenEnv.IsDev() || env.TickenEnv.IsTest()) && !builder.tickenConfig.Dev.Mock.DisableAuthMock {
 		jwtPublicKey := builder.tickenConfig.Dev.JWTPublicKey
 		jwtPrivateKey := builder.tickenConfig.Dev.JWTPrivateKey
 
