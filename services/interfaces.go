@@ -32,4 +32,5 @@ type UserManager interface {
 	// user provided one, if is an empty string,
 	// a new key is generated
 	CreateUser(uuid uuid.UUID, pubBCPrivateKey string) (*models.User, error)
+	GetUser(uuid uuid.UUID) (*models.User, error)
 }

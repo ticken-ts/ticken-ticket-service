@@ -8,7 +8,7 @@ import (
 	"ticken-ticket-service/models"
 )
 
-const UserCollectionName = "users"
+const UserCollectionName = "attendants"
 
 type UserMongoDBRepository struct {
 	baseRepository

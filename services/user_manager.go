@@ -69,3 +69,12 @@ func (userManager *userManager) CreateUser(uuid uuid.UUID, providedPK string) (*
 	}
 	return newUser, nil
 }
+
+// GetUser returns the user with the given UUID
+func (userManager *userManager) GetUser(uuid uuid.UUID) (*models.User, error) {
+	user := userManager.userRepository.FindUser(uuid)
+	if user == nil {
+		return nil, errors.New("user not found")
+	}
+	return user, nil
+}
