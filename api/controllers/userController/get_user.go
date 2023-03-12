@@ -9,12 +9,16 @@ import (
 )
 
 func (controller *UserController) GetUser(c *gin.Context) {
-	owner := c.MustGet("jwt").(*jwt.Token).Subject
+	owner := c.MustGet("jwt").(*jwt.Token)
+	token := owner.Subject
+	email := owner.Email
+	profile := owner.Profile
 
-	user, err := controller.serviceProvider.GetUserManager().GetUser(owner)
+	user, err := controller.serviceProvider.GetUserManager().GetUser(token)
+
 	if err != nil {
 		c.JSON(http.StatusNotFound, utils.HttpResponse{Message: err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, utils.HttpResponse{Message: "User fetched successfully", Data: mappers.MapUserToDTO(user)})
+	c.JSON(http.StatusOK, utils.HttpResponse{Message: "User fetched successfully", Data: mappers.MapUserToDTO(user, email, &profile)})
 }

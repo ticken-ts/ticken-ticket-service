@@ -13,7 +13,10 @@ type createAccountPayload struct {
 }
 
 func (controller *UserController) CreateAccount(c *gin.Context) {
-	owner := c.MustGet("jwt").(*jwt.Token).Subject
+	owner := c.MustGet("jwt").(*jwt.Token)
+	token := owner.Subject
+	email := owner.Email
+	profile := owner.Profile
 
 	payload := createAccountPayload{}
 	err := c.BindJSON(&payload)
@@ -23,10 +26,10 @@ func (controller *UserController) CreateAccount(c *gin.Context) {
 		return
 	}
 
-	user, err := controller.serviceProvider.GetUserManager().CreateUser(owner, payload.AddressPK)
+	user, err := controller.serviceProvider.GetUserManager().CreateUser(token, payload.AddressPK)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, utils.HttpResponse{Message: err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, utils.HttpResponse{Message: "Account created successfully", Data: mappers.MapUserToDTO(user)})
+	c.JSON(http.StatusOK, utils.HttpResponse{Message: "Account created successfully", Data: mappers.MapUserToDTO(user, email, &profile)})
 }

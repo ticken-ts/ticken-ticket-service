@@ -65,6 +65,11 @@ func (jwtVerifier *OnlineVerifier) Verify(rawJWT string) (*Token, error) {
 		Subject:  uuidSubject,
 		Email:    claims.Email,
 		Username: claims.PreferredUsername,
+		Profile: Profile{
+			FirstName:     claims.GivenName,
+			LastName:      claims.FamilyName,
+			EmailVerified: claims.EmailVerified,
+		},
 	}
 
 	return token, nil
