@@ -2,6 +2,7 @@
   "server": {
     "host": "localhost",
     "port": 8000,
+    "api_prefix": "/api/t",
     "client_id": "ticken.event.service",
     "identity_issuer": "http://localhost:8080/realms/organizers"
   },

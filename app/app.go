@@ -80,18 +80,20 @@ func New(infraBuilder infra.IBuilder, tickenConfig *config.Config) *TickenTicket
 		middlewares.NewAuthMiddleware(serviceProvider, jwtVerifier),
 	}
 
-	for _, middleware := range appMiddlewares {
-		middleware.Setup(engine)
-	}
-
 	var appControllers = []api.Controller{
 		healthController.New(serviceProvider),
 		ticketController.New(serviceProvider),
 		userController.New(serviceProvider),
 	}
 
+	apiRouter := engine.Group(tickenConfig.Server.APIPrefix)
+
+	for _, middleware := range appMiddlewares {
+		middleware.Setup(apiRouter)
+	}
+
 	for _, controller := range appControllers {
-		controller.Setup(engine)
+		controller.Setup(apiRouter)
 	}
 
 	var appPopulators = []Populator{
