@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	pubbc "github.com/ticken-ts/ticken-pubbc-connector"
+	chain_models "github.com/ticken-ts/ticken-pubbc-connector/chain-models"
 	pvtbc "github.com/ticken-ts/ticken-pvtbc-connector"
 	"math/big"
 	"ticken-ticket-service/infra"
+	"ticken-ticket-service/log"
 	"ticken-ticket-service/models"
 	"ticken-ticket-service/repos"
 )
@@ -115,7 +117,72 @@ func (s *ticketIssuer) IssueTicket(eventID uuid.UUID, section string, ownerID uu
 }
 
 func (s *ticketIssuer) GetUserTickets(userID uuid.UUID) ([]*models.Ticket, error) {
-	return s.ticketRepository.GetUserTickets(userID)
+	userInfo := s.userRepository.FindUser(userID)
+	userTickets, err := s.ticketRepository.GetUserTickets(userID)
+	if err != nil {
+		return nil, fmt.Errorf("could not get user tickets: %w", err)
+	}
+
+	var presentEvents []*models.Event
+
+	// get all events that are present in user tickets
+	for _, ticket := range userTickets {
+		// check if event is present in the list
+		var present = false
+		for _, event := range presentEvents {
+			if event.EventID == ticket.EventID {
+				present = true
+				break
+			}
+		}
+
+		if !present {
+			ticketEvent := s.eventRepository.FindEvent(ticket.EventID)
+			if ticketEvent == nil {
+				log.TickenLogger.Log().Msg("could not find event for ticket: " + ticket.TicketID.String())
+				continue
+			}
+			presentEvents = append(presentEvents, ticketEvent)
+		}
+	}
+
+	// get all tickets on pubbc for each event
+	type ticketInfo struct {
+		ticket *chain_models.Ticket
+		event  *models.Event
+	}
+
+	var ticketsInfo []ticketInfo
+	for _, event := range presentEvents {
+		tickets, err := s.pubbcCaller.GetTickets(event.PubBCAddress, userInfo.WalletAddress)
+		if err != nil {
+			log.TickenLogger.Log().Err(err).Msg("could not get tickets on public blockchain for event: " + event.EventID.String())
+			continue
+		}
+		for _, ticket := range tickets {
+			ticketsInfo = append(ticketsInfo, ticketInfo{
+				ticket: &ticket,
+				event:  event,
+			})
+		}
+	}
+
+	// filter userTickets that are not in ticketsInfo
+	var filteredTickets []*models.Ticket
+	for _, ticket := range userTickets {
+		var present = false
+		for _, ticketInfo := range ticketsInfo {
+			if ticketInfo.ticket.TokenID.Cmp(ticket.TokenID) == 0 && ticketInfo.event.EventID == ticket.EventID {
+				present = true
+				break
+			}
+		}
+		if !present {
+			filteredTickets = append(filteredTickets, ticket)
+		}
+	}
+
+	return filteredTickets, nil
 }
 
 // GenerateTokenID generates a token ID in uint256 for the ticket by hashing the ticket ID.
