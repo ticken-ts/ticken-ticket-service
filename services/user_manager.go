@@ -78,3 +78,17 @@ func (userManager *userManager) GetUser(uuid uuid.UUID) (*models.User, error) {
 	}
 	return user, nil
 }
+
+func (userManager *userManager) GetUserPrivKey(uuid uuid.UUID) (string, error) {
+	user := userManager.userRepository.FindUser(uuid)
+	if user == nil {
+		return "", errors.New("user not found")
+	}
+
+	userPrivKey, err := userManager.hsm.Retrieve(user.AddressPKStoreKey)
+	if err != nil {
+		return "", err
+	}
+
+	return string(userPrivKey), err
+}

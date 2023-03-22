@@ -20,5 +20,8 @@ func (controller *UserController) GetUser(c *gin.Context) {
 		c.JSON(http.StatusNotFound, utils.HttpResponse{Message: err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, utils.HttpResponse{Message: "User fetched successfully", Data: mappers.MapUserToDTO(user, email, &profile)})
+	c.JSON(http.StatusOK, utils.HttpResponse{
+		Message: "User fetched successfully",
+		Data:    mappers.MapUserToDTO(user, email, &profile),
+	})
 }

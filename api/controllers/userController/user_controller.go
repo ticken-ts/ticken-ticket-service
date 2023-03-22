@@ -21,5 +21,5 @@ func New(serviceProvider services.IProvider) *UserController {
 func (controller *UserController) Setup(router gin.IRouter) {
 	router.POST("/users", controller.CreateAccount)
 	router.GET("/users/myUser", controller.GetUser)
-	//router.GET("/users/:userID", controller.SignTicket)
+	router.GET("/users/myUser/privKey", controller.GetUserPrivKey)
 }
