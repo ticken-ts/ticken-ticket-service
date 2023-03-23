@@ -23,17 +23,15 @@ type ticketIssuer struct {
 }
 
 func NewTicketIssuer(
-	eventRepository repos.EventRepository,
-	ticketRepository repos.TicketRepository,
-	userRepository repos.UserRepository,
+	repoProvider repos.IProvider,
 	hsm infra.HSM,
 	pubbcCaller pubbc.Caller,
 	pvtbcCaller *pvtbc.Caller,
 ) TicketIssuer {
 	return &ticketIssuer{
-		eventRepository:  eventRepository,
-		ticketRepository: ticketRepository,
-		userRepository:   userRepository,
+		eventRepository:  repoProvider.GetEventRepository(),
+		ticketRepository: repoProvider.GetTicketRepository(),
+		userRepository:   repoProvider.GetUserRepository(),
 		hsm:              hsm,
 		pubbcCaller:      pubbcCaller,
 		pvtbcCaller:      pvtbcCaller,

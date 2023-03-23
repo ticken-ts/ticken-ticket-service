@@ -1,8 +1,5 @@
 package services
 
-// TODO
-// * Check lazy build
-
 import (
 	pubbc "github.com/ticken-ts/ticken-pubbc-connector"
 	pvtbc "github.com/ticken-ts/ticken-pvtbc-connector"
@@ -12,7 +9,7 @@ import (
 
 type Provider struct {
 	ticketIssuer TicketIssuer
-	ticketSigner TicketSigner
+	ticketLinker TicketLinker
 	eventManager IEventManager
 	userManager  UserManager
 }
@@ -26,7 +23,8 @@ func NewProvider(repoProvider repos.IProvider, pvtbcCaller *pvtbc.Caller, pubbcA
 
 	provider.eventManager = NewEventManager(eventRepo, ticketRepo)
 	provider.userManager = NewUserManager(eventRepo, ticketRepo, userRepo, pubbcAdmin, hsm)
-	provider.ticketIssuer = NewTicketIssuer(eventRepo, ticketRepo, userRepo, hsm, pubbcCaller, pvtbcCaller)
+	provider.ticketIssuer = NewTicketIssuer(repoProvider, hsm, pubbcCaller, pvtbcCaller)
+	provider.ticketLinker = NewTicketLinker(repoProvider, pubbcCaller)
 
 	return provider, nil
 }
@@ -39,10 +37,10 @@ func (provider *Provider) GetEventManager() IEventManager {
 	return provider.eventManager
 }
 
-func (provider *Provider) GetTicketSigner() TicketSigner {
-	return provider.ticketSigner
-}
-
 func (provider *Provider) GetUserManager() UserManager {
 	return provider.userManager
+}
+
+func (provider *Provider) GetTicketLinker() TicketLinker {
+	return provider.ticketLinker
 }

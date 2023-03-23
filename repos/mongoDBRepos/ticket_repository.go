@@ -5,6 +5,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"math/big"
 	"ticken-ticket-service/models"
 )
 
@@ -113,6 +114,43 @@ func (r *TicketMongoDBRepository) UpdateTicketBlockchainData(ticket *models.Tick
 			"pvtbc_tx_id": ticket.PvtbcTxID,
 		},
 	}
+
+	_, err := tickets.UpdateOne(updateContext, filter, update)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *TicketMongoDBRepository) FindTicketByPUBBCToken(eventID uuid.UUID, tokenID *big.Int) *models.Ticket {
+	findContext, cancel := r.generateOpSubcontext()
+	defer cancel()
+
+	tickets := r.getCollection()
+	result := tickets.FindOne(findContext, bson.M{
+		"event_id": eventID,
+		"token_id": tokenID,
+	})
+
+	var foundTicket models.Ticket
+	err := result.Decode(&foundTicket)
+
+	if err != nil {
+		return nil
+	}
+
+	return &foundTicket
+}
+
+func (r *TicketMongoDBRepository) UpdateTicketOwner(ticket *models.Ticket) error {
+	updateContext, cancel := r.generateOpSubcontext()
+	defer cancel()
+
+	tickets := r.getCollection()
+
+	filter := bson.M{"event_id": ticket.EventID, "ticket_id": ticket.TicketID}
+	update := bson.M{"owner_id": ticket.OwnerID}
 
 	_, err := tickets.UpdateOne(updateContext, filter, update)
 	if err != nil {

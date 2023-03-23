@@ -7,7 +7,7 @@ import (
 
 type IProvider interface {
 	GetTicketIssuer() TicketIssuer
-	GetTicketSigner() TicketSigner
+	GetTicketLinker() TicketLinker
 	GetEventManager() IEventManager
 	GetUserManager() UserManager
 }
@@ -17,8 +17,8 @@ type TicketIssuer interface {
 	GetUserTickets(userID uuid.UUID) ([]*models.Ticket, error)
 }
 
-type TicketSigner interface {
-	SignTicket(eventID string, ticketID string, owner string) (*models.Ticket, error)
+type TicketLinker interface {
+	LinkTickets(ownerID uuid.UUID, eventContractAddress string) ([]*models.Ticket, error)
 }
 
 type IEventManager interface {

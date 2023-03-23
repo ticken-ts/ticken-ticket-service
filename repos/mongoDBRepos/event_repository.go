@@ -53,6 +53,23 @@ func (r *EventMongoDBRepository) FindEvent(eventID uuid.UUID) *models.Event {
 	return &foundEvent
 }
 
+func (r *EventMongoDBRepository) FindEventByContractAddress(contractAddr string) *models.Event {
+	findContext, cancel := r.generateOpSubcontext()
+	defer cancel()
+
+	events := r.getCollection()
+	result := events.FindOne(findContext, bson.M{"pub_bc_address": contractAddr})
+
+	var foundEvent models.Event
+	err := result.Decode(&foundEvent)
+
+	if err != nil {
+		return nil
+	}
+
+	return &foundEvent
+}
+
 func (r *EventMongoDBRepository) GetActiveEvents() ([]*models.Event, error) {
 	findContext, cancel := r.generateOpSubcontext()
 	defer cancel()

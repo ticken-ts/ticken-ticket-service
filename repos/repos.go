@@ -2,6 +2,7 @@ package repos
 
 import (
 	"github.com/google/uuid"
+	"math/big"
 	"ticken-ticket-service/models"
 )
 
@@ -9,6 +10,7 @@ type EventRepository interface {
 	AddEvent(event *models.Event) error
 	FindEvent(eventID uuid.UUID) *models.Event
 	GetActiveEvents() ([]*models.Event, error)
+	FindEventByContractAddress(contractAddr string) *models.Event
 }
 
 type TicketRepository interface {
@@ -17,6 +19,8 @@ type TicketRepository interface {
 	FindTicket(eventID uuid.UUID, ticketID uuid.UUID) *models.Ticket
 	GetUserTickets(userID uuid.UUID) ([]*models.Ticket, error)
 	UpdateTicketBlockchainData(ticket *models.Ticket) error
+	UpdateTicketOwner(ticket *models.Ticket) error
+	FindTicketByPUBBCToken(eventID uuid.UUID, token *big.Int) *models.Ticket
 }
 
 type UserRepository interface {
