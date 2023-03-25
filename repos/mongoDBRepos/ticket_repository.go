@@ -29,6 +29,12 @@ func (r *TicketMongoDBRepository) AddTicket(ticket *models.Ticket) error {
 	storeContext, cancel := r.generateOpSubcontext()
 	defer cancel()
 
+	// initialize arrays to make the field
+	// be of type array in the database
+	if ticket.SaleAnnouncements == nil {
+		ticket.SaleAnnouncements = make([]*models.SaleAnnouncement, 0)
+	}
+
 	tickets := r.getCollection()
 	_, err := tickets.InsertOne(storeContext, ticket)
 	if err != nil {
@@ -151,6 +157,22 @@ func (r *TicketMongoDBRepository) UpdateTicketOwner(ticket *models.Ticket) error
 
 	filter := bson.M{"event_id": ticket.EventID, "ticket_id": ticket.TicketID}
 	update := bson.M{"owner_id": ticket.OwnerID}
+
+	_, err := tickets.UpdateOne(updateContext, filter, update)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *TicketMongoDBRepository) AddTicketSaleAnnouncement(eventID, ticketID uuid.UUID, saleAnnouncement *models.SaleAnnouncement) error {
+	updateContext, cancel := r.generateOpSubcontext()
+	defer cancel()
+
+	tickets := r.getCollection()
+	filter := bson.M{"event_id": eventID, "ticket_id": ticketID}
+	update := bson.M{"$push": bson.M{"sale_announcements": saleAnnouncement}}
 
 	_, err := tickets.UpdateOne(updateContext, filter, update)
 	if err != nil {

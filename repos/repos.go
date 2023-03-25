@@ -21,6 +21,7 @@ type TicketRepository interface {
 	UpdateTicketBlockchainData(ticket *models.Ticket) error
 	UpdateTicketOwner(ticket *models.Ticket) error
 	FindTicketByPUBBCToken(eventID uuid.UUID, token *big.Int) *models.Ticket
+	AddTicketSaleAnnouncement(eventID, ticketID uuid.UUID, saleAnnouncement *models.SaleAnnouncement) error
 }
 
 type UserRepository interface {

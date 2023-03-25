@@ -3,6 +3,7 @@ package services
 import (
 	"github.com/google/uuid"
 	"ticken-ticket-service/models"
+	"ticken-ticket-service/utils/money"
 )
 
 type IProvider interface {
@@ -10,6 +11,11 @@ type IProvider interface {
 	GetTicketLinker() TicketLinker
 	GetEventManager() IEventManager
 	GetUserManager() UserManager
+	GetTicketTrader() TicketTrader
+}
+
+type TicketTrader interface {
+	SellTicket(ownerID, eventID, ticketID uuid.UUID, price *money.Money) (*models.Ticket, error)
 }
 
 type TicketIssuer interface {

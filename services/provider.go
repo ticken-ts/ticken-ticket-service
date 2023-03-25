@@ -12,6 +12,7 @@ type Provider struct {
 	ticketLinker TicketLinker
 	eventManager IEventManager
 	userManager  UserManager
+	ticketTrader TicketTrader
 }
 
 func NewProvider(repoProvider repos.IProvider, pvtbcCaller *pvtbc.Caller, pubbcAdmin pubbc.Admin, pubbcCaller pubbc.Caller, hsm infra.HSM) (*Provider, error) {
@@ -25,6 +26,7 @@ func NewProvider(repoProvider repos.IProvider, pvtbcCaller *pvtbc.Caller, pubbcA
 	provider.userManager = NewUserManager(eventRepo, ticketRepo, userRepo, pubbcAdmin, hsm)
 	provider.ticketIssuer = NewTicketIssuer(repoProvider, hsm, pubbcCaller, pvtbcCaller)
 	provider.ticketLinker = NewTicketLinker(repoProvider, pubbcCaller)
+	provider.ticketTrader = NewTicketTrader(repoProvider, pubbcCaller)
 
 	return provider, nil
 }
@@ -43,4 +45,8 @@ func (provider *Provider) GetUserManager() UserManager {
 
 func (provider *Provider) GetTicketLinker() TicketLinker {
 	return provider.ticketLinker
+}
+
+func (provider *Provider) GetTicketTrader() TicketTrader {
+	return provider.ticketTrader
 }

@@ -2,14 +2,12 @@ package models
 
 import (
 	"github.com/google/uuid"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type User struct {
-	mongoID           primitive.ObjectID `bson:"_id"`
-	UUID              uuid.UUID          `bson:"uuid"`
-	AddressPKStoreKey string             `bson:"addressPKStore"`
-	WalletAddress     string             `bson:"wallet_address"`
+	UUID              uuid.UUID `bson:"uuid"`
+	AddressPKStoreKey string    `bson:"addressPKStore"`
+	WalletAddress     string    `bson:"wallet_address"`
 }
 
 func NewUser(id uuid.UUID) *User {
