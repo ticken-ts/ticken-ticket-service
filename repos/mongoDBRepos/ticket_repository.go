@@ -197,3 +197,22 @@ func (r *TicketMongoDBRepository) UpdateResoldTicket(ticket *models.Ticket) erro
 
 	return nil
 }
+
+func (r *TicketMongoDBRepository) GetTicketsInResell(eventID uuid.UUID, section string) ([]*models.Ticket, error) {
+	findContext, cancel := r.generateOpSubcontext()
+	defer cancel()
+
+	tickets := r.getCollection()
+	cursor, err := tickets.Find(findContext, bson.M{
+		"event_id":       eventID,
+		"section":        section,
+		"resells.active": true,
+	})
+
+	var foundTickets []*models.Ticket
+	if err = cursor.All(findContext, &foundTickets); err != nil {
+		return nil, err
+	}
+
+	return foundTickets, nil
+}

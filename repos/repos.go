@@ -22,6 +22,7 @@ type TicketRepository interface {
 	UpdateTicketOwner(ticket *models.Ticket) error
 	FindTicketByPUBBCToken(eventID uuid.UUID, token *big.Int) *models.Ticket
 	UpdateResoldTicket(ticket *models.Ticket) error
+	GetTicketsInResell(eventID uuid.UUID, section string) ([]*models.Ticket, error)
 	AddTicketResell(eventID, ticketID uuid.UUID, saleAnnouncement *models.Resell) error
 }
 

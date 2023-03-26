@@ -17,6 +17,7 @@ type IProvider interface {
 type TicketTrader interface {
 	SellTicket(ownerID, eventID, ticketID uuid.UUID, price *money.Money) (*models.Ticket, error)
 	BuyResoldTicket(buyerID, eventID, ticketID, resellID uuid.UUID) (*models.Ticket, error)
+	GetResells(eventID uuid.UUID, section string) ([]*models.Ticket, error)
 }
 
 type TicketIssuer interface {

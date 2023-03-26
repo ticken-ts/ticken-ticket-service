@@ -103,3 +103,7 @@ func (ticketTrader *ticketTrader) BuyResoldTicket(buyerID, eventID, ticketID, re
 
 	return ticket, nil
 }
+
+func (ticketTrader *ticketTrader) GetResells(eventID uuid.UUID, section string) ([]*models.Ticket, error) {
+	return ticketTrader.ticketRepository.GetTicketsInResell(eventID, section)
+}
