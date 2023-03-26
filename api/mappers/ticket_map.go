@@ -17,14 +17,14 @@ func MapTicketToDTO(ticket *models.Ticket) *dto.Ticket {
 		PvtbcTxID: ticket.PvtbcTxID,
 		TokenID:   ticket.TokenID.String(),
 
-		SaleAnnouncements: make([]*dto.SaleAnnouncement, 0),
+		Resells: make([]*dto.Resells, 0),
 	}
 
-	if ticket.SaleAnnouncements != nil {
-		for _, saleAnnouncement := range ticket.SaleAnnouncements {
-			ticketDTO.SaleAnnouncements = append(
-				ticketDTO.SaleAnnouncements,
-				MapSaleAnnouncementToDTO(ticket, saleAnnouncement),
+	if ticket.Resells != nil {
+		for _, resell := range ticket.Resells {
+			ticketDTO.Resells = append(
+				ticketDTO.Resells,
+				MapResellToDTO(resell),
 			)
 		}
 	}
@@ -32,11 +32,9 @@ func MapTicketToDTO(ticket *models.Ticket) *dto.Ticket {
 	return ticketDTO
 }
 
-func MapSaleAnnouncementToDTO(ticket *models.Ticket, saleAnnoucement *models.SaleAnnouncement) *dto.SaleAnnouncement {
-	return &dto.SaleAnnouncement{
-		Price:    fmt.Sprintf("%.2f", saleAnnoucement.Price.Amount),
-		Currency: saleAnnoucement.Price.Currency.Symbol,
-		TicketID: ticket.TicketID.String(),
-		EventID:  ticket.EventID.String(),
+func MapResellToDTO(resell *models.Resell) *dto.Resells {
+	return &dto.Resells{
+		Price:    fmt.Sprintf("%.2f", resell.Price.Amount),
+		Currency: resell.Price.Currency.Symbol,
 	}
 }

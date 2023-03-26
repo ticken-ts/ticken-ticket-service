@@ -10,13 +10,10 @@ type Ticket struct {
 	PvtbcTxID string `json:"pvtbc_tx_id"`
 	TokenID   string `json:"token_id"`
 
-	SaleAnnouncements []*SaleAnnouncement `json:"sale_announcements"`
+	Resells []*Resells `json:"resells"`
 }
 
-type SaleAnnouncement struct {
-	TicketID string `json:"ticket_id"`
-	EventID  string `json:"event_id"`
-
+type Resells struct {
 	Price    string `json:"price"`
 	Currency string `json:"currency"`
 }

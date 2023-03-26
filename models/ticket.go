@@ -29,26 +29,31 @@ type Ticket struct {
 	/*******************************************/
 
 	/***************** sales *******************/
-	SaleAnnouncements []*SaleAnnouncement `bson:"sale_announcements"`
+	Resells []*Resell `bson:"resells"`
 	/*******************************************/
 }
 
-type SaleAnnouncement struct {
-	Price  *money.Money `bson:"money"`
-	Active bool         `bson:"active"`
-}
-
-func (announcement *SaleAnnouncement) IsOnBlockchain() bool {
-	return announcement.Price.IsCrypto()
+func (ticket *Ticket) IsOnSale() bool {
+	if ticket.Resells == nil || len(ticket.Resells) == 0 {
+		return false
+	}
+	for _, announcement := range ticket.Resells {
+		if announcement.Active {
+			return true
+		}
+	}
+	return false
 }
 
 func (ticket *Ticket) TransferTo(anotherAttendant *User) error {
 	if ticket.IsOwnedBy(anotherAttendant) {
-		return fmt.Errorf("ticket is already ownerd by %s", anotherAttendant.UUID)
+		return fmt.Errorf(
+			"ticket is already ownerd by %s",
+			anotherAttendant.UUID,
+		)
 	}
 
 	ticket.OwnerID = anotherAttendant.UUID
-
 	return nil
 }
 
@@ -56,12 +61,12 @@ func (ticket *Ticket) IsOwnedBy(attendant *User) bool {
 	return attendant.UUID == ticket.OwnerID
 }
 
-func (ticket *Ticket) CreateSaleAnnouncement(price *money.Money) (*SaleAnnouncement, error) {
-	if ticket.SaleAnnouncements == nil {
-		ticket.SaleAnnouncements = make([]*SaleAnnouncement, 0)
+func (ticket *Ticket) CreateResell(price *money.Money) (*Resell, error) {
+	if ticket.Resells == nil {
+		ticket.Resells = make([]*Resell, 0)
 	}
 
-	for _, announcement := range ticket.SaleAnnouncements {
+	for _, announcement := range ticket.Resells {
 		if announcement.Active && announcement.Price.Currency == price.Currency {
 			return nil,
 				fmt.Errorf(
@@ -71,8 +76,39 @@ func (ticket *Ticket) CreateSaleAnnouncement(price *money.Money) (*SaleAnnouncem
 		}
 	}
 
-	newSaleAnnouncement := &SaleAnnouncement{Price: price, Active: true}
-	ticket.SaleAnnouncements = append(ticket.SaleAnnouncements, newSaleAnnouncement)
+	newResell := &Resell{Price: price, Active: true, ResellID: uuid.New()}
+	ticket.Resells = append(ticket.Resells, newResell)
 
-	return newSaleAnnouncement, nil
+	return newResell, nil
+}
+
+func (ticket *Ticket) GetResell(resellID uuid.UUID) *Resell {
+	for _, resell := range ticket.Resells {
+		if resell.ResellID == resellID {
+			return resell
+		}
+	}
+	return nil
+}
+
+func (ticket *Ticket) SellTo(buyer *User, resellID uuid.UUID) error {
+	if !ticket.IsOnSale() {
+		return fmt.Errorf("ticket is not on sale")
+	}
+
+	foundResell := ticket.GetResell(resellID)
+	if foundResell.IsOnBlockchain() {
+		panic("blockchain resell is not supported")
+	}
+
+	// invalidate all resells
+	for _, resell := range ticket.Resells {
+		resell.Deactivate()
+	}
+
+	if err := ticket.TransferTo(buyer); err != nil {
+		return err
+	}
+
+	return nil
 }

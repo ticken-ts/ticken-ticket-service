@@ -46,18 +46,59 @@ func (ticketTrader *ticketTrader) SellTicket(ownerID, eventID, ticketID uuid.UUI
 		return nil, fmt.Errorf("%s is not the ticket owner", attendant.UUID)
 	}
 
-	newSaleAnnouncement, err := ticket.CreateSaleAnnouncement(price)
+	newResell, err := ticket.CreateResell(price)
 	if err != nil {
 		return nil, err
 	}
 
-	err = ticketTrader.ticketRepository.AddTicketSaleAnnouncement(eventID, ticketID, newSaleAnnouncement)
-	if err != nil {
-		return nil, err
-	}
-
-	if newSaleAnnouncement.IsOnBlockchain() {
+	if newResell.IsOnBlockchain() {
 		panic("still not supported")
+	}
+
+	if err := ticketTrader.ticketRepository.AddTicketResell(eventID, ticketID, newResell); err != nil {
+		return nil, err
+	}
+
+	return ticket, nil
+}
+
+func (ticketTrader *ticketTrader) BuyResoldTicket(buyerID, eventID, ticketID, resellID uuid.UUID) (*models.Ticket, error) {
+	buyer := ticketTrader.userRepository.FindUser(buyerID)
+	if buyer == nil {
+		return nil, fmt.Errorf("user not found")
+	}
+
+	event := ticketTrader.eventRepository.FindEvent(eventID)
+	if event == nil {
+		return nil, fmt.Errorf("event not found")
+	}
+
+	ticket := ticketTrader.ticketRepository.FindTicket(eventID, ticketID)
+	if ticket == nil {
+		return nil, fmt.Errorf("ticket not found")
+	}
+
+	seller := ticketTrader.userRepository.FindUser(ticket.OwnerID)
+	if seller == nil {
+		return nil, fmt.Errorf("ticket owner not found")
+	}
+
+	if err := ticket.SellTo(buyer, resellID); err != nil {
+		return nil, err
+	}
+
+	_, err := ticketTrader.pubbcCaller.TransferTicket(
+		event.PubBCAddress,
+		ticket.TokenID,
+		seller.WalletAddress,
+		buyer.WalletAddress,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := ticketTrader.ticketRepository.UpdateResoldTicket(ticket); err != nil {
+		return nil, err
 	}
 
 	return ticket, nil

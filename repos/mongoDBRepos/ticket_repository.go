@@ -31,8 +31,8 @@ func (r *TicketMongoDBRepository) AddTicket(ticket *models.Ticket) error {
 
 	// initialize arrays to make the field
 	// be of type array in the database
-	if ticket.SaleAnnouncements == nil {
-		ticket.SaleAnnouncements = make([]*models.SaleAnnouncement, 0)
+	if ticket.Resells == nil {
+		ticket.Resells = make([]*models.Resell, 0)
 	}
 
 	tickets := r.getCollection()
@@ -166,13 +166,29 @@ func (r *TicketMongoDBRepository) UpdateTicketOwner(ticket *models.Ticket) error
 	return nil
 }
 
-func (r *TicketMongoDBRepository) AddTicketSaleAnnouncement(eventID, ticketID uuid.UUID, saleAnnouncement *models.SaleAnnouncement) error {
+func (r *TicketMongoDBRepository) AddTicketResell(eventID, ticketID uuid.UUID, resell *models.Resell) error {
 	updateContext, cancel := r.generateOpSubcontext()
 	defer cancel()
 
 	tickets := r.getCollection()
 	filter := bson.M{"event_id": eventID, "ticket_id": ticketID}
-	update := bson.M{"$push": bson.M{"sale_announcements": saleAnnouncement}}
+	update := bson.M{"$push": bson.M{"resells": resell}}
+
+	_, err := tickets.UpdateOne(updateContext, filter, update)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *TicketMongoDBRepository) UpdateResoldTicket(ticket *models.Ticket) error {
+	updateContext, cancel := r.generateOpSubcontext()
+	defer cancel()
+
+	tickets := r.getCollection()
+	filter := bson.M{"event_id": ticket.EventID, "ticket_id": ticket.TicketID}
+	update := bson.M{"resells": ticket.Resells, "owner": ticket.OwnerID}
 
 	_, err := tickets.UpdateOne(updateContext, filter, update)
 	if err != nil {
