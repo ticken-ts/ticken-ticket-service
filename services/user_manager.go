@@ -7,6 +7,8 @@ import (
 	"ticken-ticket-service/infra"
 	"ticken-ticket-service/models"
 	"ticken-ticket-service/repos"
+	"ticken-ticket-service/tickenerr"
+	"ticken-ticket-service/tickenerr/usererr"
 )
 
 type userManager struct {
@@ -33,41 +35,41 @@ func NewUserManager(
 	}
 }
 
-func (userManager *userManager) CreateUser(uuid uuid.UUID, providedPK string) (*models.User, error) {
-	newUser := models.NewUser(uuid)
-	var pkStoreKey string
-	var walletAddr string
+func (userManager *userManager) CreateUser(attendantID uuid.UUID, providedPK string) (*models.User, error) {
+	newAttendant := models.NewUser(attendantID)
+
+	var pkStoreKey, walletAddr string
 	var err error
 
 	// check if user exists
-	user := userManager.userRepository.FindUser(uuid)
+	user := userManager.userRepository.FindUser(attendantID)
 	if user != nil {
-		return nil, errors.New("user already exists")
+		return nil, tickenerr.New(usererr.UserAlreadyExistErrorCode)
 	}
 
-	if providedPK != "" {
+	if len(providedPK) > 0 {
 		pkStoreKey, err = userManager.hsm.Store([]byte(providedPK))
 		if err != nil {
-			return nil, err
+			return nil, tickenerr.FromError(usererr.PrivateKeyStoreErrorCode, err)
 		}
 	} else {
 		newPK, newWalletAddr, err := userManager.pubbcAdmin.CreateWallet()
 		if err != nil {
-			return nil, err
+			return nil, tickenerr.FromError(usererr.CreateWallerErrorCode, err)
 		}
 		pkStoreKey, err = userManager.hsm.Store([]byte(newPK))
 		if err != nil {
-			return nil, err
+			return nil, tickenerr.FromError(usererr.PrivateKeyStoreErrorCode, err)
 		}
 		walletAddr = newWalletAddr
 	}
 
-	newUser.SetWallet(pkStoreKey, walletAddr)
-	err = userManager.userRepository.AddUser(newUser)
+	newAttendant.SetWallet(pkStoreKey, walletAddr)
+	err = userManager.userRepository.AddUser(newAttendant)
 	if err != nil {
-		return nil, err
+		return nil, tickenerr.FromError(usererr.StoreUserInDatabase, err)
 	}
-	return newUser, nil
+	return newAttendant, nil
 }
 
 // GetUser returns the user with the given UUID
