@@ -1,10 +1,11 @@
 package usererr
 
 const (
-	UserAlreadyExistErrorCode = 100
-	PrivateKeyStoreErrorCode  = 101
-	CreateWallerErrorCode     = 102
-	StoreUserInDatabase       = 103
+	UserAlreadyExistErrorCode = iota + 100
+	PrivateKeyStoreErrorCode
+	CreateWallerErrorCode
+	StoreUserInDatabaseErrorCode
+	UserNotFoundInDatabaseErrorCode
 )
 
 func GetErrMessage(code uint8) string {
@@ -15,8 +16,10 @@ func GetErrMessage(code uint8) string {
 		return "failed to store user private key"
 	case CreateWallerErrorCode:
 		return "failed to create user wallet in public blockchain"
-	case StoreUserInDatabase:
+	case StoreUserInDatabaseErrorCode:
 		return "failed to store new user in database"
+	case UserNotFoundInDatabaseErrorCode:
+		return "user not found in database"
 	default:
 		return "an error has occurred"
 	}

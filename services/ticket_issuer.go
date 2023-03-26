@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	pubbc "github.com/ticken-ts/ticken-pubbc-connector"
-	chain_models "github.com/ticken-ts/ticken-pubbc-connector/chain-models"
 	pvtbc "github.com/ticken-ts/ticken-pvtbc-connector"
 	"math/big"
 	"ticken-ticket-service/infra"
 	"ticken-ticket-service/log"
 	"ticken-ticket-service/models"
 	"ticken-ticket-service/repos"
+	"ticken-ticket-service/tickenerr"
+	"ticken-ticket-service/tickenerr/usererr"
 )
 
 type ticketIssuer struct {
@@ -114,76 +115,54 @@ func (s *ticketIssuer) IssueTicket(eventID uuid.UUID, section string, ownerID uu
 	return newTicket, nil
 }
 
-func (s *ticketIssuer) GetUserTickets(userID uuid.UUID) ([]*models.Ticket, error) {
-	userInfo := s.userRepository.FindUser(userID)
-	userTickets, err := s.ticketRepository.GetUserTickets(userID)
+func (s *ticketIssuer) GetUserTickets(attendantID uuid.UUID) ([]*models.Ticket, error) {
+	userTickets, err := s.ticketRepository.GetUserTickets(attendantID)
 	if err != nil {
-		return nil, fmt.Errorf("could not get user tickets: %w", err)
+		return nil, err
+	}
+	attendant := s.userRepository.FindUser(attendantID)
+	if attendant == nil {
+		return nil, tickenerr.New(usererr.UserNotFoundInDatabaseErrorCode)
 	}
 
-	var presentEvents []*models.Event
+	// represents the tickets that the user still has
+	// after syncing it with the public blockchain
+	filteredTickets := make([]*models.Ticket, 0)
 
-	// get all events that are present in user tickets
 	for _, ticket := range userTickets {
-		// check if event is present in the list
-		var present = false
-		for _, event := range presentEvents {
-			if event.EventID == ticket.EventID {
-				present = true
-				break
-			}
+		event := s.eventRepository.FindEvent(ticket.EventID)
+		if event == nil {
+			log.TickenLogger.Warn().Msg(fmt.Sprintf(
+				"Couldn't find event for ticket %s",
+				ticket.TicketID.String(),
+			))
+		}
+		pubbcTicket, err := s.pubbcCaller.GetTicket(event.PubBCAddress, ticket.TokenID)
+
+		if pubbcTicket.TokenID.Text(16) != ticket.TokenID.Text(16) {
+			panic("token ID differs")
 		}
 
-		if !present {
-			ticketEvent := s.eventRepository.FindEvent(ticket.EventID)
-			if ticketEvent == nil {
-				log.TickenLogger.Log().Msg("could not find event for ticket: " + ticket.TicketID.String())
-				continue
-			}
-			presentEvents = append(presentEvents, ticketEvent)
-		}
-	}
-
-	// get all tickets on pubbc for each event
-	type ticketInfo struct {
-		ticket *chain_models.Ticket
-		event  *models.Event
-	}
-
-	var ticketsInfo []ticketInfo
-	for _, event := range presentEvents {
-		tickets, err := s.pubbcCaller.GetTickets(event.PubBCAddress, userInfo.WalletAddress)
 		if err != nil {
-			log.TickenLogger.Log().Err(err).Msg("could not get tickets on public blockchain for event: " + event.EventID.String())
-			continue
+			log.TickenLogger.Warn().Msg(fmt.Sprintf(
+				"Failed to get ticket %s from contract with addr %s: %s",
+				ticket.TicketID.String(),
+				event.PubBCAddress,
+				err.Error(),
+			))
 		}
-		for _, ticket := range tickets {
-			ticketsInfo = append(ticketsInfo, ticketInfo{
-				ticket: &ticket,
-				event:  event,
-			})
-		}
-	}
-
-	// filter userTickets that are not in ticketsInfo
-	var filteredTickets []*models.Ticket
-	for _, ticket := range userTickets {
-		var present = false
-		for _, ticketInfo := range ticketsInfo {
-			if ticketInfo.ticket.TokenID.Cmp(ticket.TokenID) == 0 && ticketInfo.event.EventID == ticket.EventID {
-				present = true
-				break
-			}
-		}
-		if !present {
+		if pubbcTicket.OwnerAddr != attendant.WalletAddress {
+			ticket.ToBatman()
+			// todo call repo
+		} else {
 			filteredTickets = append(filteredTickets, ticket)
 		}
 	}
-
 	return filteredTickets, nil
 }
 
-// GenerateTokenID generates a token ID in uint256 for the ticket by hashing the ticket ID.
+// GenerateTokenID generates a token ID in uint256
+// for the ticket by hashing the ticket ID.
 func generateTokenID(ticketID uuid.UUID) (*big.Int, error) {
 	bytes, err := ticketID.MarshalBinary()
 	if err != nil {

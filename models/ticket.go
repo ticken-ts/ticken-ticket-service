@@ -112,3 +112,7 @@ func (ticket *Ticket) SellTo(buyer *User, resellID uuid.UUID) error {
 
 	return nil
 }
+
+func (ticket *Ticket) ToBatman() {
+	ticket.OwnerID = uuid.Nil
+}
