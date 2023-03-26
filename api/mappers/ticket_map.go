@@ -22,6 +22,9 @@ func MapTicketToDTO(ticket *models.Ticket) *dto.Ticket {
 
 	if ticket.Resells != nil {
 		for _, resell := range ticket.Resells {
+			if !resell.Active {
+				continue
+			}
 			ticketDTO.Resells = append(
 				ticketDTO.Resells,
 				MapResellToDTO(resell),

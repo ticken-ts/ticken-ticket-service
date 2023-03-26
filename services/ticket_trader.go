@@ -26,8 +26,8 @@ func NewTicketTrader(repoProvider repos.IProvider, pubbcCaller pubbc.Caller) Tic
 }
 
 func (ticketTrader *ticketTrader) SellTicket(ownerID, eventID, ticketID uuid.UUID, price *money.Money) (*models.Ticket, error) {
-	attendant := ticketTrader.userRepository.FindUser(ownerID)
-	if attendant == nil {
+	seller := ticketTrader.userRepository.FindUser(ownerID)
+	if seller == nil {
 		return nil, fmt.Errorf("user not found")
 	}
 
@@ -42,8 +42,8 @@ func (ticketTrader *ticketTrader) SellTicket(ownerID, eventID, ticketID uuid.UUI
 	}
 
 	// todo -> handle ownership when the ticket were transferred without ht eapp
-	if !ticket.IsOwnedBy(attendant) {
-		return nil, fmt.Errorf("%s is not the ticket owner", attendant.UUID)
+	if !ticket.IsOwnedBy(seller) {
+		return nil, fmt.Errorf("%s is not the ticket owner", seller.UUID)
 	}
 
 	newResell, err := ticket.CreateResell(price)
