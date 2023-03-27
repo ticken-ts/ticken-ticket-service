@@ -153,7 +153,7 @@ func (s *ticketIssuer) GetUserTickets(attendantID uuid.UUID) ([]*models.Ticket, 
 		}
 		if pubbcTicket.OwnerAddr != attendant.WalletAddress {
 			ticket.ToBatman()
-			// todo call repo
+			_ = s.ticketRepository.UpdateTicketOwner(ticket)
 		} else {
 			filteredTickets = append(filteredTickets, ticket)
 		}
