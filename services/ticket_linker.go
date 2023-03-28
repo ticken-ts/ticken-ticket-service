@@ -4,8 +4,15 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	pubbc "github.com/ticken-ts/ticken-pubbc-connector"
+	"ticken-ticket-service/env"
+	"ticken-ticket-service/log"
 	"ticken-ticket-service/models"
 	"ticken-ticket-service/repos"
+	"ticken-ticket-service/tickenerr"
+	"ticken-ticket-service/tickenerr/commonerr"
+	"ticken-ticket-service/tickenerr/eventerr"
+	"ticken-ticket-service/tickenerr/ticketerr"
+	"ticken-ticket-service/tickenerr/usererr"
 )
 
 type ticketLinker struct {
@@ -15,7 +22,7 @@ type ticketLinker struct {
 	pubbcCaller      pubbc.Caller
 }
 
-func NewTicketLinker(repoProvider repos.IProvider, pubbcCaller pubbc.Caller) TicketLinker {
+func NewTicketLinker(repoProvider repos.IProvider, pubbcCaller pubbc.Caller) ITicketLinker {
 	return &ticketLinker{
 		eventRepository:  repoProvider.GetEventRepository(),
 		ticketRepository: repoProvider.GetTicketRepository(),
@@ -27,17 +34,21 @@ func NewTicketLinker(repoProvider repos.IProvider, pubbcCaller pubbc.Caller) Tic
 func (t ticketLinker) LinkTickets(attendantID uuid.UUID, eventContractAddress string) ([]*models.Ticket, error) {
 	attendant := t.userRepository.FindUser(attendantID)
 	if attendant == nil {
-		return nil, fmt.Errorf("user not found")
+		return nil, tickenerr.New(usererr.UserNotFoundErrorCode)
 	}
 
 	event := t.eventRepository.FindEventByContractAddress(eventContractAddress)
 	if event == nil {
-		return nil, fmt.Errorf("event with contract address %s not found", eventContractAddress)
+		return nil, tickenerr.NewWithMessage(
+			eventerr.EventNotFoundErrorCode,
+			fmt.Sprintf("contract addr: %s", eventContractAddress))
 	}
 
 	pubbcTickets, err := t.pubbcCaller.GetTickets(eventContractAddress, attendant.WalletAddress)
 	if err != nil {
-		return nil, fmt.Errorf("could not obtain tickets from the blockchain: %s", err.Error())
+		return nil, tickenerr.FromError(
+			ticketerr.FailedToRetrievePUBBCTicketsErrorCode,
+			err)
 	}
 
 	newTickets := make([]*models.Ticket, 0)
@@ -48,7 +59,13 @@ func (t ticketLinker) LinkTickets(attendantID uuid.UUID, eventContractAddress st
 		// this should never happen, because the user cant mint
 		// the tickets by themselves.
 		if ticket == nil {
-			panic("found a ticket in blockchain that is not in db") // todo just for dev
+			msg := fmt.Sprintf("ticket with token ID %s present in PUBBC not found in local database: %v",
+				ticket.TokenID.Text(16), err)
+
+			if env.TickenEnv.IsDev() {
+				panic(msg)
+			}
+			log.TickenLogger.Warn().Msg(msg)
 		}
 
 		// if the user didn't change, we continue
@@ -56,13 +73,20 @@ func (t ticketLinker) LinkTickets(attendantID uuid.UUID, eventContractAddress st
 			continue
 		}
 
-		// todo -> handle better these failures
-		if err := ticket.TransferTo(attendant); err != nil {
-			return nil, fmt.Errorf("failed to tranfer ticket %s: %s", ticket.TokenID.Text(16), err.Error())
-		}
+		if err := ticket.TransferTo(attendant); err == nil {
+			if err := t.ticketRepository.UpdateTicketOwner(ticket); err != nil {
+				return nil, tickenerr.FromErrorWithMessage(
+					commonerr.FailedToUpdateElement, err,
+					fmt.Sprintf("owner of ticket with token ID %s", ticket.TokenID.Text(16)))
+			}
+		} else { // this should never happen
+			msg := fmt.Sprintf("error transferring ticket locally from %s to %s: %v",
+				ticket.OwnerID.String(), attendant.UUID.String(), err)
 
-		if err := t.ticketRepository.UpdateTicketOwner(ticket); err != nil {
-			return nil, fmt.Errorf("fialed to update ticket %s owner: %s", ticket.TokenID.Text(16), err.Error())
+			if env.TickenEnv.IsDev() {
+				panic(msg)
+			}
+			log.TickenLogger.Warn().Msg(msg)
 		}
 
 		newTickets = append(newTickets, ticket)

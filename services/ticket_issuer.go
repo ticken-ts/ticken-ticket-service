@@ -11,10 +11,13 @@ import (
 	"ticken-ticket-service/models"
 	"ticken-ticket-service/repos"
 	"ticken-ticket-service/tickenerr"
+	"ticken-ticket-service/tickenerr/commonerr"
+	"ticken-ticket-service/tickenerr/eventerr"
+	"ticken-ticket-service/tickenerr/ticketerr"
 	"ticken-ticket-service/tickenerr/usererr"
 )
 
-type ticketIssuer struct {
+type TicketIssuer struct {
 	eventRepository  repos.EventRepository
 	ticketRepository repos.TicketRepository
 	userRepository   repos.UserRepository
@@ -28,8 +31,8 @@ func NewTicketIssuer(
 	hsm infra.HSM,
 	pubbcCaller pubbc.Caller,
 	pvtbcCaller *pvtbc.Caller,
-) TicketIssuer {
-	return &ticketIssuer{
+) ITicketIssuer {
+	return &TicketIssuer{
 		eventRepository:  repoProvider.GetEventRepository(),
 		ticketRepository: repoProvider.GetTicketRepository(),
 		userRepository:   repoProvider.GetUserRepository(),
@@ -39,27 +42,29 @@ func NewTicketIssuer(
 	}
 }
 
-func (s *ticketIssuer) IssueTicket(eventID uuid.UUID, section string, ownerID uuid.UUID) (*models.Ticket, error) {
+func (s *TicketIssuer) IssueTicket(eventID uuid.UUID, section string, attendantID uuid.UUID) (*models.Ticket, error) {
 	event := s.eventRepository.FindEvent(eventID)
 	if event == nil {
-		return nil, fmt.Errorf("could not determine organizer channel")
+		return nil, tickenerr.New(eventerr.EventNotFoundErrorCode)
 	}
 
-	user := s.userRepository.FindUser(ownerID)
-	if user == nil {
-		return nil, fmt.Errorf("could not find user")
+	attendant := s.userRepository.FindUser(attendantID)
+	if attendant == nil {
+		return nil, tickenerr.New(usererr.UserNotFoundErrorCode)
 	}
 
 	err := s.pvtbcCaller.SetChannel(event.PvtBCChannel)
 	if err != nil {
-		return nil, fmt.Errorf("could not set channel: %w", err)
+		return nil, tickenerr.FromError(
+			commonerr.FailedToEstablishConnectionWithPVTBCErrorCode,
+			err)
 	}
 
 	newTicket := &models.Ticket{
 		TicketID: uuid.New(),
 		EventID:  eventID,
 		Section:  section,
-		OwnerID:  ownerID,
+		OwnerID:  attendantID,
 
 		// this fields will be populated after each
 		// blockchain transaction, indicating if the
@@ -70,7 +75,9 @@ func (s *ticketIssuer) IssueTicket(eventID uuid.UUID, section string, ownerID uu
 
 	tokenID, err := generateTokenID(newTicket.TicketID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate token ID: %w", err)
+		return nil, tickenerr.FromError(
+			ticketerr.FailedToGenerateTokenIDErrorCode,
+			err)
 	}
 	newTicket.TokenID = tokenID
 
@@ -87,7 +94,7 @@ func (s *ticketIssuer) IssueTicket(eventID uuid.UUID, section string, ownerID uu
 		newTicket.TokenID,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to issue ticket to pvtbc: %w", err)
+		return nil, tickenerr.FromError(ticketerr.FailedToMintTicketInPVTBC, err)
 	}
 	newTicket.PvtbcTxID = pvtbcTxID
 	newTicket.Status = ticketResponse.Status
@@ -99,12 +106,12 @@ func (s *ticketIssuer) IssueTicket(eventID uuid.UUID, section string, ownerID uu
 	// ******************* PUBBC Ticket Issuing ******************* //
 	pubbcTxID, err := s.pubbcCaller.MintTicket(
 		event.PubBCAddress,
-		user.WalletAddress,
+		attendant.WalletAddress,
 		newTicket.Section,
 		newTicket.TokenID,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("could not generate ticket on public blockchain")
+		return nil, tickenerr.FromError(ticketerr.FailedToMintTicketInPUBBC, err)
 	}
 	newTicket.PubbcTxID = pubbcTxID
 	if err := s.ticketRepository.UpdateTicketBlockchainData(newTicket); err != nil {
@@ -115,14 +122,14 @@ func (s *ticketIssuer) IssueTicket(eventID uuid.UUID, section string, ownerID uu
 	return newTicket, nil
 }
 
-func (s *ticketIssuer) GetUserTickets(attendantID uuid.UUID) ([]*models.Ticket, error) {
+func (s *TicketIssuer) GetUserTickets(attendantID uuid.UUID) ([]*models.Ticket, error) {
 	userTickets, err := s.ticketRepository.GetUserTickets(attendantID)
 	if err != nil {
 		return nil, err
 	}
 	attendant := s.userRepository.FindUser(attendantID)
 	if attendant == nil {
-		return nil, tickenerr.New(usererr.UserNotFoundInDatabaseErrorCode)
+		return nil, tickenerr.New(usererr.UserNotFoundErrorCode)
 	}
 
 	// represents the tickets that the user still has
@@ -136,13 +143,9 @@ func (s *ticketIssuer) GetUserTickets(attendantID uuid.UUID) ([]*models.Ticket, 
 				"Couldn't find event for ticket %s",
 				ticket.TicketID.String(),
 			))
+			continue
 		}
 		pubbcTicket, err := s.pubbcCaller.GetTicket(event.PubBCAddress, ticket.TokenID)
-
-		if pubbcTicket.TokenID.Text(16) != ticket.TokenID.Text(16) {
-			panic("token ID differs")
-		}
-
 		if err != nil {
 			log.TickenLogger.Warn().Msg(fmt.Sprintf(
 				"Failed to get ticket %s from contract with addr %s: %s",
@@ -150,7 +153,13 @@ func (s *ticketIssuer) GetUserTickets(attendantID uuid.UUID) ([]*models.Ticket, 
 				event.PubBCAddress,
 				err.Error(),
 			))
+			continue
 		}
+
+		if pubbcTicket.TokenID.Text(16) != ticket.TokenID.Text(16) {
+			panic("token ID differs")
+		}
+
 		if pubbcTicket.OwnerAddr != attendant.WalletAddress {
 			ticket.ToBatman()
 			_ = s.ticketRepository.UpdateTicketOwner(ticket)

@@ -1,7 +1,6 @@
 package services
 
 import (
-	"errors"
 	"github.com/google/uuid"
 	pubbc "github.com/ticken-ts/ticken-pubbc-connector"
 	"ticken-ticket-service/infra"
@@ -11,7 +10,7 @@ import (
 	"ticken-ticket-service/tickenerr/usererr"
 )
 
-type userManager struct {
+type UserManager struct {
 	eventRepository  repos.EventRepository
 	ticketRepository repos.TicketRepository
 	userRepository   repos.UserRepository
@@ -19,24 +18,18 @@ type userManager struct {
 	hsm              infra.HSM
 }
 
-func NewUserManager(
-	eventRepository repos.EventRepository,
-	ticketRepository repos.TicketRepository,
-	userRepository repos.UserRepository,
-	pubbcAdmin pubbc.Admin,
-	hsm infra.HSM,
-) UserManager {
-	return &userManager{
-		ticketRepository: ticketRepository,
-		eventRepository:  eventRepository,
-		userRepository:   userRepository,
+func NewUserManager(repoProvider repos.IProvider, pubbcAdmin pubbc.Admin, hsm infra.HSM) IUserManager {
+	return &UserManager{
+		ticketRepository: repoProvider.GetTicketRepository(),
+		eventRepository:  repoProvider.GetEventRepository(),
+		userRepository:   repoProvider.GetUserRepository(),
 		pubbcAdmin:       pubbcAdmin,
 		hsm:              hsm,
 	}
 }
 
-func (userManager *userManager) CreateUser(attendantID uuid.UUID, providedPK string) (*models.User, error) {
-	newAttendant := models.NewUser(attendantID)
+func (userManager *UserManager) CreateUser(attendantID uuid.UUID, providedPK string) (*models.User, error) {
+	newAttendant := &models.User{UUID: attendantID}
 
 	var pkStoreKey, walletAddr string
 	var err error
@@ -73,23 +66,23 @@ func (userManager *userManager) CreateUser(attendantID uuid.UUID, providedPK str
 }
 
 // GetUser returns the user with the given UUID
-func (userManager *userManager) GetUser(uuid uuid.UUID) (*models.User, error) {
+func (userManager *UserManager) GetUser(uuid uuid.UUID) (*models.User, error) {
 	user := userManager.userRepository.FindUser(uuid)
 	if user == nil {
-		return nil, errors.New("user not found")
+		return nil, tickenerr.New(usererr.UserNotFoundErrorCode)
 	}
 	return user, nil
 }
 
-func (userManager *userManager) GetUserPrivKey(uuid uuid.UUID) (string, error) {
+func (userManager *UserManager) GetUserPrivKey(uuid uuid.UUID) (string, error) {
 	user := userManager.userRepository.FindUser(uuid)
 	if user == nil {
-		return "", errors.New("user not found")
+		return "", tickenerr.New(usererr.UserNotFoundErrorCode)
 	}
 
 	userPrivKey, err := userManager.hsm.Retrieve(user.AddressPKStoreKey)
 	if err != nil {
-		return "", err
+		return "", tickenerr.FromError(usererr.PrivateKeyRetrieveErrorCode, err)
 	}
 
 	return string(userPrivKey), err

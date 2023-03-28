@@ -19,7 +19,7 @@ func (controller *TicketController) GetTicketsInResell(c *gin.Context) {
 
 	section := c.Query("section")
 
-	tickets, err := controller.serviceProvider.GetTicketTrader().GetResells(eventID, section)
+	tickets, err := controller.serviceProvider.GetTicketTrader().GetTicketsInResells(eventID, section)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.HttpResponse{Message: err.Error()})
 		c.Abort()

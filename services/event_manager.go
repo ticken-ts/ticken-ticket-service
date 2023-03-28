@@ -11,8 +11,11 @@ type EventManager struct {
 	ticketRepository repos.TicketRepository
 }
 
-func NewEventManager(eventRepository repos.EventRepository, ticketRepository repos.TicketRepository) *EventManager {
-	return &EventManager{ticketRepository: ticketRepository, eventRepository: eventRepository}
+func NewEventManager(repoProvider repos.IProvider) *EventManager {
+	return &EventManager{
+		ticketRepository: repoProvider.GetTicketRepository(),
+		eventRepository:  repoProvider.GetEventRepository(),
+	}
 }
 
 func (eventManager *EventManager) AddEvent(eventID, organizerID uuid.UUID, pvtBCChannel, pubBCAddress string) (*models.Event, error) {

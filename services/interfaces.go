@@ -7,25 +7,25 @@ import (
 )
 
 type IProvider interface {
-	GetTicketIssuer() TicketIssuer
-	GetTicketLinker() TicketLinker
+	GetTicketIssuer() ITicketIssuer
+	GetTicketLinker() ITicketLinker
 	GetEventManager() IEventManager
-	GetUserManager() UserManager
-	GetTicketTrader() TicketTrader
+	GetUserManager() IUserManager
+	GetTicketTrader() ITicketTrader
 }
 
-type TicketTrader interface {
+type ITicketTrader interface {
 	SellTicket(ownerID, eventID, ticketID uuid.UUID, price *money.Money) (*models.Ticket, error)
 	BuyResoldTicket(buyerID, eventID, ticketID, resellID uuid.UUID) (*models.Ticket, error)
-	GetResells(eventID uuid.UUID, section string) ([]*models.Ticket, error)
+	GetTicketsInResells(eventID uuid.UUID, section string) ([]*models.Ticket, error)
 }
 
-type TicketIssuer interface {
+type ITicketIssuer interface {
 	IssueTicket(eventID uuid.UUID, section string, owner uuid.UUID) (*models.Ticket, error)
 	GetUserTickets(userID uuid.UUID) ([]*models.Ticket, error)
 }
 
-type TicketLinker interface {
+type ITicketLinker interface {
 	LinkTickets(ownerID uuid.UUID, eventContractAddress string) ([]*models.Ticket, error)
 }
 
@@ -33,7 +33,7 @@ type IEventManager interface {
 	AddEvent(eventID, organizerID uuid.UUID, pvtBCChannel, pubBCAddress string) (*models.Event, error)
 }
 
-type UserManager interface {
+type IUserManager interface {
 	// CreateUser creates a new user and returns it.
 	// pubBCPrivateKey is the private key of
 	// the user in the public blockchain if the

@@ -96,9 +96,8 @@ func (ticket *Ticket) SellTo(buyer *User, resellID uuid.UUID) error {
 		return fmt.Errorf("ticket is not on sale")
 	}
 
-	foundResell := ticket.GetResell(resellID)
-	if foundResell.IsOnBlockchain() {
-		panic("blockchain resell is not supported")
+	if ticket.GetResell(resellID) == nil {
+		return fmt.Errorf("resell %s doest not exist", resellID.String())
 	}
 
 	// invalidate all resells
