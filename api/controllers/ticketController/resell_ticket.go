@@ -5,8 +5,8 @@ import (
 	"github.com/google/uuid"
 	"net/http"
 	"ticken-ticket-service/api/mappers"
+	"ticken-ticket-service/api/res"
 	"ticken-ticket-service/security/jwt"
-	"ticken-ticket-service/utils"
 	"ticken-ticket-service/utils/money"
 )
 
@@ -21,28 +21,27 @@ func (controller *TicketController) ResellTicket(c *gin.Context) {
 	ownerID := c.MustGet("jwt").(*jwt.Token).Subject
 
 	if err := c.BindJSON(&payload); err != nil {
-		c.JSON(http.StatusBadRequest, utils.HttpResponse{Message: err.Error()})
 		c.Abort()
 		return
 	}
 
 	eventID, err := uuid.Parse(c.Param("eventID"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, utils.HttpResponse{Message: err.Error()})
+		c.Error(err)
 		c.Abort()
 		return
 	}
 
 	ticketID, err := uuid.Parse(c.Param("ticketID"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, utils.HttpResponse{Message: err.Error()})
+		c.Error(err)
 		c.Abort()
 		return
 	}
 
 	price, err := money.BuildFrom(payload.Price, payload.Currency)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, utils.HttpResponse{Message: err.Error()})
+		c.Error(err)
 		c.Abort()
 		return
 	}
@@ -54,12 +53,12 @@ func (controller *TicketController) ResellTicket(c *gin.Context) {
 		price,
 	)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, utils.HttpResponse{Message: err.Error()})
+		c.Error(err)
 		c.Abort()
 		return
 	}
 
-	c.JSON(http.StatusOK, utils.HttpResponse{
+	c.JSON(http.StatusOK, res.Success{
 		Message: "Ticket published for sale successfully",
 		Data:    mappers.MapTicketToDTO(ticket),
 	})

@@ -6,11 +6,29 @@ import (
 	"ticken-ticket-service/api/res"
 	"ticken-ticket-service/log"
 	"ticken-ticket-service/tickenerr"
+	"ticken-ticket-service/tickenerr/commonerr"
+	"ticken-ticket-service/tickenerr/eventerr"
+	"ticken-ticket-service/tickenerr/ticketerr"
 	"ticken-ticket-service/tickenerr/usererr"
 )
 
-var statusCodesByError = map[uint8]int{
+var statusCodesByError = map[uint32]int{
+	// user err
 	usererr.UserAlreadyExistErrorCode: http.StatusBadRequest,
+	usererr.UserNotFoundErrorCode:     http.StatusNotFound,
+
+	// ticket err
+	ticketerr.TicketNotFoundErrorCode:             http.StatusNotFound,
+	ticketerr.BuyResellErrorCode:                  http.StatusBadRequest,
+	ticketerr.CreateResellErrorCode:               http.StatusBadRequest,
+	ticketerr.ResellCurrencyNotSupportedErrorCode: http.StatusBadRequest,
+	ticketerr.TicketResellNotFoundErrorCode:       http.StatusNotFound,
+
+	// event err
+	eventerr.EventNotFoundErrorCode: http.StatusNotFound,
+
+	// ticket err
+	commonerr.ElementNotFoundInDatabase: http.StatusNotFound,
 }
 
 type ErrorMiddleware struct {
@@ -42,7 +60,7 @@ func (middleware *ErrorMiddleware) ErrorHandler() gin.HandlerFunc {
 	}
 }
 
-func getStatusCode(errCode uint8) int {
+func getStatusCode(errCode uint32) int {
 	statusCode, ok := statusCodesByError[errCode]
 	if !ok {
 		return http.StatusInternalServerError

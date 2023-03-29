@@ -4,23 +4,28 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"ticken-ticket-service/api/mappers"
+	"ticken-ticket-service/api/res"
 	"ticken-ticket-service/security/jwt"
-	"ticken-ticket-service/utils"
 )
 
 func (controller *UserController) GetUser(c *gin.Context) {
-	owner := c.MustGet("jwt").(*jwt.Token)
-	token := owner.Subject
-	email := owner.Email
-	profile := owner.Profile
+	token := c.MustGet("token").(*jwt.Token)
 
-	user, err := controller.serviceProvider.GetUserManager().GetUser(token)
+	attendantID := token.Subject
+	email := token.Email
+	profile := token.Profile
+
+	user, err := controller.serviceProvider.GetUserManager().GetUser(
+		attendantID,
+	)
 
 	if err != nil {
-		c.JSON(http.StatusNotFound, utils.HttpResponse{Message: err.Error()})
+		c.Error(err)
+		c.Abort()
 		return
 	}
-	c.JSON(http.StatusOK, utils.HttpResponse{
+
+	c.JSON(http.StatusOK, res.Success{
 		Message: "User fetched successfully",
 		Data:    mappers.MapUserToDTO(user, email, &profile),
 	})

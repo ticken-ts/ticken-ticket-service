@@ -5,9 +5,9 @@ import (
 	"github.com/go-playground/validator/v10"
 	"net/http"
 	"strings"
+	"ticken-ticket-service/api/res"
 	"ticken-ticket-service/security/jwt"
 	"ticken-ticket-service/services"
-	"ticken-ticket-service/utils"
 )
 
 type AuthMiddleware struct {
@@ -47,7 +47,9 @@ func (middleware *AuthMiddleware) isJWTAuthorized() gin.HandlerFunc {
 
 		token, err := middleware.jwtVerifier.Verify(rawAccessToken)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, utils.HttpResponse{Message: "authorization failed while verifying the token: " + err.Error()})
+			c.JSON(http.StatusUnauthorized, res.Error{
+				Message: "authorization failed while verifying the token: " + err.Error(),
+			})
 			c.Abort()
 			return
 		}

@@ -6,6 +6,6 @@ type Success struct {
 }
 
 type Error struct {
-	Code    uint8  `json:"code,omitempty"`
+	Code    uint32 `json:"code,omitempty"`
 	Message string `json:"message,omitempty"`
 }

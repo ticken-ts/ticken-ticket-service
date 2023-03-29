@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"ticken-ticket-service/api/dto"
 	"ticken-ticket-service/api/mappers"
+	"ticken-ticket-service/api/res"
 	"ticken-ticket-service/security/jwt"
-	"ticken-ticket-service/utils"
 )
 
 type linkTicketPayload struct {
@@ -17,18 +17,19 @@ type linkTicketPayload struct {
 func (controller *TicketController) LinkTicket(c *gin.Context) {
 	var payload linkTicketPayload
 
-	ownerID := c.MustGet("jwt").(*jwt.Token).Subject
+	attendantID := c.MustGet("jwt").(*jwt.Token).Subject
 
 	if err := c.BindJSON(&payload); err != nil {
-		c.JSON(http.StatusBadRequest, utils.HttpResponse{Message: err.Error()})
 		c.Abort()
 		return
 	}
 
-	linkedTickets, err := controller.serviceProvider.GetTicketLinker().LinkTickets(ownerID, payload.EventContractAddr)
-
+	linkedTickets, err := controller.serviceProvider.GetTicketLinker().LinkTickets(
+		attendantID,
+		payload.EventContractAddr,
+	)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, utils.HttpResponse{Message: err.Error()})
+		c.Error(err)
 		c.Abort()
 		return
 	}
@@ -41,7 +42,7 @@ func (controller *TicketController) LinkTicket(c *gin.Context) {
 		ticketsDTO[i] = mappers.MapTicketToDTO(ticket)
 	}
 
-	c.JSON(http.StatusOK, utils.HttpResponse{
+	c.JSON(http.StatusOK, res.Success{
 		Message: fmt.Sprintf("%d tickets linked", len(linkedTickets)),
 		Data:    ticketsDTO,
 	})
