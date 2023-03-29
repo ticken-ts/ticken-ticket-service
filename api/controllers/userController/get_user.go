@@ -9,7 +9,7 @@ import (
 )
 
 func (controller *UserController) GetUser(c *gin.Context) {
-	token := c.MustGet("token").(*jwt.Token)
+	token := c.MustGet("jwt").(*jwt.Token)
 
 	attendantID := token.Subject
 	email := token.Email
