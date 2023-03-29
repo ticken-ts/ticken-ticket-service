@@ -98,7 +98,7 @@ func New(infraBuilder infra.IBuilder, tickenConfig *config.Config) *TickenTicket
 	}
 
 	var appPopulators = []Populator{
-		&fakes.FakeEventsPopulator{EventRepo: repoProvider.GetEventRepository(), Pubbc: pubbcAdmin},
+		//&fakes.FakeEventsPopulator{EventRepo: repoProvider.GetEventRepository(), Pubbc: pubbcAdmin},
 		&fakes.FakeUsersPopulator{Repo: repoProvider.GetUserRepository(), Config: tickenConfig.Dev.User, HSM: hsm},
 	}
 	tickenTicketApp.populators = appPopulators
