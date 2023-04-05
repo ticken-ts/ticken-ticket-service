@@ -14,7 +14,9 @@
 
   "bus": {
     "driver": "rabbitmq",
-    "exchange": "ticken"
+    "exchange": "ticken",
+    "send_queues": ["service.events", "service.validator"],
+    "listen_queue": "service.tickets"
   },
 
   "pvtbc": {

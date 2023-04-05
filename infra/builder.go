@@ -148,7 +148,7 @@ func (builder *Builder) BuildBusPublisher(connString string) BusPublisher {
 		tickenBus = bus.NewTickenDevBusPublisher()
 	case config.RabbitMQDriver:
 		log.TickenLogger.Info().Msg("using bus publisher: " + config.RabbitMQDriver)
-		tickenBus = bus.NewRabbitMQPublisher()
+		tickenBus = bus.NewRabbitMQPublisher(builder.tickenConfig.Bus.SendQueues)
 	default:
 		err := fmt.Errorf("bus driver %s not implemented", builder.tickenConfig.Bus.Driver)
 		log.TickenLogger.Panic().Err(err)
@@ -177,7 +177,7 @@ func (builder *Builder) BuildBusSubscriber(connString string) BusSubscriber {
 		tickenBus = bus.NewTickenDevBusSubscriber()
 	case config.RabbitMQDriver:
 		log.TickenLogger.Info().Msg("using bus subscriber: " + config.RabbitMQDriver)
-		tickenBus = bus.NewRabbitMQSubscriber()
+		tickenBus = bus.NewRabbitMQSubscriber(builder.tickenConfig.Bus.ListenQueue)
 	default:
 		err := fmt.Errorf("bus driver %s not implemented", builder.tickenConfig.Bus.Driver)
 		log.TickenLogger.Panic().Err(err)

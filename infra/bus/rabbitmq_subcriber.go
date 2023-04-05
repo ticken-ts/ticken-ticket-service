@@ -2,17 +2,21 @@ package bus
 
 import (
 	"fmt"
+
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 type RabbitMQSubscriber struct {
-	conn    *amqp.Connection
-	channel *amqp.Channel
-	queue   amqp.Queue
+	conn            *amqp.Connection
+	channel         *amqp.Channel
+	queue           amqp.Queue
+	listenQueueName string
 }
 
-func NewRabbitMQSubscriber() *RabbitMQSubscriber {
-	return new(RabbitMQSubscriber)
+func NewRabbitMQSubscriber(listenQueueName string) *RabbitMQSubscriber {
+	return &RabbitMQSubscriber{
+		listenQueueName: listenQueueName,
+	}
 }
 
 func (subscriber *RabbitMQSubscriber) Connect(connString string, exchangeName string) error {
@@ -43,12 +47,12 @@ func (subscriber *RabbitMQSubscriber) Connect(connString string, exchangeName st
 	}
 
 	queue, err := channel.QueueDeclare(
-		"",    // name
-		false, // durable
-		false, // delete when unused
-		true,  // exclusive
-		false, // no-wait
-		nil,   // arguments
+		subscriber.listenQueueName, // name
+		false,                      // durable
+		false,                      // delete when unused
+		false,                      // exclusive
+		false,                      // no-wait
+		nil,                        // arguments
 	)
 
 	if err != nil {

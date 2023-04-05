@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
@@ -11,10 +12,13 @@ type RabbitMQPublisher struct {
 	conn         *amqp.Connection
 	channel      *amqp.Channel
 	exchangeName string
+	sendQueues   []string
 }
 
-func NewRabbitMQPublisher() *RabbitMQPublisher {
-	return new(RabbitMQPublisher)
+func NewRabbitMQPublisher(sendQueues []string) *RabbitMQPublisher {
+	return &RabbitMQPublisher{
+		sendQueues: sendQueues,
+	}
 }
 
 func (publisher *RabbitMQPublisher) Connect(connString string, exchangeName string) error {
@@ -38,9 +42,36 @@ func (publisher *RabbitMQPublisher) Connect(connString string, exchangeName stri
 		false,               // no-wait
 		nil,                 // args
 	)
+
 	if err != nil {
 		publisher.Shutdown()
 		return err
+	}
+
+	for _, queueName := range publisher.sendQueues {
+		queue, err := channel.QueueDeclare(
+			queueName, // name
+			false,     // durable
+			false,     // delete when unused
+			false,     // exclusive
+			false,     // no-wait
+			nil,       // arguments
+		)
+		if err != nil {
+			publisher.Shutdown()
+			return err
+		}
+		err = channel.QueueBind(
+			queue.Name,   // queue name
+			"",           // routing key
+			exchangeName, // exchange
+			false,        // no-wait
+			nil,          // arguments
+		)
+		if err != nil {
+			publisher.Shutdown()
+			return err
+		}
 	}
 
 	publisher.conn = conn
