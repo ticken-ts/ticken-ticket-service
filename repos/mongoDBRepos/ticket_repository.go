@@ -1,12 +1,13 @@
 package mongoDBRepos
 
 import (
+	"math/big"
+	"ticken-ticket-service/models"
+
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"math/big"
-	"ticken-ticket-service/models"
 )
 
 const TicketCollectionName = "tickets"
@@ -156,7 +157,7 @@ func (r *TicketMongoDBRepository) UpdateTicketOwner(ticket *models.Ticket) error
 	tickets := r.getCollection()
 
 	filter := bson.M{"event_id": ticket.EventID, "ticket_id": ticket.TicketID}
-	update := bson.M{"owner_id": ticket.OwnerID}
+	update := bson.M{"$set": bson.M{"owner_id": ticket.OwnerID}}
 
 	_, err := tickets.UpdateOne(updateContext, filter, update)
 	if err != nil {
@@ -188,7 +189,7 @@ func (r *TicketMongoDBRepository) UpdateResoldTicket(ticket *models.Ticket) erro
 
 	tickets := r.getCollection()
 	filter := bson.M{"event_id": ticket.EventID, "ticket_id": ticket.TicketID}
-	update := bson.M{"resells": ticket.Resells, "owner": ticket.OwnerID}
+	update := bson.M{"$set": bson.M{"resells": ticket.Resells, "owner": ticket.OwnerID}}
 
 	_, err := tickets.UpdateOne(updateContext, filter, update)
 	if err != nil {
@@ -208,6 +209,10 @@ func (r *TicketMongoDBRepository) GetTicketsInResell(eventID uuid.UUID, section 
 		"section":        section,
 		"resells.active": true,
 	})
+
+	if err != nil {
+		return nil, err
+	}
 
 	var foundTickets []*models.Ticket
 	if err = cursor.All(findContext, &foundTickets); err != nil {
