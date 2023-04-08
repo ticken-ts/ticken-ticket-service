@@ -303,6 +303,12 @@ github.com/ticken-ts/ticken-pubbc-connector v0.0.16 h1:1RlZ3foVuLSKM1H88NyZUy1bh
 github.com/ticken-ts/ticken-pubbc-connector v0.0.16/go.mod h1:3QARm+lkbMN/mJrdNBDoknNZLaVyEdk3O0DpEAu1hzM=
 github.com/ticken-ts/ticken-pubbc-connector v0.0.17 h1:yjtEM4b59wCcNpEaRJt53Ed3fBdI9Edi+YPypPL74jo=
 github.com/ticken-ts/ticken-pubbc-connector v0.0.17/go.mod h1:3QARm+lkbMN/mJrdNBDoknNZLaVyEdk3O0DpEAu1hzM=
+github.com/ticken-ts/ticken-pubbc-connector v0.0.18 h1:+HG15Pm7DeVLzBTaC+wkNOXX3de3qoJdy4A4gTJWAl4=
+github.com/ticken-ts/ticken-pubbc-connector v0.0.18/go.mod h1:3QARm+lkbMN/mJrdNBDoknNZLaVyEdk3O0DpEAu1hzM=
+github.com/ticken-ts/ticken-pubbc-connector v0.0.19 h1:AjsvLqnIDrauq8MhnxQnmTzCqY6I6tmlhnwRoepUUSE=
+github.com/ticken-ts/ticken-pubbc-connector v0.0.19/go.mod h1:3QARm+lkbMN/mJrdNBDoknNZLaVyEdk3O0DpEAu1hzM=
+github.com/ticken-ts/ticken-pubbc-connector v0.0.20 h1:s/1PTm+E6kC5sMEXtq+ajT5iNMN3gE7mqMUk6SX+ZNA=
+github.com/ticken-ts/ticken-pubbc-connector v0.0.20/go.mod h1:3QARm+lkbMN/mJrdNBDoknNZLaVyEdk3O0DpEAu1hzM=
 github.com/ticken-ts/ticken-pvtbc-connector v0.2.46 h1:U6wjUUyML5xGEhObYRVyJBcqslIi3xKhWmIezmOEJs0=
 github.com/ticken-ts/ticken-pvtbc-connector v0.2.46/go.mod h1:rK1J3x+qeLeGTzjwqYVqI/9AKL0vseqrlwJNZoZXr3o=
 github.com/ticken-ts/ticken-pvtbc-connector v0.2.47 h1:D//WDAg9PMOqp/d2JAKRfNNuPyXLND4NjwxVRDPqJ5c=
