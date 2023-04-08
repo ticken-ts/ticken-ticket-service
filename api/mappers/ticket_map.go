@@ -39,5 +39,6 @@ func MapResellToDTO(resell *models.Resell) *dto.Resells {
 	return &dto.Resells{
 		Price:    fmt.Sprintf("%.2f", resell.Price.Amount),
 		Currency: resell.Price.Currency.Symbol,
+		ResellID: resell.ResellID.String(),
 	}
 }

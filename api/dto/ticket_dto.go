@@ -16,4 +16,5 @@ type Ticket struct {
 type Resells struct {
 	Price    string `json:"price"`
 	Currency string `json:"currency"`
+	ResellID string `json:"resell_id"`
 }
