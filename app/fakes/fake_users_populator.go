@@ -37,5 +37,5 @@ func (populator *FakeUsersPopulator) Populate() error {
 		AddressPKStoreKey: hsmKey,
 	}
 
-	return populator.Repo.AddUser(fakeUser)
+	return populator.Repo.AddOne(fakeUser)
 }

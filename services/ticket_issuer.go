@@ -81,7 +81,7 @@ func (s *TicketIssuer) IssueTicket(eventID uuid.UUID, section string, attendantI
 	}
 	newTicket.TokenID = tokenID
 
-	if err := s.ticketRepository.AddTicket(newTicket); err != nil {
+	if err := s.ticketRepository.AddOne(newTicket); err != nil {
 		return nil, err
 	}
 

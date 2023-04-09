@@ -26,7 +26,7 @@ func (eventManager *EventManager) AddEvent(eventID, organizerID uuid.UUID, pvtBC
 		PubBCAddress: pubBCAddress,
 	}
 
-	if err := eventManager.eventRepository.AddEvent(event); err != nil {
+	if err := eventManager.eventRepository.AddOne(event); err != nil {
 		return nil, err
 	}
 	return event, nil

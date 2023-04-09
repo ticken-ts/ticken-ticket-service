@@ -19,21 +19,9 @@ func NewEventRepository(dbClient *mongo.Client, dbName string) *EventMongoDBRepo
 			dbClient:       dbClient,
 			dbName:         dbName,
 			collectionName: EventCollectionName,
+			primKeyField:   "event_id",
 		},
 	}
-}
-
-func (r *EventMongoDBRepository) AddEvent(event *models.Event) error {
-	storeContext, cancel := r.generateOpSubcontext()
-	defer cancel()
-
-	events := r.getCollection()
-	_, err := events.InsertOne(storeContext, event)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (r *EventMongoDBRepository) FindEvent(eventID uuid.UUID) *models.Event {

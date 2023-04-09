@@ -58,7 +58,7 @@ func (userManager *UserManager) CreateUser(attendantID uuid.UUID, providedPK str
 	}
 
 	newAttendant.SetWallet(pkStoreKey, walletAddr)
-	err = userManager.userRepository.AddUser(newAttendant)
+	err = userManager.userRepository.AddOne(newAttendant)
 	if err != nil {
 		return nil, tickenerr.FromError(usererr.StoreUserInDatabaseErrorCode, err)
 	}

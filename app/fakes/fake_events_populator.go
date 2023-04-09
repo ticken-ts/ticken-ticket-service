@@ -23,7 +23,7 @@ func (populator *FakeEventsPopulator) Populate() error {
 	if event != nil {
 		return nil
 	}
-	
+
 	fakeEvent := &models.Event{
 		EventID:      eventID,
 		OrganizerID:  uuid.New(),
@@ -35,5 +35,5 @@ func (populator *FakeEventsPopulator) Populate() error {
 
 	fakeEvent.PubBCAddress = addr
 
-	return populator.EventRepo.AddEvent(fakeEvent)
+	return populator.EventRepo.AddOne(fakeEvent)
 }

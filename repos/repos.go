@@ -6,15 +6,21 @@ import (
 	"ticken-ticket-service/models"
 )
 
+type BaseRepository interface {
+	Count() int64
+	AddOne(element any) error
+	AnyWithID(id uuid.UUID) bool
+}
+
 type EventRepository interface {
-	AddEvent(event *models.Event) error
+	BaseRepository
 	FindEvent(eventID uuid.UUID) *models.Event
 	GetActiveEvents() ([]*models.Event, error)
 	FindEventByContractAddress(contractAddr string) *models.Event
 }
 
 type TicketRepository interface {
-	AddTicket(ticket *models.Ticket) error
+	BaseRepository
 	UpdateTicketStatus(ticket *models.Ticket) error
 	FindTicket(eventID uuid.UUID, ticketID uuid.UUID) *models.Ticket
 	GetUserTickets(userID uuid.UUID) ([]*models.Ticket, error)
@@ -27,14 +33,14 @@ type TicketRepository interface {
 }
 
 type UserRepository interface {
-	AddUser(user *models.User) error
+	BaseRepository
 	FindUser(userID uuid.UUID) *models.User
 }
 
 type IProvider interface {
+	GetUserRepository() UserRepository
 	GetEventRepository() EventRepository
 	GetTicketRepository() TicketRepository
-	GetUserRepository() UserRepository
 }
 
 type IFactory interface {

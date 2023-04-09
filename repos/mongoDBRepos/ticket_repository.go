@@ -22,27 +22,17 @@ func NewTicketRepository(db *mongo.Client, database string) *TicketMongoDBReposi
 			dbClient:       db,
 			dbName:         database,
 			collectionName: TicketCollectionName,
+			primKeyField:   "ticket_id",
 		},
 	}
 }
 
-func (r *TicketMongoDBRepository) AddTicket(ticket *models.Ticket) error {
-	storeContext, cancel := r.generateOpSubcontext()
-	defer cancel()
-
-	// initialize arrays to make the field
-	// be of type array in the database
+func (r *TicketMongoDBRepository) AddOne(ticket *models.Ticket) error {
 	if ticket.Resells == nil {
 		ticket.Resells = make([]*models.Resell, 0)
 	}
 
-	tickets := r.getCollection()
-	_, err := tickets.InsertOne(storeContext, ticket)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return r.baseRepository.AddOne(ticket)
 }
 
 func (r *TicketMongoDBRepository) FindTicket(eventID uuid.UUID, ticketID uuid.UUID) *models.Ticket {

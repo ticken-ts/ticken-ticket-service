@@ -20,6 +20,7 @@ func NewUserRepository(dbClient *mongo.Client, dbName string) *UserMongoDBReposi
 			dbClient:       dbClient,
 			dbName:         dbName,
 			collectionName: UserCollectionName,
+			primKeyField:   "attendant_id",
 		},
 	}
 	users := userRepo.getCollection()
@@ -38,19 +39,6 @@ func NewUserRepository(dbClient *mongo.Client, dbName string) *UserMongoDBReposi
 	}
 
 	return userRepo
-}
-
-func (r *UserMongoDBRepository) AddUser(user *models.User) error {
-	storeContext, cancel := r.generateOpSubcontext()
-	defer cancel()
-
-	users := r.getCollection()
-	_, err := users.InsertOne(storeContext, user)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (r *UserMongoDBRepository) FindUser(userUUID uuid.UUID) *models.User {
