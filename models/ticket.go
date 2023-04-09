@@ -7,6 +7,25 @@ import (
 	"ticken-ticket-service/utils/money"
 )
 
+type TicketStatus string
+
+const (
+	// TicketStatusIssued represents the state of the
+	// ticket right after it is "issued". Tickets in
+	// this state can be scanned
+	TicketStatusIssued TicketStatus = "issued"
+
+	// TicketStatusScanned represents the state of the
+	// ticket after it is "scanned". Note that this is
+	// not  done in the same moment the scanning occurs.
+	TicketStatusScanned TicketStatus = "scanned"
+
+	// TicketStatusExpired represents the state of the
+	// ticket after the event is finished and the ticket
+	// never were scanned
+	TicketStatusExpired TicketStatus = "expired"
+)
+
 type Ticket struct {
 	/*************** ticket key ****************/
 	EventID  uuid.UUID `bson:"event_id"`
@@ -18,8 +37,8 @@ type Ticket struct {
 	/*******************************************/
 
 	/****************** info *******************/
-	Section string `bson:"section"`
-	Status  string `bson:"status"`
+	Section string       `bson:"section"`
+	Status  TicketStatus `bson:"status"`
 	/*******************************************/
 
 	/************** blockchain *****************/

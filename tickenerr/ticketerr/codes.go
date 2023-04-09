@@ -11,6 +11,7 @@ const (
 	ResellCurrencyNotSupportedErrorCode
 	TicketResellNotFoundErrorCode
 	TransferTicketInPUBBCErrorCode
+	ReadUserTicketsFromDatabaseErrorCode
 )
 
 func GetErrorMessages(code uint32) string {
@@ -35,6 +36,8 @@ func GetErrorMessages(code uint32) string {
 		return "ticket resell not found"
 	case TransferTicketInPUBBCErrorCode:
 		return "an error occurred while transferring the ticket in the public blockchain"
+	case ReadUserTicketsFromDatabaseErrorCode:
+		return "an error occurred while trying to read user tickets from database"
 	default:
 		return "an error has occurred"
 	}

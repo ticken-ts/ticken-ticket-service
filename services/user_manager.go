@@ -65,7 +65,6 @@ func (userManager *UserManager) CreateUser(attendantID uuid.UUID, providedPK str
 	return newAttendant, nil
 }
 
-// GetUser returns the user with the given UUID
 func (userManager *UserManager) GetUser(uuid uuid.UUID) (*models.User, error) {
 	user := userManager.userRepository.FindUser(uuid)
 	if user == nil {

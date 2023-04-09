@@ -46,9 +46,7 @@ func (t ticketLinker) LinkTickets(attendantID uuid.UUID, eventContractAddress st
 
 	pubbcTickets, err := t.pubbcCaller.GetTickets(eventContractAddress, attendant.WalletAddress)
 	if err != nil {
-		return nil, tickenerr.FromError(
-			ticketerr.FailedToRetrievePUBBCTicketsErrorCode,
-			err)
+		return nil, tickenerr.FromError(ticketerr.FailedToRetrievePUBBCTicketsErrorCode, err)
 	}
 
 	newTickets := make([]*models.Ticket, 0)
