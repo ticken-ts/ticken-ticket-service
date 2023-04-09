@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"github.com/fatih/color"
 	"github.com/gin-gonic/gin"
 	gojwt "github.com/golang-jwt/jwt"
 	"ticken-ticket-service/api"
@@ -21,13 +22,12 @@ import (
 	"ticken-ticket-service/utils"
 )
 
-const ServiceName = "ticken-ticket-service"
-
 type TickenTicketApp struct {
 	engine          *gin.Engine
 	config          *config.Config
 	repoProvider    repos.IProvider
 	serviceProvider services.IProvider
+	jwtVerifier     jwt.Verifier
 	subscriber      *async.Subscriber
 
 	// populators are intended to populate
@@ -38,10 +38,11 @@ type TickenTicketApp struct {
 }
 
 func New(infraBuilder infra.IBuilder, tickenConfig *config.Config) *TickenTicketApp {
-	log.TickenLogger.Info().Msg("initializing " + ServiceName)
+	log.TickenLogger.Info().Msg(color.BlueString("initializing " + tickenConfig.Server.ClientID))
 
 	tickenTicketApp := new(TickenTicketApp)
 
+	/******************************** infra builds ********************************/
 	engine := infraBuilder.BuildEngine()
 	pvtbcCaller := infraBuilder.BuildPvtbcCaller()
 	jwtVerifier := infraBuilder.BuildJWTVerifier()
@@ -50,58 +51,52 @@ func New(infraBuilder infra.IBuilder, tickenConfig *config.Config) *TickenTicket
 	pubbcAdmin := infraBuilder.BuildPubbcAdmin(env.TickenEnv.TickenWalletKey)
 	pubbcCaller := infraBuilder.BuildPubbcCaller(env.TickenEnv.TickenWalletKey)
 	busSubscriber := infraBuilder.BuildBusSubscriber(env.TickenEnv.BusConnString)
+	/**************************++***************************************************/
 
-	// this provider is going to provider all repositories
-	// to the services
-	repoProvider, err := repos.NewProvider(db, &tickenConfig.Database)
+	/********************************** providers **********************************/
+	repoProvider, err := repos.NewProvider(
+		db,
+		&tickenConfig.Database,
+	)
 	if err != nil {
-		panic(err)
+		log.TickenLogger.Panic().Msg(err.Error())
 	}
 
-	// this provider is going to provide all services
-	// needed by the controllers to execute it operations
-	serviceProvider, err := services.NewProvider(repoProvider, pvtbcCaller, pubbcAdmin, pubbcCaller, hsm)
+	serviceProvider, err := services.NewProvider(
+		repoProvider,
+		pvtbcCaller,
+		pubbcAdmin,
+		pubbcCaller,
+		hsm,
+	)
 	if err != nil {
-		panic(err)
+		log.TickenLogger.Panic().Msg(err.Error())
 	}
+	/**************************++***************************************************/
 
+	/********************************* subscriber **********************************/
 	subscriber, err := async.NewSubscriber(busSubscriber, serviceProvider)
 	if err != nil {
-		panic(err)
+		log.TickenLogger.Panic().Msg(err.Error())
 	}
+	/**************************++***************************************************/
 
 	tickenTicketApp.engine = engine
 	tickenTicketApp.config = tickenConfig
 	tickenTicketApp.subscriber = subscriber
+	tickenTicketApp.jwtVerifier = jwtVerifier
 	tickenTicketApp.repoProvider = repoProvider
 	tickenTicketApp.serviceProvider = serviceProvider
 
-	var appMiddlewares = []api.Middleware{
-		middlewares.NewErrorMiddleware(),
-		middlewares.NewAuthMiddleware(serviceProvider, jwtVerifier, tickenConfig.Server.APIPrefix),
-	}
-
-	var appControllers = []api.Controller{
-		healthController.New(serviceProvider),
-		ticketController.New(serviceProvider),
-		userController.New(serviceProvider),
-	}
-
 	apiRouter := engine.Group(tickenConfig.Server.APIPrefix)
+	tickenTicketApp.loadControllers(apiRouter)
+	tickenTicketApp.loadMiddlewares(apiRouter)
 
-	for _, middleware := range appMiddlewares {
-		middleware.Setup(apiRouter)
-	}
-
-	for _, controller := range appControllers {
-		controller.Setup(apiRouter)
-	}
-
-	var appPopulators = []Populator{
-		//&fakes.FakeEventsPopulator{EventRepo: repoProvider.GetEventRepository(), Pubbc: pubbcAdmin},
+	/********************************* populators **********************************/
+	tickenTicketApp.populators = []Populator{
 		&fakes.FakeUsersPopulator{Repo: repoProvider.GetUserRepository(), Config: tickenConfig.Dev.User, HSM: hsm},
 	}
-	tickenTicketApp.populators = appPopulators
+	/**************************++***************************************************/
 
 	return tickenTicketApp
 }
@@ -146,4 +141,27 @@ func (ticketTicketApp *TickenTicketApp) EmitFakeJWT() {
 	}
 
 	fmt.Printf("DEV Token: %s \n", signedJWT)
+}
+
+func (ticketTicketApp *TickenTicketApp) loadControllers(apiRouter gin.IRouter) {
+	var appControllers = []api.Controller{
+		userController.New(ticketTicketApp.serviceProvider),
+		healthController.New(ticketTicketApp.serviceProvider),
+		ticketController.New(ticketTicketApp.serviceProvider),
+	}
+
+	for _, controller := range appControllers {
+		controller.Setup(apiRouter)
+	}
+}
+
+func (ticketTicketApp *TickenTicketApp) loadMiddlewares(apiRouter gin.IRouter) {
+	var appMiddlewares = []api.Middleware{
+		middlewares.NewErrorMiddleware(),
+		middlewares.NewAuthMiddleware(ticketTicketApp.jwtVerifier, ticketTicketApp.config.Server.APIPrefix),
+	}
+
+	for _, middleware := range appMiddlewares {
+		middleware.Setup(apiRouter)
+	}
 }
