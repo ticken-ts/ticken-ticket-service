@@ -10,7 +10,7 @@ func MapTicketToDTO(ticket *models.Ticket) *dto.Ticket {
 	ticketDTO := &dto.Ticket{
 		TicketID: ticket.TicketID.String(),
 		EventID:  ticket.EventID.String(),
-		Status:   ticket.Status,
+		Status:   string(ticket.Status),
 		Section:  ticket.Section,
 
 		PubbcTxID: ticket.PubbcTxID,
