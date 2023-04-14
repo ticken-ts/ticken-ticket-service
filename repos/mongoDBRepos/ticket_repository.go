@@ -27,14 +27,6 @@ func NewTicketRepository(db *mongo.Client, database string) *TicketMongoDBReposi
 	}
 }
 
-func (r *TicketMongoDBRepository) AddOne(ticket *models.Ticket) error {
-	if ticket.Resells == nil {
-		ticket.Resells = make([]*models.Resell, 0)
-	}
-
-	return r.baseRepository.AddOne(ticket)
-}
-
 func (r *TicketMongoDBRepository) FindTicket(eventID uuid.UUID, ticketID uuid.UUID) *models.Ticket {
 	findContext, cancel := r.generateOpSubcontext()
 	defer cancel()

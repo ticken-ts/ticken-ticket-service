@@ -2,9 +2,6 @@ package services
 
 import (
 	"fmt"
-	"github.com/google/uuid"
-	pubbc "github.com/ticken-ts/ticken-pubbc-connector"
-	pvtbc "github.com/ticken-ts/ticken-pvtbc-connector"
 	"math/big"
 	"ticken-ticket-service/infra"
 	"ticken-ticket-service/log"
@@ -15,6 +12,10 @@ import (
 	"ticken-ticket-service/tickenerr/eventerr"
 	"ticken-ticket-service/tickenerr/ticketerr"
 	"ticken-ticket-service/tickenerr/usererr"
+
+	"github.com/google/uuid"
+	pubbc "github.com/ticken-ts/ticken-pubbc-connector"
+	pvtbc "github.com/ticken-ts/ticken-pvtbc-connector"
 )
 
 type TicketIssuer struct {
@@ -80,6 +81,7 @@ func (s *TicketIssuer) IssueTicket(eventID uuid.UUID, section string, attendantI
 		/****************** info *******************/
 		Section: section,
 		Status:  models.TicketStatusIssued,
+		Resells: make([]*models.Resell, 0),
 		/*******************************************/
 
 		/************** blockchain *****************/

@@ -2,9 +2,10 @@ package models
 
 import (
 	"fmt"
-	"github.com/google/uuid"
 	"math/big"
 	"ticken-ticket-service/utils/money"
+
+	"github.com/google/uuid"
 )
 
 type TicketStatus string
@@ -39,16 +40,13 @@ type Ticket struct {
 	/****************** info *******************/
 	Section string       `bson:"section"`
 	Status  TicketStatus `bson:"status"`
+	Resells []*Resell    `bson:"resells"`
 	/*******************************************/
 
 	/************** blockchain *****************/
 	TokenID   *big.Int `bson:"token_id"`
 	PubbcTxID string   `bson:"pubbc_tx_id"`
 	PvtbcTxID string   `bson:"pvtbc_tx_id"`
-	/*******************************************/
-
-	/***************** sales *******************/
-	Resells []*Resell `bson:"resells"`
 	/*******************************************/
 }
 
