@@ -2,9 +2,6 @@ package app
 
 import (
 	"fmt"
-	"github.com/fatih/color"
-	"github.com/gin-gonic/gin"
-	gojwt "github.com/golang-jwt/jwt"
 	"ticken-ticket-service/api"
 	"ticken-ticket-service/api/controllers/healthController"
 	"ticken-ticket-service/api/controllers/ticketController"
@@ -20,6 +17,10 @@ import (
 	"ticken-ticket-service/security/jwt"
 	"ticken-ticket-service/services"
 	"ticken-ticket-service/utils"
+
+	"github.com/fatih/color"
+	"github.com/gin-gonic/gin"
+	gojwt "github.com/golang-jwt/jwt"
 )
 
 type TickenTicketApp struct {
@@ -88,9 +89,8 @@ func New(infraBuilder infra.IBuilder, tickenConfig *config.Config) *TickenTicket
 	tickenTicketApp.repoProvider = repoProvider
 	tickenTicketApp.serviceProvider = serviceProvider
 
-	apiRouter := engine.Group(tickenConfig.Server.APIPrefix)
-	tickenTicketApp.loadControllers(apiRouter)
-	tickenTicketApp.loadMiddlewares(apiRouter)
+	tickenTicketApp.loadMiddlewares(engine)
+	tickenTicketApp.loadControllers(engine)
 
 	/********************************* populators **********************************/
 	tickenTicketApp.populators = []Populator{
@@ -144,6 +144,7 @@ func (ticketTicketApp *TickenTicketApp) EmitFakeJWT() {
 }
 
 func (ticketTicketApp *TickenTicketApp) loadControllers(apiRouter gin.IRouter) {
+	apiRouterGroup := apiRouter.Group(ticketTicketApp.config.Server.APIPrefix)
 	var appControllers = []api.Controller{
 		userController.New(ticketTicketApp.serviceProvider),
 		healthController.New(ticketTicketApp.serviceProvider),
@@ -151,7 +152,7 @@ func (ticketTicketApp *TickenTicketApp) loadControllers(apiRouter gin.IRouter) {
 	}
 
 	for _, controller := range appControllers {
-		controller.Setup(apiRouter)
+		controller.Setup(apiRouterGroup)
 	}
 }
 
