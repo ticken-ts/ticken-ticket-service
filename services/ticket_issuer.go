@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	chainmodels "github.com/ticken-ts/ticken-pubbc-connector/chain-models"
 	"math/big"
 	"ticken-ticket-service/infra"
 	"ticken-ticket-service/log"
@@ -80,7 +81,7 @@ func (s *TicketIssuer) IssueTicket(eventID uuid.UUID, section string, attendantI
 
 		/****************** info *******************/
 		Section: section,
-		Status:  models.TicketStatusIssued,
+		Status:  chainmodels.TicketStatusIssued,
 		Resells: make([]*models.Resell, 0),
 		/*******************************************/
 
@@ -172,7 +173,7 @@ func (s *TicketIssuer) GetUserTickets(attendantID uuid.UUID) ([]*models.Ticket, 
 			log.TickenLogger.Panic().Msg("token ID differs") // should never happen
 		}
 
-		if pubbcTicket.OwnerAddr != attendant.WalletAddress {
+		if pubbcTicket.Owner != attendant.WalletAddress {
 			ticket.ToBatman()
 			_ = s.ticketRepository.UpdateTicketOwner(ticket)
 		} else {
