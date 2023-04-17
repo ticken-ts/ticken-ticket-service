@@ -13,8 +13,8 @@ require (
 	github.com/rabbitmq/amqp091-go v1.5.0
 	github.com/rs/zerolog v1.28.0
 	github.com/spf13/viper v1.13.0
-	github.com/ticken-ts/ticken-pubbc-connector v0.0.35
-	github.com/ticken-ts/ticken-pvtbc-connector v0.2.49
+	github.com/ticken-ts/ticken-pubbc-connector v0.0.20
+	github.com/ticken-ts/ticken-pvtbc-connector v0.2.47
 	go.mongodb.org/mongo-driver v1.10.3
 )
 

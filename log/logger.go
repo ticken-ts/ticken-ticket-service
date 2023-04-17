@@ -47,7 +47,7 @@ func buildConsoleWriter() io.Writer {
 		return strings.ToUpper(fmt.Sprintf("| %-6s|", i))
 	}
 	consoleWriter.FormatMessage = func(i interface{}) string {
-		return fmt.Sprintf("***%s****", i)
+		return fmt.Sprintf("*** %s ***", i)
 	}
 	consoleWriter.FormatFieldName = func(i interface{}) string {
 		return fmt.Sprintf("%s:", i)

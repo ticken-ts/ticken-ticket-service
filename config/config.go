@@ -10,6 +10,7 @@ type Config struct {
 	Pubbc    PubbcConfig    `mapstructure:"pubbc"`
 	Server   ServerConfig   `mapstructure:"server"`
 	Bus      BusConfig      `mapstructure:"bus"`
+	Services ServicesConfig `mapstructure:"services"`
 
 	// this field is going to be
 	// loaded only during dev or test env

@@ -2,29 +2,10 @@ package models
 
 import (
 	"fmt"
+	"github.com/google/uuid"
+	chainmodels "github.com/ticken-ts/ticken-pubbc-connector/chain-models"
 	"math/big"
 	"ticken-ticket-service/utils/money"
-
-	"github.com/google/uuid"
-)
-
-type TicketStatus string
-
-const (
-	// TicketStatusIssued represents the state of the
-	// ticket right after it is "issued". Tickets in
-	// this state can be scanned
-	TicketStatusIssued TicketStatus = "issued"
-
-	// TicketStatusScanned represents the state of the
-	// ticket after it is "scanned". Note that this is
-	// not  done in the same moment the scanning occurs.
-	TicketStatusScanned TicketStatus = "scanned"
-
-	// TicketStatusExpired represents the state of the
-	// ticket after the event is finished and the ticket
-	// never were scanned
-	TicketStatusExpired TicketStatus = "expired"
 )
 
 type Ticket struct {
@@ -38,9 +19,9 @@ type Ticket struct {
 	/*******************************************/
 
 	/****************** info *******************/
-	Section string       `bson:"section"`
-	Status  TicketStatus `bson:"status"`
-	Resells []*Resell    `bson:"resells"`
+	Status  chainmodels.TicketStatus `bson:"status"`
+	Section string                   `bson:"section"`
+	Resells []*Resell                `bson:"resells"`
 	/*******************************************/
 
 	/************** blockchain *****************/
@@ -62,7 +43,7 @@ func (ticket *Ticket) IsOnSale() bool {
 	return false
 }
 
-func (ticket *Ticket) TransferTo(anotherAttendant *User) error {
+func (ticket *Ticket) TransferTo(anotherAttendant *Attendant) error {
 	if ticket.IsOwnedBy(anotherAttendant) {
 		return fmt.Errorf(
 			"ticket is already ownerd by %s",
@@ -74,7 +55,7 @@ func (ticket *Ticket) TransferTo(anotherAttendant *User) error {
 	return nil
 }
 
-func (ticket *Ticket) IsOwnedBy(attendant *User) bool {
+func (ticket *Ticket) IsOwnedBy(attendant *Attendant) bool {
 	return attendant.UUID == ticket.OwnerID
 }
 
@@ -108,7 +89,7 @@ func (ticket *Ticket) GetResell(resellID uuid.UUID) *Resell {
 	return nil
 }
 
-func (ticket *Ticket) SellTo(buyer *User, resellID uuid.UUID) error {
+func (ticket *Ticket) SellTo(buyer *Attendant, resellID uuid.UUID) error {
 	if !ticket.IsOnSale() {
 		return fmt.Errorf("ticket is not on sale")
 	}

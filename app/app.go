@@ -1,7 +1,8 @@
 package app
 
 import (
-	"fmt"
+	"github.com/fatih/color"
+	"github.com/gin-gonic/gin"
 	"ticken-ticket-service/api"
 	"ticken-ticket-service/api/controllers/healthController"
 	"ticken-ticket-service/api/controllers/ticketController"
@@ -16,11 +17,6 @@ import (
 	"ticken-ticket-service/repos"
 	"ticken-ticket-service/security/jwt"
 	"ticken-ticket-service/services"
-	"ticken-ticket-service/utils"
-
-	"github.com/fatih/color"
-	"github.com/gin-gonic/gin"
-	gojwt "github.com/golang-jwt/jwt"
 )
 
 type TickenTicketApp struct {
@@ -51,6 +47,7 @@ func New(infraBuilder infra.IBuilder, tickenConfig *config.Config) *TickenTicket
 	hsm := infraBuilder.BuildHSM(env.TickenEnv.HSMEncryptionKey)
 	pubbcAdmin := infraBuilder.BuildPubbcAdmin(env.TickenEnv.TickenWalletKey)
 	pubbcCaller := infraBuilder.BuildPubbcCaller(env.TickenEnv.TickenWalletKey)
+	authIssuer := infraBuilder.BuildAuthIssuer(env.TickenEnv.ServiceClientSecret)
 	busSubscriber := infraBuilder.BuildBusSubscriber(env.TickenEnv.BusConnString)
 	/**************************++***************************************************/
 
@@ -69,6 +66,8 @@ func New(infraBuilder infra.IBuilder, tickenConfig *config.Config) *TickenTicket
 		pubbcAdmin,
 		pubbcCaller,
 		hsm,
+		authIssuer,
+		tickenConfig,
 	)
 	if err != nil {
 		log.TickenLogger.Panic().Msg(err.Error())
@@ -94,7 +93,7 @@ func New(infraBuilder infra.IBuilder, tickenConfig *config.Config) *TickenTicket
 
 	/********************************* populators **********************************/
 	tickenTicketApp.populators = []Populator{
-		&fakes.FakeUsersPopulator{Repo: repoProvider.GetUserRepository(), Config: tickenConfig.Dev.User, HSM: hsm},
+		fakes.NewFakeLoader(repoProvider, serviceProvider, tickenConfig),
 	}
 	/**************************++***************************************************/
 
@@ -123,28 +122,11 @@ func (ticketTicketApp *TickenTicketApp) Populate() {
 }
 
 func (ticketTicketApp *TickenTicketApp) EmitFakeJWT() {
-	rsaPrivKey, err := utils.LoadRSA(ticketTicketApp.config.Dev.JWTPrivateKey, ticketTicketApp.config.Dev.JWTPublicKey)
-	if err != nil {
-		panic(err)
-	}
-
-	fakeJWT := gojwt.NewWithClaims(gojwt.SigningMethodRS256, &jwt.Claims{
-		Subject:           ticketTicketApp.config.Dev.User.UserID,
-		Email:             ticketTicketApp.config.Dev.User.Email,
-		PreferredUsername: ticketTicketApp.config.Dev.User.Username,
-	})
-
-	signedJWT, err := fakeJWT.SignedString(rsaPrivKey)
-
-	if err != nil {
-		panic(fmt.Errorf("error generation fake Token: %s", err.Error()))
-	}
-
-	fmt.Printf("DEV Token: %s \n", signedJWT)
 }
 
 func (ticketTicketApp *TickenTicketApp) loadControllers(apiRouter gin.IRouter) {
 	apiRouterGroup := apiRouter.Group(ticketTicketApp.config.Server.APIPrefix)
+
 	var appControllers = []api.Controller{
 		userController.New(ticketTicketApp.serviceProvider),
 		healthController.New(ticketTicketApp.serviceProvider),

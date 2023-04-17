@@ -1,41 +1,45 @@
 package fakes
 
 import (
-	"github.com/google/uuid"
-	"ticken-ticket-service/config"
-	"ticken-ticket-service/env"
-	"ticken-ticket-service/infra"
-	"ticken-ticket-service/models"
-	"ticken-ticket-service/repos"
+	"fmt"
+	"strings"
 )
 
-type FakeUsersPopulator struct {
-	HSM    infra.HSM
-	Config config.DevUser
-	Repo   repos.UserRepository
+type SeedAttendant struct {
+	Email         string `json:"email"`
+	Firstname     string `json:"firstname"`
+	Lastname      string `json:"lastname"`
+	WalletPrivKey string `json:"wallet_private_key"`
 }
 
-func (populator *FakeUsersPopulator) Populate() error {
-	if !env.TickenEnv.IsDev() {
-		return nil
+func (loader *Loader) seedAttendant(toSeed []*SeedAttendant) []error {
+	var seedErrors = make([]error, 0)
+
+	if loader.repoProvider.GetUserRepository().Count() > 0 {
+		return seedErrors
 	}
 
-	userID := uuid.MustParse(populator.Config.UserID)
+	for _, attendant := range toSeed {
+		// lower firstname + dot (".") + lastname
+		// example: Facundo Torraca -> facundo.torraca
+		password := strings.ToLower(strings.Join([]string{attendant.Firstname, attendant.Lastname}, "."))
 
-	user := populator.Repo.FindUser(userID)
-	if user != nil {
-		return nil
+		_, err := loader.serviceProvider.GetUserManager().RegisterUser(
+			attendant.Email,
+			password,
+			attendant.Firstname,
+			attendant.Lastname,
+			attendant.WalletPrivKey,
+		)
+
+		if err != nil {
+			seedErrors = append(
+				seedErrors,
+				fmt.Errorf("failed to seed organizer with name %s %s: %s",
+					attendant.Firstname, attendant.Lastname, err.Error()),
+			)
+		}
 	}
 
-	walletPrivateKey := populator.Config.WalletPrivateKey
-
-	hsmKey, _ := populator.HSM.Store([]byte(walletPrivateKey))
-
-	fakeUser := &models.User{
-		UUID:              userID,
-		WalletAddress:     populator.Config.WalletAddress,
-		AddressPKStoreKey: hsmKey,
-	}
-
-	return populator.Repo.AddOne(fakeUser)
+	return seedErrors
 }

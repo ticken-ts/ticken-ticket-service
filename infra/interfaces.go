@@ -6,6 +6,7 @@ import (
 	pubbc "github.com/ticken-ts/ticken-pubbc-connector"
 	pvtbc "github.com/ticken-ts/ticken-pvtbc-connector"
 	"ticken-ticket-service/infra/bus"
+	"ticken-ticket-service/security/auth"
 	"ticken-ticket-service/security/jwt"
 )
 
@@ -44,8 +45,10 @@ type IBuilder interface {
 	BuildJWTVerifier() jwt.Verifier
 	BuildPvtbcCaller() *pvtbc.Caller
 	BuildPvtbcListener() *pvtbc.Listener
+
 	BuildPubbcAdmin(privateKey string) pubbc.Admin
 	BuildPubbcCaller(privateKey string) pubbc.Caller
+	BuildAuthIssuer(clientSecret string) *auth.Issuer
 	BuildBusPublisher(connString string) BusPublisher
 	BuildBusSubscriber(connString string) BusSubscriber
 

@@ -34,7 +34,8 @@ type TicketRepository interface {
 
 type UserRepository interface {
 	BaseRepository
-	FindUser(userID uuid.UUID) *models.User
+	FindAll() []*models.Attendant
+	FindUser(userID uuid.UUID) *models.Attendant
 }
 
 type IProvider interface {

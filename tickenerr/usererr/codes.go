@@ -2,6 +2,7 @@ package usererr
 
 const (
 	UserAlreadyExistErrorCode = iota + 100
+	RegisterAttendantErrorCode
 	PrivateKeyStoreErrorCode
 	PrivateKeyRetrieveErrorCode
 	CreateWallerErrorCode
@@ -13,6 +14,8 @@ func GetErrMessage(code uint32) string {
 	switch code {
 	case UserAlreadyExistErrorCode:
 		return "user already exists"
+	case RegisterAttendantErrorCode:
+		return "failed to register attendant"
 	case PrivateKeyStoreErrorCode:
 		return "failed to store user private key"
 	case CreateWallerErrorCode:

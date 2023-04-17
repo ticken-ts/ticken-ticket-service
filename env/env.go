@@ -18,23 +18,25 @@ const (
 )
 
 const (
-	ExecEnvKey         = "ENV"
-	DbConnStringEnvKey = "DB_CONN_STRING"
-	BusConnStringKey   = "BUS_CONN_STRING"
-	ConfigFilePath     = "CONFIG_FILE_PATH"
-	ConfigFileName     = "CONFIG_FILE_NAME"
-	HSMEncryptionKey   = "HSM_ENCRYPTION_KEY"
-	TickenWalletKey    = "TICKEN_WALLET_KEY"
+	ExecEnvKey          = "ENV"
+	DbConnStringEnvKey  = "DB_CONN_STRING"
+	BusConnStringKey    = "BUS_CONN_STRING"
+	ConfigFilePath      = "CONFIG_FILE_PATH"
+	ConfigFileName      = "CONFIG_FILE_NAME"
+	HSMEncryptionKey    = "HSM_ENCRYPTION_KEY"
+	TickenWalletKey     = "TICKEN_WALLET_KEY"
+	ServiceClientSecret = "SERVICE_CLIENT_SECRET"
 )
 
 type Env struct {
-	Env              string
-	DbConnString     string
-	BusConnString    string
-	ConfigFilePath   string
-	ConfigFileName   string
-	HSMEncryptionKey string
-	TickenWalletKey  string
+	Env                 string
+	DbConnString        string
+	BusConnString       string
+	ConfigFilePath      string
+	ConfigFileName      string
+	HSMEncryptionKey    string
+	TickenWalletKey     string
+	ServiceClientSecret string
 }
 
 func Load() (*Env, error) {
@@ -46,13 +48,14 @@ func Load() (*Env, error) {
 	}
 
 	env := &Env{
-		Env:              getEnvOrPanic(ExecEnvKey),
-		DbConnString:     getEnvOrPanic(DbConnStringEnvKey),
-		BusConnString:    getEnvOrPanic(BusConnStringKey),
-		ConfigFilePath:   getEnvOrPanic(ConfigFilePath),
-		ConfigFileName:   getEnvOrPanic(ConfigFileName),
-		HSMEncryptionKey: getEnvOrPanic(HSMEncryptionKey),
-		TickenWalletKey:  getEnvOrPanic(TickenWalletKey),
+		Env:                 getEnvOrPanic(ExecEnvKey),
+		DbConnString:        getEnvOrPanic(DbConnStringEnvKey),
+		BusConnString:       getEnvOrPanic(BusConnStringKey),
+		ConfigFilePath:      getEnvOrPanic(ConfigFilePath),
+		ConfigFileName:      getEnvOrPanic(ConfigFileName),
+		HSMEncryptionKey:    getEnvOrPanic(HSMEncryptionKey),
+		TickenWalletKey:     getEnvOrPanic(TickenWalletKey),
+		ServiceClientSecret: getEnvOrPanic(ServiceClientSecret),
 	}
 
 	TickenEnv = env

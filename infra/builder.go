@@ -2,9 +2,12 @@ package infra
 
 import (
 	"fmt"
+	"github.com/fatih/color"
 	"github.com/gin-gonic/gin"
 	pubbc "github.com/ticken-ts/ticken-pubbc-connector"
 	ethconnector "github.com/ticken-ts/ticken-pubbc-connector/eth-connector"
+	"path"
+	"ticken-ticket-service/security/auth"
 
 	ethnode "github.com/ticken-ts/ticken-pubbc-connector/eth-connector/node"
 	pvtbc "github.com/ticken-ts/ticken-pvtbc-connector"
@@ -71,7 +74,17 @@ func (builder *Builder) BuildHSM(encryptingKey string) HSM {
 }
 
 func (builder *Builder) BuildEngine() *gin.Engine {
-	return gin.Default()
+	gin.SetMode(gin.ReleaseMode)
+	r := gin.Default()
+
+	gin.DebugPrintRouteFunc = func(httpMethod, absolutePath, handlerName string, nuHandlers int) {
+		log.TickenLogger.Info().Msg(
+			// 14 is the length of the largest HTTP method (PATCH) with magenta color
+			fmt.Sprintf("%-14s -> %s", color.MagentaString(httpMethod), color.BlueString(absolutePath)),
+		)
+	}
+
+	return r
 }
 
 func (builder *Builder) BuildJWTVerifier() jwt.Verifier {
@@ -132,6 +145,19 @@ func (builder *Builder) BuildPubbcCaller(privateKey string) pubbc.Caller {
 		panic(err)
 	}
 	return caller
+}
+
+func (builder *Builder) BuildAuthIssuer(clientSecret string) *auth.Issuer {
+	authIssuer, err := auth.NewAuthIssuer(
+		auth.TickenTicketService,
+		builder.tickenConfig.Services.Keycloak,
+		builder.tickenConfig.Server.ClientID,
+		clientSecret,
+	)
+	if err != nil {
+		log.TickenLogger.Panic().Msg(err.Error())
+	}
+	return authIssuer
 }
 
 func (builder *Builder) BuildBusPublisher(connString string) BusPublisher {
@@ -236,10 +262,18 @@ func buildPeerConnector(config config.PvtbcConfig, devConfig config.DevConfig) p
 	if env.TickenEnv.IsDev() && !devConfig.Mock.DisablePVTBCMock {
 		pc = peerconnector.NewDev(config.MspID, "admin")
 	} else {
-		pc = peerconnector.New(config.MspID, config.CertificatePath, config.PrivateKeyPath)
+		pc = peerconnector.New(
+			config.MspID,
+			path.Join(config.ClusterStoragePath, config.CertificatePath),
+			path.Join(config.ClusterStoragePath, config.PrivateKeyPath),
+		)
 	}
 
-	err := pc.Connect(config.PeerEndpoint, config.GatewayPeer, config.TLSCertificatePath)
+	err := pc.Connect(
+		config.PeerEndpoint,
+		config.GatewayPeer,
+		path.Join(config.ClusterStoragePath, config.TLSCertificatePath),
+	)
 	if err != nil {
 		panic(err)
 	}

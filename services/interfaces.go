@@ -39,7 +39,11 @@ type IUserManager interface {
 	// the user in the public blockchain if the
 	// user provided one, if is an empty string,
 	// a new key is generated
-	CreateUser(uuid uuid.UUID, pubBCPrivateKey string) (*models.User, error)
-	GetUser(uuid uuid.UUID) (*models.User, error)
+	CreateUser(uuid uuid.UUID, pubBCPrivateKey string) (*models.Attendant, error)
+
+	// todo
+	RegisterUser(email, password, firstname, lastname, providedPK string) (*models.Attendant, error)
+
+	GetUser(uuid uuid.UUID) (*models.Attendant, error)
 	GetUserPrivKey(uuid uuid.UUID) (string, error)
 }

@@ -6,7 +6,7 @@ import (
 	"ticken-ticket-service/security/jwt"
 )
 
-func MapUserToDTO(user *models.User, email string, profile *jwt.Profile) *dto.User {
+func MapUserToDTO(user *models.Attendant, email string, profile *jwt.Profile) *dto.User {
 	return &dto.User{
 		UserID:        user.UUID.String(),
 		WalletAddress: user.WalletAddress,

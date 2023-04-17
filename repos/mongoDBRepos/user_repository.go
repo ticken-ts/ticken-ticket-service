@@ -41,14 +41,14 @@ func NewUserRepository(dbClient *mongo.Client, dbName string) *UserMongoDBReposi
 	return userRepo
 }
 
-func (r *UserMongoDBRepository) FindUser(userUUID uuid.UUID) *models.User {
+func (r *UserMongoDBRepository) FindUser(userUUID uuid.UUID) *models.Attendant {
 	findContext, cancel := r.generateOpSubcontext()
 	defer cancel()
 
 	users := r.getCollection()
 	result := users.FindOne(findContext, bson.M{"uuid": userUUID})
 
-	var foundUser models.User
+	var foundUser models.Attendant
 	err := result.Decode(&foundUser)
 
 	if err != nil {
@@ -56,4 +56,22 @@ func (r *UserMongoDBRepository) FindUser(userUUID uuid.UUID) *models.User {
 	}
 
 	return &foundUser
+}
+
+func (r *UserMongoDBRepository) FindAll() []*models.Attendant {
+	findContext, cancel := r.generateOpSubcontext()
+	defer cancel()
+
+	attendants := r.getCollection()
+	result, err := attendants.Find(findContext, bson.M{})
+	if err != nil {
+		return nil
+	}
+
+	var foundAttendants []*models.Attendant
+	if err := result.Decode(&foundAttendants); err != nil {
+		return nil
+	}
+
+	return foundAttendants
 }

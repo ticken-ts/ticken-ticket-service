@@ -3,8 +3,12 @@ package services
 import (
 	pubbc "github.com/ticken-ts/ticken-pubbc-connector"
 	pvtbc "github.com/ticken-ts/ticken-pvtbc-connector"
+	"ticken-ticket-service/config"
+	"ticken-ticket-service/env"
 	"ticken-ticket-service/infra"
 	"ticken-ticket-service/repos"
+	"ticken-ticket-service/security/auth"
+	"ticken-ticket-service/sync"
 )
 
 type Provider struct {
@@ -21,14 +25,21 @@ func NewProvider(
 	pubbcAdmin pubbc.Admin,
 	pubbcCaller pubbc.Caller,
 	hsm infra.HSM,
+	authIssuer *auth.Issuer,
+	tickenConfig *config.Config,
 ) (*Provider, error) {
 	provider := new(Provider)
+
+	var attendantsKeycloakClient *sync.KeycloakHTTPClient
+	if !env.TickenEnv.IsDev() || tickenConfig.Dev.Mock.DisableAuthMock {
+		attendantsKeycloakClient = sync.NewKeycloakHTTPClient(tickenConfig.Services.Keycloak, auth.Attendant, authIssuer)
+	}
 
 	provider.eventManager = NewEventManager(repoProvider)
 	provider.ticketLinker = NewTicketLinker(repoProvider, pubbcCaller)
 	provider.ticketTrader = NewTicketTrader(repoProvider, pubbcCaller)
-	provider.userManager = NewUserManager(repoProvider, pubbcAdmin, hsm)
 	provider.ticketIssuer = NewTicketIssuer(repoProvider, hsm, pubbcCaller, pvtbcCaller)
+	provider.userManager = NewUserManager(repoProvider, pubbcAdmin, hsm, attendantsKeycloakClient)
 
 	return provider, nil
 }
