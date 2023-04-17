@@ -1,7 +1,9 @@
 package fakes
 
 import (
+	"encoding/pem"
 	"fmt"
+	"github.com/ethereum/go-ethereum/crypto"
 	"strings"
 )
 
@@ -24,13 +26,16 @@ func (loader *Loader) seedAttendant(toSeed []*SeedAttendant) []error {
 		// example: Facundo Torraca -> facundo.torraca
 		password := strings.ToLower(strings.Join([]string{attendant.Firstname, attendant.Lastname}, "."))
 
-		_, err := loader.serviceProvider.GetUserManager().RegisterUser(
-			attendant.Email,
-			password,
-			attendant.Firstname,
-			attendant.Lastname,
-			attendant.WalletPrivKey,
-		)
+		pemEncodedPrivKey, err := walletPrivKeyFromHEXToPEM(attendant.WalletPrivKey)
+		if err == nil {
+			_, err = loader.serviceProvider.GetUserManager().RegisterUser(
+				attendant.Email,
+				password,
+				attendant.Firstname,
+				attendant.Lastname,
+				pemEncodedPrivKey,
+			)
+		}
 
 		if err != nil {
 			seedErrors = append(
@@ -42,4 +47,23 @@ func (loader *Loader) seedAttendant(toSeed []*SeedAttendant) []error {
 	}
 
 	return seedErrors
+}
+
+// walletPrivKeyFromHEXToPEM passes the wallet private key
+// from hex format to PEM format. Hex format is the format
+// that is displayed by ganache, and PEM format is the
+// formar adopted by Ticken by convention
+func walletPrivKeyFromHEXToPEM(hexPrivKey string) (string, error) {
+	privKey, err := crypto.HexToECDSA(hexPrivKey)
+	if err != nil {
+		return "", err
+	}
+
+	pemEncoded := pem.EncodeToMemory(
+		&pem.Block{
+			Type:  "PRIVATE KEY",
+			Bytes: crypto.FromECDSA(privKey),
+		})
+
+	return string(pemEncoded), nil
 }

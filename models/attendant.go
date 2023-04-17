@@ -5,12 +5,15 @@ import (
 )
 
 type Attendant struct {
-	UUID              uuid.UUID `bson:"uuid"`
-	AddressPKStoreKey string    `bson:"addressPKStore"`
-	WalletAddress     string    `bson:"wallet_address"`
+	UUID          uuid.UUID `bson:"uuid"`
+	WalletAddress string    `bson:"wallet_address"`
+
+	PrivStoreKey string `bson:"priv_store_key"`
+	PubKey       string `bson:"pub_key"`
 }
 
-func (u *Attendant) SetWallet(privKeyStorageKey, address string) {
-	u.AddressPKStoreKey = privKeyStorageKey
-	u.WalletAddress = address
+func (u *Attendant) SetWallet(privStoreKey, pubKey, walletAddr string) {
+	u.PrivStoreKey = privStoreKey
+	u.PubKey = pubKey
+	u.WalletAddress = walletAddr
 }

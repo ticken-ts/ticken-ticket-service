@@ -10,6 +10,8 @@ import (
 	"ticken-ticket-service/api/middlewares"
 	"ticken-ticket-service/app/fakes"
 	"ticken-ticket-service/async"
+	"ticken-ticket-service/async/publisher"
+	"ticken-ticket-service/async/subscriber"
 	"ticken-ticket-service/config"
 	"ticken-ticket-service/env"
 	"ticken-ticket-service/infra"
@@ -25,7 +27,7 @@ type TickenTicketApp struct {
 	repoProvider    repos.IProvider
 	serviceProvider services.IProvider
 	jwtVerifier     jwt.Verifier
-	subscriber      *async.Subscriber
+	subscriber      async.IAsyncSubscriber
 
 	// populators are intended to populate
 	// useful data. It can be testdata or
@@ -47,8 +49,16 @@ func New(infraBuilder infra.IBuilder, tickenConfig *config.Config) *TickenTicket
 	hsm := infraBuilder.BuildHSM(env.TickenEnv.HSMEncryptionKey)
 	pubbcAdmin := infraBuilder.BuildPubbcAdmin(env.TickenEnv.TickenWalletKey)
 	pubbcCaller := infraBuilder.BuildPubbcCaller(env.TickenEnv.TickenWalletKey)
-	authIssuer := infraBuilder.BuildAuthIssuer(env.TickenEnv.ServiceClientSecret)
+	busPublisher := infraBuilder.BuildBusPublisher(env.TickenEnv.BusConnString)
 	busSubscriber := infraBuilder.BuildBusSubscriber(env.TickenEnv.BusConnString)
+	authIssuer := infraBuilder.BuildAuthIssuer(env.TickenEnv.ServiceClientSecret)
+	/**************************++***************************************************/
+
+	/*********************************** publisher *********************************/
+	asyncPublisher, err := publisher.New(busPublisher)
+	if err != nil {
+		log.TickenLogger.Panic().Msg(err.Error())
+	}
 	/**************************++***************************************************/
 
 	/********************************** providers **********************************/
@@ -65,6 +75,7 @@ func New(infraBuilder infra.IBuilder, tickenConfig *config.Config) *TickenTicket
 		pvtbcCaller,
 		pubbcAdmin,
 		pubbcCaller,
+		asyncPublisher,
 		hsm,
 		authIssuer,
 		tickenConfig,
@@ -72,10 +83,10 @@ func New(infraBuilder infra.IBuilder, tickenConfig *config.Config) *TickenTicket
 	if err != nil {
 		log.TickenLogger.Panic().Msg(err.Error())
 	}
-	/**************************++***************************************************/
+	/*******************************************************************************/
 
-	/********************************* subscriber **********************************/
-	subscriber, err := async.NewSubscriber(busSubscriber, serviceProvider)
+	/******************************* subscriber ************************************/
+	asyncSubscriber, err := subscriber.New(busSubscriber, serviceProvider)
 	if err != nil {
 		log.TickenLogger.Panic().Msg(err.Error())
 	}
@@ -83,9 +94,9 @@ func New(infraBuilder infra.IBuilder, tickenConfig *config.Config) *TickenTicket
 
 	tickenTicketApp.engine = engine
 	tickenTicketApp.config = tickenConfig
-	tickenTicketApp.subscriber = subscriber
 	tickenTicketApp.jwtVerifier = jwtVerifier
 	tickenTicketApp.repoProvider = repoProvider
+	tickenTicketApp.subscriber = asyncSubscriber
 	tickenTicketApp.serviceProvider = serviceProvider
 
 	tickenTicketApp.loadMiddlewares(engine)
@@ -103,7 +114,7 @@ func New(infraBuilder infra.IBuilder, tickenConfig *config.Config) *TickenTicket
 func (ticketTicketApp *TickenTicketApp) Start() {
 	url := ticketTicketApp.config.Server.GetServerURL()
 
-	if err := ticketTicketApp.subscriber.Start(); err != nil {
+	if err := ticketTicketApp.subscriber.ListenMessages(); err != nil {
 		panic(err)
 	}
 

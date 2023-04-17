@@ -3,6 +3,8 @@ package services
 import (
 	"github.com/google/uuid"
 	pubbc "github.com/ticken-ts/ticken-pubbc-connector"
+	"ticken-ticket-service/async"
+	"ticken-ticket-service/async/asyncmsg"
 	"ticken-ticket-service/infra"
 	"ticken-ticket-service/models"
 	"ticken-ticket-service/repos"
@@ -17,17 +19,24 @@ type UserManager struct {
 	userRepository   repos.UserRepository
 	pubbcAdmin       pubbc.Admin
 	hsm              infra.HSM
-
-	keycloakClient *sync.KeycloakHTTPClient
+	asyncPublisher   async.IAsyncPublisher
+	keycloakClient   *sync.KeycloakHTTPClient
 }
 
-func NewUserManager(repoProvider repos.IProvider, pubbcAdmin pubbc.Admin, hsm infra.HSM, keycloakClient *sync.KeycloakHTTPClient) IUserManager {
+func NewUserManager(
+	repoProvider repos.IProvider,
+	pubbcAdmin pubbc.Admin,
+	hsm infra.HSM,
+	asyncPublisher async.IAsyncPublisher,
+	keycloakClient *sync.KeycloakHTTPClient,
+) IUserManager {
 	return &UserManager{
 		ticketRepository: repoProvider.GetTicketRepository(),
 		eventRepository:  repoProvider.GetEventRepository(),
 		userRepository:   repoProvider.GetUserRepository(),
 		pubbcAdmin:       pubbcAdmin,
 		hsm:              hsm,
+		asyncPublisher:   asyncPublisher,
 		keycloakClient:   keycloakClient,
 	}
 }
@@ -60,7 +69,7 @@ func (userManager *UserManager) RegisterUser(email, password, firstname, lastnam
 func (userManager *UserManager) CreateUser(attendantID uuid.UUID, providedPK string) (*models.Attendant, error) {
 	newAttendant := &models.Attendant{UUID: attendantID}
 
-	var pkStoreKey, walletAddr string
+	var pkStoreKey, walletPrivKey, walletPubKey, walletAddr string
 	var err error
 
 	// check if user exists
@@ -70,7 +79,7 @@ func (userManager *UserManager) CreateUser(attendantID uuid.UUID, providedPK str
 	}
 
 	if len(providedPK) > 0 {
-		walletAddr, err = userManager.pubbcAdmin.GetWalletForKey(providedPK)
+		walletPrivKey, walletPubKey, walletAddr, err = userManager.pubbcAdmin.GetWalletForKey(providedPK)
 		if err != nil {
 			return nil, tickenerr.FromError(usererr.CreateWallerErrorCode, err)
 		}
@@ -79,21 +88,24 @@ func (userManager *UserManager) CreateUser(attendantID uuid.UUID, providedPK str
 			return nil, tickenerr.FromError(usererr.PrivateKeyStoreErrorCode, err)
 		}
 	} else {
-		newPK, newWalletAddr, err := userManager.pubbcAdmin.CreateWallet()
+		walletPrivKey, walletPubKey, walletAddr, err = userManager.pubbcAdmin.CreateWallet()
 		if err != nil {
 			return nil, tickenerr.FromError(usererr.CreateWallerErrorCode, err)
 		}
-		pkStoreKey, err = userManager.hsm.Store([]byte(newPK))
+		pkStoreKey, err = userManager.hsm.Store([]byte(walletPrivKey))
 		if err != nil {
 			return nil, tickenerr.FromError(usererr.PrivateKeyStoreErrorCode, err)
 		}
-		walletAddr = newWalletAddr
 	}
 
-	newAttendant.SetWallet(pkStoreKey, walletAddr)
+	newAttendant.SetWallet(pkStoreKey, walletPubKey, walletAddr)
 	err = userManager.userRepository.AddOne(newAttendant)
 	if err != nil {
 		return nil, tickenerr.FromError(usererr.StoreUserInDatabaseErrorCode, err)
+	}
+
+	if err := userManager.asyncPublisher.PublishMessage(asyncmsg.NewAttendant, newAttendant); err != nil {
+		panic(err) // TODO -> how to handle
 	}
 
 	return newAttendant, nil
@@ -113,7 +125,7 @@ func (userManager *UserManager) GetUserPrivKey(uuid uuid.UUID) (string, error) {
 		return "", tickenerr.New(usererr.UserNotFoundErrorCode)
 	}
 
-	userPrivKey, err := userManager.hsm.Retrieve(user.AddressPKStoreKey)
+	userPrivKey, err := userManager.hsm.Retrieve(user.WalletAddress)
 	if err != nil {
 		return "", tickenerr.FromError(usererr.PrivateKeyRetrieveErrorCode, err)
 	}

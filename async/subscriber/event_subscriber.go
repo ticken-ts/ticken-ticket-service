@@ -1,4 +1,4 @@
-package async
+package subscriber
 
 import (
 	"encoding/json"
@@ -6,9 +6,7 @@ import (
 	"ticken-ticket-service/services"
 )
 
-const (
-	NewEventMessageType = "new_event"
-)
+const ()
 
 type eventDTO struct {
 	EventID      uuid.UUID `json:"event_id"`

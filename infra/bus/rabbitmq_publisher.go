@@ -76,6 +76,7 @@ func (publisher *RabbitMQPublisher) Connect(connString string, exchangeName stri
 
 	publisher.conn = conn
 	publisher.channel = channel
+	publisher.exchangeName = exchangeName
 
 	err = publisher.ensureIsConnected()
 	if err != nil {

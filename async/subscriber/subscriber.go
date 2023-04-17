@@ -1,8 +1,9 @@
-package async
+package subscriber
 
 import (
 	"encoding/json"
 	"fmt"
+	"ticken-ticket-service/async/asyncmsg"
 	"ticken-ticket-service/infra"
 	"ticken-ticket-service/infra/bus"
 	"ticken-ticket-service/services"
@@ -13,7 +14,7 @@ type Subscriber struct {
 	eventProcessor *EventSubscriber
 }
 
-func NewSubscriber(busSubscriber infra.BusSubscriber, serviceProvider services.IProvider) (*Subscriber, error) {
+func New(busSubscriber infra.BusSubscriber, serviceProvider services.IProvider) (*Subscriber, error) {
 	if !busSubscriber.IsConnected() {
 		return nil, fmt.Errorf("bus subscriber is not connected")
 	}
@@ -26,7 +27,7 @@ func NewSubscriber(busSubscriber infra.BusSubscriber, serviceProvider services.I
 	return subscriber, nil
 }
 
-func (processor *Subscriber) Start() error {
+func (processor *Subscriber) ListenMessages() error {
 	err := processor.busSubscriber.Listen(processor.handler)
 	if err != nil {
 		return err
@@ -43,7 +44,7 @@ func (processor *Subscriber) handler(rawmsg []byte) {
 
 	var processingError error = nil
 	switch msg.Type {
-	case NewEventMessageType:
+	case asyncmsg.NewEvent:
 		processingError = processor.eventProcessor.NewEventHandler(msg.Data)
 	default:
 		processingError = fmt.Errorf("message type %s not supported\n", msg.Type)
