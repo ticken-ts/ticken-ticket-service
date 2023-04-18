@@ -45,5 +45,7 @@ type IUserManager interface {
 	RegisterUser(email, password, firstname, lastname, providedPK string) (*models.Attendant, error)
 
 	GetUser(uuid uuid.UUID) (*models.Attendant, error)
-	GetUserPrivKey(uuid uuid.UUID) (string, error)
+
+	// format -> hex / pem
+	GetUserPrivKey(uuid uuid.UUID, format string) (string, error)
 }

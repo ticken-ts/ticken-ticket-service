@@ -1,6 +1,10 @@
 package services
 
 import (
+	"encoding/hex"
+	"encoding/pem"
+	"fmt"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/google/uuid"
 	pubbc "github.com/ticken-ts/ticken-pubbc-connector"
 	"ticken-ticket-service/async"
@@ -119,16 +123,36 @@ func (userManager *UserManager) GetUser(uuid uuid.UUID) (*models.Attendant, erro
 	return user, nil
 }
 
-func (userManager *UserManager) GetUserPrivKey(uuid uuid.UUID) (string, error) {
+func (userManager *UserManager) GetUserPrivKey(uuid uuid.UUID, format string) (string, error) {
 	user := userManager.userRepository.FindUser(uuid)
 	if user == nil {
 		return "", tickenerr.New(usererr.UserNotFoundErrorCode)
 	}
 
-	userPrivKey, err := userManager.hsm.Retrieve(user.WalletAddress)
+	userPrivKey, err := userManager.hsm.Retrieve(user.PrivStoreKey)
 	if err != nil {
 		return "", tickenerr.FromError(usererr.PrivateKeyRetrieveErrorCode, err)
 	}
 
-	return string(userPrivKey), err
+	pemUserPrivKey := string(userPrivKey)
+
+	switch format {
+	case "hex":
+		return pubKeyToHex(pemUserPrivKey)
+	case "pem":
+		return pemUserPrivKey, nil
+	default:
+		return "",
+			tickenerr.FromError(
+				usererr.PrivateKeyRetrieveErrorCode, fmt.Errorf("format %s not supported", format))
+	}
+}
+
+func pubKeyToHex(pemEncodedPrivKey string) (string, error) {
+	pemPrivKey, _ := pem.Decode([]byte(pemEncodedPrivKey))
+	privKey, err := crypto.ToECDSA(pemPrivKey.Bytes)
+	if err != nil {
+		return "", fmt.Errorf("failed to decode pem public key: %s", err.Error())
+	}
+	return hex.EncodeToString(crypto.FromECDSA(privKey)), nil
 }
