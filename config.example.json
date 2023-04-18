@@ -1,10 +1,10 @@
 {
   "server": {
-    "host": "localhost",
+    "host": "0.0.0.0",
     "port": 8000,
     "api_prefix": "/api/t",
-    "client_id": "ticken.event.service",
-    "identity_issuer": "http://localhost:8080/realms/organizers"
+    "client_id": "ticken.ticket.service",
+    "identity_issuer": "http://192.168.0.102:8080/realms/attendants"
   },
 
   "database": {
@@ -19,13 +19,19 @@
     "listen_queue": "service.tickets"
   },
 
+  "services": {
+    "keycloak": "http://localhost:8080",
+    "validator": "http://localhost:7000"
+  },
+
   "pvtbc": {
+    "cluster_storage_path": "/tmp/ticken/pvtbc-pv",
     "msp_id": "tickenMSP",
     "peer_endpoint": "ticken-peer0.localho.st:443",
     "gateway_peer": "ticken-peer0.localho.st",
-    "certificate_path": "/tmp/ticken-pv/orgs/peer-orgs/ticken/users/ticken-admin/msp/signcerts/cert.pem",
-    "private_key_path": "/tmp/ticken-pv/orgs/peer-orgs/ticken/users/ticken-admin/msp/keystore/priv.pem",
-    "tls_certificate_path": "/tmp/ticken-pv/orgs/peer-orgs/ticken/nodes/ticken-peer0/tls/signcerts/tls-cert.pem"
+    "certificate_path": "/orgs/peer-orgs/ticken/users/ticken-admin/msp/signcerts/cert.pem",
+    "private_key_path": "/orgs/peer-orgs/ticken/users/ticken-admin/msp/keystore/priv.pem",
+    "tls_certificate_path": "/orgs/peer-orgs/ticken/nodes/ticken-peer0/tls/signcerts/tls-cert.pem"
   },
 
   "pubbc": {
@@ -35,21 +41,12 @@
   "dev": {
     "mock": {
       "disable_pvtbc_mock": false,
-      "disable_bus_mock": true,
-      "disable_auth_mock": true
-    },
-
-    "user": {
-      "username": "admin",
-      "firstname": "facundo",
-      "lastname": "torraca",
-      "email": "facundo@ticken.com",
-      "user_id": "290c641a-55a1-40f5-acc3-d4ebe3626fdd",
-      "wallet_address": "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0",
-      "wallet_private_key": "6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1"
+      "disable_bus_mock": false,
+      "disable_auth_mock": false
     },
 
     "jwt_public_key": "-----BEGIN RSA PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDUqRecbJUp6pVi5cCpB97cxNav\nHxjlPCa4sB/MwcGbo/nuP/iPJf6X4XeRM1xFey5b3STSbhBKmM01+WR6XmUBvzdE\nPntm/3Byn9OfKIZcXJoRP1xpFbwfBcSlpZj0bVX0i+1asWWCvdykjcyNy3CMYCSR\nHzquQ87BNrh7g7nfjwIDAQAB\n-----END RSA PUBLIC KEY-----",
     "jwt_private_key": "-----BEGIN RSA PRIVATE KEY-----\nMIICWwIBAAKBgQDUqRecbJUp6pVi5cCpB97cxNavHxjlPCa4sB/MwcGbo/nuP/iP\nJf6X4XeRM1xFey5b3STSbhBKmM01+WR6XmUBvzdEPntm/3Byn9OfKIZcXJoRP1xp\nFbwfBcSlpZj0bVX0i+1asWWCvdykjcyNy3CMYCSRHzquQ87BNrh7g7nfjwIDAQAB\nAoGAW3URM3O7PtilQHAgyFEbNoTs80mDcmrJGFqegne9pQsDXMRkSGQFtxn/SxH0\nl+kfCeD0ig9NsFdAwfqsjLf15d6KvXZOlV8zeHHB2qLeW+1orNmThYurAPo4+MdU\nEdpYe3bGB8ZidEpDPrg1zhDlePnN9bsKSFOlCzXJRKGBTekCQQD0AiTTF0dNbRmG\nzGRmmJoLDVW32RfNCLg4CnGFIuumAKntglKYNig4ke9hNTd5+sSD/jdWSBnTTYRl\nhnCZpNI1AkEA3xyQC93M7zb4FPKEXhAaZ/XyJGgarRtNr//qGVBypP85Yucd0h5j\nyamh+ArJZouplZX0s7Pi/2bhZl4ne2PjMwJAShDghqa5QPpN1knya+YEVDh+/WhL\nPjRYXsJkxOndp6zp56s4UPWXbdx2UgZqSX9h6ULgHzORiz8rYfnV8f1CxQJAWoFC\nqZ2i2VMKFa0/Js0PeSaawEv+rkQKIqAEfZpVtzrVM5qfTTIItrB6RJ1Tj6aN92Eq\nL4+EQKiiPJ1rFLGzYwJAGpZsgLpoJq6NppNTuuKK1OJj0NSoeIdYl0UftG5pG1V+\nHw09Kn47X96bdsycEaKN/aZUPGVw9Bqtv/gsw/FTQQ==\n-----END RSA PRIVATE KEY-----"
   }
 }
+

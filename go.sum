@@ -292,12 +292,8 @@ github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO
 github.com/subosito/gotenv v1.4.1 h1:jyEFiXpy21Wm81FBN71l9VoMMV8H8jG+qIK3GCpY6Qs=
 github.com/subosito/gotenv v1.4.1/go.mod h1:ayKnFf/c6rvx/2iiLrJUk1e6plDbT3edrFNGqEflhK0=
 github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7 h1:epCh84lMvA70Z7CTTCmYQn2CKbY8j86K7/FAIr141uY=
-github.com/ticken-ts/ticken-pubbc-connector v0.0.20 h1:s/1PTm+E6kC5sMEXtq+ajT5iNMN3gE7mqMUk6SX+ZNA=
-github.com/ticken-ts/ticken-pubbc-connector v0.0.20/go.mod h1:3QARm+lkbMN/mJrdNBDoknNZLaVyEdk3O0DpEAu1hzM=
 github.com/ticken-ts/ticken-pubbc-connector v0.0.46 h1:WzyNX84HFMLAItIjTNzy5zG7ba8p3bi0vglRHXh3OXE=
 github.com/ticken-ts/ticken-pubbc-connector v0.0.46/go.mod h1:3QARm+lkbMN/mJrdNBDoknNZLaVyEdk3O0DpEAu1hzM=
-github.com/ticken-ts/ticken-pvtbc-connector v0.2.47 h1:D//WDAg9PMOqp/d2JAKRfNNuPyXLND4NjwxVRDPqJ5c=
-github.com/ticken-ts/ticken-pvtbc-connector v0.2.47/go.mod h1:rK1J3x+qeLeGTzjwqYVqI/9AKL0vseqrlwJNZoZXr3o=
 github.com/ticken-ts/ticken-pvtbc-connector v0.2.49 h1:LT8uYPknWxuf7fbQnMrmWq6zOKbxF4tJVlxYV0GU290=
 github.com/ticken-ts/ticken-pvtbc-connector v0.2.49/go.mod h1:rK1J3x+qeLeGTzjwqYVqI/9AKL0vseqrlwJNZoZXr3o=
 github.com/tidwall/pretty v1.0.0 h1:HsD+QiTn7sK6flMKIvNmpqz1qrpP3Ps6jOKIKMooyg4=
