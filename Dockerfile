@@ -1,6 +1,5 @@
-# syntax=docker/dockerfile:
 # specify the base image to be used for the application, alpine or ubuntu
-FROM golang:1.18-alpine as build
+FROM golang:1.20-alpine as build
 
 # git is required to fetch go dependencies
 RUN apk add --no-cache ca-certificates git
@@ -28,6 +27,7 @@ RUN CGO_ENABLED=0 go build -o /service .
 FROM scratch AS final
 
 COPY --from=build /service /service
+COPY --from=build /src/fakes.json /fakes.json
 
 # tells Docker that the container listens on specified network ports at runtime
 EXPOSE 9000
